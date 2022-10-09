@@ -18,9 +18,9 @@ then
   read -n 1 -s -r -p "Network is not online. Press any key to exit."
   exit
 fi
-echo "This server and the default printer need to be have static IP addresses on the local network and this server should be added to the demilitarized zone, (DMZ), in the router."
-read -p "Do you wish to continue? (y/n): " con
-if [ ${con} != "y" ]
+echo "This server and the default printer need to be have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports forwarded in the router."
+read -p "Do you wish to continue? (y/n): " cont
+if [ ${cont} != "y" ]
 then
   exit
 fi
