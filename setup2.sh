@@ -98,10 +98,9 @@ echo
 echo "Accept terms and conditions then pres ctl+c to exit qBittorrent."
 echo
 qbittorrent-nox
-curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=1J1xoJWIEHmo469RthEHPVz-HKQdodjce" > /dev/null
-curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./#cookie`&id=1J1xoJWIEHmo469RthEHPVz-HKQdodjce" -o blocklist.zip
+curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
-rm cookie blocklist.zip
+rm blocklist.zip
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=false
@@ -264,10 +263,9 @@ if [ ! -f /var/www/html/index.bak ]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=12UmhA9T3ZlIkHWIKel-2frmHle-wAK4M" > /dev/null
-curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=12UmhA9T3ZlIkHWIKel-2frmHle-wAK4M" -o icons.zip
+curl -LJO https://github.com/ctonton/homeserver/raw/main/icons.zip
 unzip -o icons.zip -d /var/www/html
-rm cookie icons.zip
+rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
 ln -s /srv/NAS/Public/Unsorted /var/www/html/egg
 mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
