@@ -24,8 +24,6 @@ if [ ${con} != "y" ]
 then
   exit
 fi
-read -p "Enter the static IP address of this server. (ex. 10.10.10.10): " staip
-subip=${staip%.*}
 
 #install
 echo "Installing software."
@@ -47,17 +45,6 @@ tee -a /etc/fstab > /dev/null <<EOT
 UUID=${uniq}  /srv/NAS  ${type}  defaults,nofail,uid=65534,gid=65534  0  0
 EOT
 mount -a
-
-#cups
-echo
-echo "Setting up print server."
-usermod -aG lpadmin root
-cupsctl --remote-admin --user-cancel-any
-read -p "Enter the static IP address of the default printer. (ex. 10.10.10.11): " defip
-read -p "Enter a name for the default printer: " defpr
-lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
-lpadmin -d $defpr
-systemctl restart cups
 
 #nfs
 echo
@@ -90,6 +77,18 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    directory mask = 0777
 EOT
 systemctl restart smbd
+
+#cups
+echo
+echo "Setting up print server."
+usermod -aG lpadmin root
+cupsctl --remote-admin --user-cancel-any
+read -p "Enter the static IP address of the default printer. (ex. 10.10.10.11): " defip
+subip=${defip%.*}
+read -p "Enter a name for the default printer: " defpr
+lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
+lpadmin -d $defpr
+systemctl restart cups
 
 #qbittorrent
 echo
