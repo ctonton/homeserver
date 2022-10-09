@@ -420,12 +420,18 @@ curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 systemctl restart php*
 systemctl restart nginx
 
+curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
+sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
+sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+
 #ufw
 echo
 echo "Setting up firewall."
 ufw allow 80
 ufw allow 443
 ufw allow 22
+ufw allow 51820/udp
 ufw allow from ${subip}.0/24
+ufw allow from 10.7.0.0/24
 ufw enable
 exit
