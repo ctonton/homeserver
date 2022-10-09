@@ -44,7 +44,7 @@ read -p "Enter disk partition (ex. sda1): " device
 uniq=$(blkid -o value -s UUID /dev/${device})
 type=$(blkid -o value -s TYPE /dev/${device})
 tee -a /etc/fstab > /dev/null <<EOT
-UUID=${uniq}  /srv/NAS  ${type}  auto,rw,user,sync,nofail,uid=65534,gid=65534  0  0
+UUID=${uniq}  /srv/NAS  ${type}  defaults,nofail,uid=65534,gid=65534  0  0
 EOT
 mount -a
 
