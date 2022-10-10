@@ -426,7 +426,6 @@ echo
 echo "Setting up firewall."
 ufw allow 80
 ufw allow 443
-ufw allow 22
 ufw allow 51820/udp
 ufw allow from ${subip}.0/24
 ufw allow from 10.7.0.0/24
