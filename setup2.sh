@@ -28,7 +28,7 @@ fi
 #install
 echo "Installing software."
 apt update
-apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl
+apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl docker.io apparmor
 
 #storage
 clear
@@ -186,6 +186,12 @@ WantedBy=multi-user.target
 EOT
 systemctl enable qbittorrent
 systemctl start qbittorrent
+
+#firefox
+echo
+echo "Setting up Firefox
+docker pull jlesage/firefox
+docker run -d --name=firefox -p 5800:5800 -v /docker/appdata/firefox:/config:rw --shm-size 2g --restart unless-stopped jlesage/firefox
 
 #ngrok
 echo
