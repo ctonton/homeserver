@@ -420,6 +420,8 @@ systemctl restart nginx
 curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
 sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
 sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+iface=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
+iptables -t nat -A POSTROUTING -s 10.7.0.0/24 -o $iface -j MASQUERADE
 
 #ufw
 echo
