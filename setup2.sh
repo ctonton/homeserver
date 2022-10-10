@@ -278,21 +278,41 @@ tee /var/www/html/index.html > /dev/null <<EOT
 <html>
   <head>
     <title>Server</title>
+	<style>
+    .column {
+    float: left;
+    width: 50%;
+    height: 2160px;
+    }
+	.row:after {
+    content: "";
+    display: table;
+    clear: both;
+    }
+    </style>
   </head>
   <body style="background-color:#000000;color:yellow;font-size:125%">
-    <div style="text-align:center;margin-bottom:1080">
-      <h1>File Server</h1>
-      <a href="/files/"><img src="files.png" alt="HTTP Server"></a>
-      <br>
-      <br>
-      <h1>Torrent Server</h1>
-      <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
-      <br>
-      <br>
-      <h1>Print Server</h1>
-      <a href="/print/"><img src="print.png" alt="Print Server"></a>
-      <br>
-      <br>
+    <div class="row" style="text-align:center">
+      <div class="column">
+        <h1>File Server</h1>
+        <a href="/files/"><img src="fs.png" alt="HTTP Server"></a>
+        <br>
+        <br>
+        <h1>Print Server</h1>
+        <a href="/print/"><img src="ps.png" alt="Print Server"></a>
+        <br>
+        <br>
+      </div>
+      <div class="column" style="text-align:center">
+        <h1>Torrent Server</h1>
+        <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
+        <br>
+        <br>
+        <h1>Web Browser</h1>
+        <a href="/browser/"><img src="ff.png" alt="Firefox"></a>
+        <br>
+        <br>
+	  </div>
     </div>
   </body>
   <footer>
@@ -384,6 +404,13 @@ server {
 
         location /torrents/ {
                 proxy_pass http://127.0.0.1:8080/;
+                proxy_buffering off;
+                auth_basic "Restricted Content";
+                auth_basic_user_file /etc/nginx/.htpasswd;
+        }
+	
+	location /browser/ {
+                proxy_pass http://127.0.0.1:5800/;
                 proxy_buffering off;
                 auth_basic "Restricted Content";
                 auth_basic_user_file /etc/nginx/.htpasswd;
