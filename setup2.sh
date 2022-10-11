@@ -238,7 +238,7 @@ echo "Setting up Duck DNS."
 mkdir /root/.ddns
 read -p "Enter the token from duckdns.org: " token
 read -p "Enter the domain from duckdns.org: " domain
-tee /root/.ddns/duck.sh > /dev/null <<EOT
+tee /root/.ddns/duck.sh > /dev/null <<'EOT'
 #!/bin/bash
 domain=${domain}
 token=${token}
