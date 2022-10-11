@@ -189,7 +189,7 @@ systemctl start qbittorrent
 
 #firefox
 echo
-echo "Setting up Firefox
+echo "Setting up Firefox."
 docker pull jlesage/firefox
 docker run -d --name=firefox -p 5800:5800 -v /docker/appdata/firefox:/config:rw --shm-size 2g --restart unless-stopped jlesage/firefox
 
