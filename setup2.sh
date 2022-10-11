@@ -424,8 +424,8 @@ server {
                 proxy_buffering off;
                 auth_basic "Restricted Content";
                 auth_basic_user_file /etc/nginx/.htpasswd;
-        }
-	
+	}
+
 	location /browser/ {
                 proxy_pass http://127.0.0.1:5800/;
 		proxy_http_version 1.1;
