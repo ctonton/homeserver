@@ -359,6 +359,23 @@ tee /var/www/html/print/print.php > /dev/null <<'EOT'
 EOT
 chown -R www-data /var/www/html
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
+map $http_x_forwarded_proto $proxy_x_forwarded_proto {
+  default $http_x_forwarded_proto;
+  ''      $scheme;
+}
+map $http_x_forwarded_port $proxy_x_forwarded_port {
+  default $http_x_forwarded_port;
+  ''      $server_port;
+}
+map $http_upgrade $proxy_connection {
+  default upgrade;
+  '' close;
+}
+map $scheme $proxy_x_forwarded_ssl {
+  default off;
+  https on;
+}
+
 server {
         listen 80 default_server;
         listen [::]:80 default_server;
@@ -411,9 +428,19 @@ server {
 	
 	location /browser/ {
                 proxy_pass http://127.0.0.1:5800/;
-                proxy_buffering off;
-                auth_basic "Restricted Content";
-                auth_basic_user_file /etc/nginx/.htpasswd;
+		proxy_http_version 1.1;
+		proxy_buffering off;
+		proxy_set_header Host $http_host;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection $proxy_connection;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+		proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
+		proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
+		proxy_set_header Proxy "";
+		#auth_basic "Restricted Content";
+                #auth_basic_user_file /etc/nginx/.htpasswd;
         }
 
         location /print/ {
