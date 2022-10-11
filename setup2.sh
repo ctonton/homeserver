@@ -61,7 +61,7 @@ if [ ! -f /etc/samba/smb.bak ]
 then
   mv /etc/samba/smb.conf /etc/samba/smb.bak
 fi
-tee /etc/samba/smb.conf > /dev/null <<EOT
+tee /etc/samba/smb.conf > /dev/null <<'EOT'
 [global]
    workgroup = WORKGROUP
    log level = 0
@@ -170,7 +170,7 @@ WebUI\SessionTimeout=3600
 WebUI\UseUPnP=true
 WebUI\Username=admin
 EOT
-tee /etc/systemd/system/qbittorrent.service > /dev/null <<EOT
+tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
 After=network.target
@@ -247,7 +247,7 @@ ipv4addr=$(curl -s https://api.ipify.org)
 curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
 EOT
 chmod +x /root/.ddns/duck.sh
-tee /etc/systemd/system/ddns.service > /dev/null <<EOT
+tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
 [Unit]
 Description=DynDNS Updater services
 Wants=network-online.target
@@ -274,7 +274,7 @@ rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
 ln -s /srv/NAS/Public/Unsorted /var/www/html/egg
 mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-tee /var/www/html/index.html > /dev/null <<EOT
+tee /var/www/html/index.html > /dev/null <<'EOT'
 <html>
   <head>
     <title>Server</title>
@@ -321,7 +321,7 @@ tee /var/www/html/index.html > /dev/null <<EOT
 </html>
 EOT
 mkdir /var/www/html/print
-tee /var/www/html/print/index.html > /dev/null <<EOT
+tee /var/www/html/print/index.html > /dev/null <<'EOT'
 <html>
 <body>
 
