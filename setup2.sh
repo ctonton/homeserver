@@ -100,7 +100,7 @@ qbittorrent-nox
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
-tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<'EOT'
+tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=false
 program=
