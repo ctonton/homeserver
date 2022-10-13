@@ -358,31 +358,15 @@ tee /var/www/html/print/print.php > /dev/null <<'EOT'
 EOT
 chown -R www-data /var/www/html
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
-map $http_x_forwarded_proto $proxy_x_forwarded_proto {
-  default $http_x_forwarded_proto;
-  ''      $scheme;
-}
-map $http_x_forwarded_port $proxy_x_forwarded_port {
-  default $http_x_forwarded_port;
-  ''      $server_port;
-}
-map $http_upgrade $proxy_connection {
-  default upgrade;
-  '' close;
-}
-map $scheme $proxy_x_forwarded_ssl {
-  default off;
-  https on;
+map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
 }
 
-server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
-
-        location / {
-                return 301 https://$host$request_uri;
-        }
+upstream docker-firefox {
+        server 127.0.0.1:5800;
 }
+
 server {
         listen 443 ssl http2;
         listen [::]:443 ssl http2;
@@ -394,8 +378,7 @@ server {
         ssl_session_tickets off;
         ssl_dhparam /etc/nginx/dhparam.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-        ssl_prefer_server_ciphers off;
+        ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SH>        ssl_prefer_server_ciphers off;
         resolver 8.8.8.8 8.8.4.4 valid=300s;
         resolver_timeout 5s;
         add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
@@ -407,8 +390,8 @@ server {
         root /var/www/html;
         index index.html;
         autoindex on;
-
-        location /files/ {
+	
+	location /files/ {
                 try_files $uri $uri/ =404;
                 auth_basic "Restricted Content";
                 auth_basic_user_file /etc/nginx/.htpasswd;
@@ -423,23 +406,6 @@ server {
                 proxy_buffering off;
                 auth_basic "Restricted Content";
                 auth_basic_user_file /etc/nginx/.htpasswd;
-	}
-
-	location /browser/ {
-                proxy_pass http://127.0.0.1:5800/;
-		proxy_http_version 1.1;
-		proxy_buffering off;
-		proxy_set_header Host $http_host;
-		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection $proxy_connection;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
-		proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
-		proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
-		proxy_set_header Proxy "";
-		#auth_basic "Restricted Content";
-                #auth_basic_user_file /etc/nginx/.htpasswd;
         }
 
         location /print/ {
@@ -456,6 +422,18 @@ server {
                 track_uploads uploads 300s;
                 auth_basic "Restricted Content";
                 auth_basic_user_file /etc/nginx/.htpasswd;
+        }
+
+        location = /browser {return 301 $scheme://$http_host/firefox/;}
+        location /browser/ {
+                proxy_pass http://docker-firefox/;
+                location /firefox/websockify {
+                        proxy_pass http://docker-firefox/websockify/;
+                        proxy_http_version 1.1;
+                        proxy_set_header Upgrade $http_upgrade;
+                        proxy_set_header Connection $connection_upgrade;
+                        proxy_read_timeout 86400;
+                }
         }
 }
 EOT
