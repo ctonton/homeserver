@@ -390,7 +390,7 @@ server {
         root /var/www/html;
         index index.html;
         autoindex on;
-	
+
 	location /files/ {
                 try_files $uri $uri/ =404;
                 auth_basic "Restricted Content";
