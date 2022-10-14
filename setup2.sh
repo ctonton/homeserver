@@ -427,7 +427,7 @@ server {
         location = /browser {return 301 $scheme://$http_host/firefox/;}
         location /browser/ {
                 proxy_pass http://docker-firefox/;
-                location /firefox/websockify {
+                location /browser/websockify/ {
                         proxy_pass http://docker-firefox/websockify/;
                         proxy_http_version 1.1;
                         proxy_set_header Upgrade $http_upgrade;
