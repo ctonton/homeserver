@@ -343,7 +343,7 @@ Description=Remote desktop service (VNC)
 After=network.target
 [Service]
 Type=forking
-ExecStart=/usr/bin/tigervncserver --I-KNOW-THIS-IS-INSECURE :0
+ExecStart=/usr/bin/tigervncserver -SecurityTypes None -localhost no --I-KNOW-THIS-IS-INSECURE :0
 ExecStop=/usr/bin/tigervncserver -kill :0
 [Install]
 WantedBy=multi-user.target
