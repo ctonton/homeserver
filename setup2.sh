@@ -354,9 +354,10 @@ systemctl start tigervnc
 tee /etc/systemd/system/websockify.service > /dev/null <<'EOT'
 [Unit]
 Description=novnc websockify service
-After=network.target
+Requires=tigervnc.service
+After=tigervnc.service
 [Service]
-Type=forking
+Type=simple
 User=root
 ExecStart=/usr/bin/websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5900
 ExecStop=/usr/bin/killall websockify
