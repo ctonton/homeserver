@@ -27,7 +27,7 @@ fi
 #install
 echo "Installing software."
 apt update
-apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl docker.io apparmor
+apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl
 
 #storage
 clear
