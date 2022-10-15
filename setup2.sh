@@ -193,7 +193,7 @@ curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok-st
 tar xvf ngrok-stable-linux-arm.tgz -C /usr/local/bin
 rm ngrok-stable-linux-arm.tgz
 mkdir /root/.ngrok2
-read -p "Enter the ngrok authtoken: " auth
+read -p "Enter your ngrok Authtoken: " auth
 tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
 authtoken: ${auth}
 tunnels:
