@@ -90,6 +90,74 @@ lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
 lpadmin -d $defpr
 systemctl restart cups
 
+#ngrok
+echo
+echo "Setting up ngrok."
+curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok-stable-linux-arm.tgz
+tar xvf ngrok-stable-linux-arm.tgz -C /usr/local/bin
+rm ngrok-stable-linux-arm.tgz
+mkdir /root/.ngrok2
+read -p "Enter your ngrok Authtoken: " auth
+tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
+authtoken: ${auth}
+tunnels:
+  nginx:
+    addr: 443
+    proto: http
+    bind_tls: true
+    inspect: false
+  ssh:
+    addr: 22
+    proto: tcp
+    inspect: false
+EOT
+tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
+[Unit]
+Description=ngrok
+After=network.target
+[Service]
+ExecStart=/usr/local/bin/ngrok start --all
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+IgnoreSIGPIPE=true
+Restart=always
+RestartSec=3
+Type=simple
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl enable ngrok
+systemctl start ngrok
+
+#ddns
+echo
+echo "Setting up Duck DNS."
+mkdir /root/.ddns
+read -p "Enter the token from duckdns.org: " token
+read -p "Enter the domain from duckdns.org: " domain
+tee /root/.ddns/duck.sh > /dev/null <<EOT
+#!/bin/bash
+domain=${domain}
+token=${token}
+ipv6addr=$(curl -s https://api6.ipify.org)
+ipv4addr=$(curl -s https://api.ipify.org)
+curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
+EOT
+chmod +x /root/.ddns/duck.sh
+tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
+[Unit]
+Description=DynDNS Updater services
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=/root/.ddns/duck.sh
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl enable ddns
+systemctl start ddns
+
 #qbittorrent
 echo
 echo "Setting up qBittorrent."
@@ -187,73 +255,114 @@ EOT
 systemctl enable qbittorrent
 systemctl start qbittorrent
 
-#ngrok
+#firefox
 echo
-echo "Setting up ngrok."
-curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok-stable-linux-arm.tgz
-tar xvf ngrok-stable-linux-arm.tgz -C /usr/local/bin
-rm ngrok-stable-linux-arm.tgz
-mkdir /root/.ngrok2
-read -p "Enter your ngrok Authtoken: " auth
-tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
-authtoken: ${auth}
-tunnels:
-  nginx:
-    addr: 443
-    proto: http
-    bind_tls: true
-    inspect: false
-  ssh:
-    addr: 22
-    proto: tcp
-    inspect: false
+echo "Setting up Firefox."
+mkdir /root/.vnc
+tee /root/.vnc/xstartup > /dev/null <<EOT
+#!/bin/bash
+/usr/bin/jwm
 EOT
-tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
+chmox +x /root/.vnc/xstartup
+tee /root/.jwmrc > /dev/null <<EOT
+<?xml version="1.0"?>
+<JWM>
+    <Group>
+        <Option>maximized</Option>
+        <Option>noborder</Option>
+    </Group>
+    <WindowStyle>
+        <Font>Sans-9:bold</Font>
+        <Width>4</Width>
+        <Height>21</Height>
+        <Corner>3</Corner>
+        <Foreground>#FFFFFF</Foreground>
+        <Background>#555555</Background>
+        <Outline>#000000</Outline>
+        <Opacity>0.5</Opacity>
+        <Active>
+            <Foreground>#FFFFFF</Foreground>
+            <Background>#0077CC</Background>
+            <Outline>#000000</Outline>
+            <Opacity>1.0</Opacity>
+        </Active>
+    </WindowStyle>
+    <IconPath>/usr/share/icons/hicolor/256x256/apps</IconPath>
+    <IconPath>/usr/share/icons/hicolor/256x256/mimetypes</IconPath>
+    <IconPath>/usr/share/icons/hicolor/32x32/actions</IconPath>
+    <IconPath>/usr/share/icons/hicolor/32x32/apps</IconPath>
+    <IconPath>/usr/share/icons/hicolor/32x32/categories</IconPath>
+    <IconPath>/usr/share/icons/hicolor/32x32/devices</IconPath>
+    <IconPath>/usr/share/icons/hicolor/32x32/emblems</IconPath>
+    <IconPath>/usr/share/icons/hicolor/32x32/mimetypes</IconPath>
+    <IconPath>/usr/share/icons/hicolor/32x32/status</IconPath>
+    <IconPath>/usr/share/icons/hicolor/512x512/apps</IconPath>
+    <IconPath>/usr/share/icons/hicolor/512x512/mimetypes</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/actions</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/apps</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/categories</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/devices</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/emblems</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/mimetypes</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/places</IconPath>
+    <IconPath>/usr/share/icons/hicolor/scalable/status</IconPath>
+    <IconPath>/usr/share/icons</IconPath>
+    <IconPath>/usr/share/pixmaps</IconPath>
+    <IconPath>/usr/local/share/jwm</IconPath>
+    <Desktops width="4" height="1">
+        <Background type="solid">#111111</Background>
+    </Desktops>
+    <DoubleClickSpeed>400</DoubleClickSpeed>
+    <DoubleClickDelta>2</DoubleClickDelta>
+    <FocusModel>sloppy</FocusModel>
+    <SnapMode distance="10">border</SnapMode>
+    <MoveMode>opaque</MoveMode>
+    <ResizeMode>opaque</ResizeMode>
+    <Key key="Up">up</Key>
+    <Key key="Down">down</Key>
+    <Key key="Right">right</Key>
+    <Key key="Left">left</Key>
+    <Key key="Return">select</Key>
+    <Key key="Escape">escape</Key>
+    <StartupCommand>/root/.ignite.sh</StartupCommand>
+</JWM>
+EOT
+tee /root/.ignite.sh > /dev/null <<'EOT'
+#!/bin/bash
+ecode=0
+while [ $ecode -eq 0 ]
+do
+  DISPLAY=:0 firefox
+  ecode=$?
+done
+EOT
+chmox +x /root/.ignite.sh
+tee /etc/systemd/system/tigervnc.service > /dev/null <<'EOT'
 [Unit]
-Description=ngrok
+Description=Remote desktop service (VNC)
 After=network.target
 [Service]
-ExecStart=/usr/local/bin/ngrok start --all
-ExecReload=/bin/kill -HUP $MAINPID
-KillMode=process
-IgnoreSIGPIPE=true
-Restart=always
-RestartSec=3
-Type=simple
+Type=forking
+ExecStart=/usr/bin/tigervncserver --I-KNOW-THIS-IS-INSECURE :0
+ExecStop=/usr/bin/tigervncserver -kill :0
 [Install]
 WantedBy=multi-user.target
 EOT
-systemctl enable ngrok
-systemctl start ngrok
-
-#ddns
-echo
-echo "Setting up Duck DNS."
-mkdir /root/.ddns
-read -p "Enter the token from duckdns.org: " token
-read -p "Enter the domain from duckdns.org: " domain
-tee /root/.ddns/duck.sh > /dev/null <<EOT
-#!/bin/bash
-domain=${domain}
-token=${token}
-ipv6addr=$(curl -s https://api6.ipify.org)
-ipv4addr=$(curl -s https://api.ipify.org)
-curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
-EOT
-chmod +x /root/.ddns/duck.sh
-tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
+systemctl enable tigervnc
+systemctl start tigervnc
+tee /etc/systemd/system/websockify.service > /dev/null <<'EOT'
 [Unit]
-Description=DynDNS Updater services
-Wants=network-online.target
-After=network-online.target
+Description=novnc websockify service
+After=network.target
 [Service]
-Type=simple
-ExecStart=/root/.ddns/duck.sh
+Type=forking
+ExecStart=/usr/bin/websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5900
+ExecStop=/usr/bin/killall websockify
 [Install]
 WantedBy=multi-user.target
 EOT
-systemctl enable ddns
-systemctl start ddns
+systemctl enable websockify
+systemctl start websockify
 
 #nginx
 echo
@@ -457,10 +566,6 @@ openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-se
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 systemctl restart php*
 systemctl restart nginx
-
-#firefox
-echo
-echo "Setting up Firefox."
 
 #ufw
 echo
