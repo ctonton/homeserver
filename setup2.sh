@@ -541,6 +541,8 @@ server {
 
 	location /novnc/ {
 		proxy_pass http://novpn-firefox/;
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /novnc/websockify {
@@ -549,6 +551,8 @@ server {
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection $connection_upgrade;
 		proxy_set_header Host $host;
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 }
 EOT
