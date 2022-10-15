@@ -93,7 +93,7 @@ systemctl restart cups
 echo
 echo "Setting up qBittorrent."
 echo
-echo "Accept terms and conditions then pres ctl+c to exit qBittorrent."
+echo "Accept the Legal Notice and then pres ctl+c to exit qBittorrent."
 echo
 qbittorrent-nox
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
