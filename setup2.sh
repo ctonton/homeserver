@@ -336,7 +336,7 @@ do
   ecode=$?
 done
 EOT
-chmox +x /root/.ignite.sh
+chmod +x /root/.ignite.sh
 tee /etc/systemd/system/tigervnc.service > /dev/null <<'EOT'
 [Unit]
 Description=Remote desktop service (VNC)
