@@ -27,7 +27,8 @@ fi
 #install
 echo "Installing software."
 apt update
-apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl
+apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
+apt install -y --no-install-recommends jwm
 
 #storage
 clear
@@ -265,6 +266,7 @@ curl -LJO https://github.com/ctonton/homeserver/raw/main/icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
+ln -s /root/Downloads /var/www/html/egg
 mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 tee /var/www/html/index.html > /dev/null <<'EOT'
 <html>
@@ -349,8 +351,16 @@ tee /var/www/html/print/print.php > /dev/null <<'EOT'
    }
 ?>
 EOT
-chown -R www-data /var/www/html
+chown -R www-data:www-data /var/www/html
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
+##
+map $http_upgrade $connection_upgrade {
+	default upgrade;
+	''      close;
+}
+upstream novpn-firefox {
+	server 127.0.0.1:5800;
+}
 ##
 server {
 listen 80 default_server;
@@ -360,7 +370,7 @@ listen [::]:80 default_server;
 	return 301 https://$host$request_uri;
 	}
 }
-
+##
 server {
 	listen 443 ssl http2;
 	listen [::]:443 ssl http2;
@@ -416,8 +426,21 @@ server {
 		auth_basic "Restricted Content";
 		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
+
+	location /novnc/ {
+		proxy_pass http://novpn-firefox/;
+	}
+
+	location /novnc/websockify {
+		proxy_pass http://novpn-firefox/;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection $connection_upgrade;
+		proxy_set_header Host $host;
+	}
 }
 EOT
+sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
 sed -i '/http {/a\\tclient_max_body_size 10M;\n\tupload_progress uploads 1m;' /etc/nginx/nginx.conf
 echo
 echo "Add users to web server."
@@ -438,46 +461,6 @@ systemctl restart nginx
 #firefox
 echo
 echo "Setting up Firefox."
-if [ $(awk '/^MemTotal:/{print $2}' /proc/meminfo) -ge 2000000 ]
-then
-apt install -y docker.io apparmor
-docker pull jlesage/firefox
-docker run -d --name=firefox -e USER_ID=0 -e GROUP_ID=0 -p 5800:5800 -v /docker/appdata/firefox:/config:rw --shm-size 2g --restart unless-stopped jlesage/firefox
-tee insert.txt > /dev/null <<'EOT'
-map $http_upgrade $connection_upgrade {
-	default upgrade;
-	''      close;
-}
-
-upstream docker-firefox {
-	server 127.0.0.1:5800;
-}
-##
-EOT
-sed -i '1 rinsert.txt' /etc/nginx/sites-available/default
-tee insert.txt > /dev/null <<'EOT'
-
-	location = /firefox {return 301 $scheme://$http_host/firefox/;}
-	location /firefox/ {
-		proxy_pass http://docker-firefox/;
-		location /firefox/websockify {
-			proxy_pass http://docker-firefox/websockify/;
-			proxy_http_version 1.1;
-			proxy_set_header Upgrade $http_upgrade;
-			proxy_set_header Connection $connection_upgrade;
-			proxy_read_timeout 86400;
-		}
-	}
-EOT
-sed -i '/autoindex on;/rinsert.txt' /etc/nginx/sites-available/default
-rm insert.txt
-systemctl restart nginx
-ln -s /docker/appdata/firefox/downloads /var/www/html/egg
-else
-echo "System does not have sufficient RAM to support this feature."
-mkdir /root/Downloads
-ln -s /root/Downloads /var/www/html/egg
-fi
 
 #ufw
 echo
