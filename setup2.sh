@@ -263,7 +263,7 @@ tee /root/.vnc/xstartup > /dev/null <<EOT
 #!/bin/bash
 /usr/bin/jwm
 EOT
-chmod +x /root/.vnc/xstartvnc
+chmod +x /root/.vnc/xstartup
 tee /root/.jwmrc > /dev/null <<EOT
 <?xml version="1.0"?>
 <JWM>
