@@ -259,11 +259,11 @@ systemctl start qbittorrent
 echo
 echo "Setting up Firefox."
 mkdir /root/.vnc
-tee /root/.vnc/xstartup > /dev/null <<EOT
-#!/bin/bash
-/usr/bin/jwm
+tee /root/.vnc/config > /dev/null <<EOT
+session=jwm
+localhost=no
+SecurityTypes=None
 EOT
-chmox +x /root/.vnc/xstartup
 tee /root/.jwmrc > /dev/null <<EOT
 <?xml version="1.0"?>
 <JWM>
@@ -343,7 +343,7 @@ Description=Remote desktop service (VNC)
 After=network.target
 [Service]
 Type=forking
-ExecStart=/usr/bin/tigervncserver -SecurityTypes None -localhost no --I-KNOW-THIS-IS-INSECURE :0
+ExecStart=/usr/bin/tigervncserver --I-KNOW-THIS-IS-INSECURE :0
 ExecStop=/usr/bin/tigervncserver -kill :0
 [Install]
 WantedBy=multi-user.target
