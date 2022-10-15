@@ -1,19 +1,18 @@
 #!/bin/bash
 
 clear
-if [ $EUID != 0 ]
+if [ $EUID -ne 0 ]
 then
   read -n 1 -s -r -p "Please run as "root". Press any key to exit."
   exit
 fi
-cpu=$(dpkg --print-architecture)
-if [ $cpu != "armhf" ]
+if [ $(dpkg --print-architecture) != "armhf" ]
 then
   read -n 1 -s -r -p "This script works on ARM devices only. Press any key to exit."
   exit
 fi
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
-if [ $? != 0 ]
+if [ $? -ne 0 ]
 then
   read -n 1 -s -r -p "Network is not online. Press any key to exit."
   exit
@@ -187,11 +186,6 @@ EOT
 systemctl enable qbittorrent
 systemctl start qbittorrent
 
-#firefox
-echo
-echo "Setting up Firefox."
-docker run -d --name=firefox -p 5800:5800 -v /docker/appdata/firefox:/config:rw --shm-size 2g --restart unless-stopped jlesage/firefox:v1.18.0
-
 #ngrok
 echo
 echo "Setting up ngrok."
@@ -271,7 +265,6 @@ curl -LJO https://github.com/ctonton/homeserver/raw/main/icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
-ln -s /srv/NAS/Public/Unsorted /var/www/html/egg
 mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 tee /var/www/html/index.html > /dev/null <<'EOT'
 <html>
@@ -308,7 +301,7 @@ tee /var/www/html/index.html > /dev/null <<'EOT'
         <br>
         <br>
         <h1>Web Browser</h1>
-        <a href="/browser/"><img src="ff.png" alt="Firefox"></a>
+        <a href="/firefox/"><img src="ff.png" alt="Firefox"></a>
         <br>
         <br>
 	  </div>
@@ -358,83 +351,71 @@ tee /var/www/html/print/print.php > /dev/null <<'EOT'
 EOT
 chown -R www-data /var/www/html
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
-map $http_upgrade $connection_upgrade {
-        default upgrade;
-        ''      close;
-}
+##
+server {
+listen 80 default_server;
+listen [::]:80 default_server;
 
-upstream docker-firefox {
-        server 127.0.0.1:5800;
+	location / {
+	return 301 https://$host$request_uri;
+	}
 }
 
 server {
-        listen 443 ssl http2;
-        listen [::]:443 ssl http2;
-
-        ssl_certificate /etc/nginx/nginx-selfsigned.crt;
-        ssl_certificate_key /etc/nginx/nginx-selfsigned.key;
-        ssl_session_timeout  10m;
-        ssl_session_cache shared:SSL:10m;
-        ssl_session_tickets off;
-        ssl_dhparam /etc/nginx/dhparam.pem;
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SH>        ssl_prefer_server_ciphers off;
-        resolver 8.8.8.8 8.8.4.4 valid=300s;
-        resolver_timeout 5s;
-        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-        add_header X-Frame-Options DENY;
-        add_header X-Content-Type-Options nosniff;
-        add_header X-XSS-Protection "1; mode=block";
-        client_max_body_size 10M;
-
-        root /var/www/html;
-        index index.html;
-        autoindex on;
+	listen 443 ssl http2;
+	listen [::]:443 ssl http2;
+	ssl_certificate /etc/nginx/nginx-selfsigned.crt;
+	ssl_certificate_key /etc/nginx/nginx-selfsigned.key;
+	ssl_session_timeout  10m;
+	ssl_session_cache shared:SSL:10m;
+	ssl_session_tickets off;
+	ssl_dhparam /etc/nginx/dhparam.pem;
+	ssl_protocols TLSv1.2 TLSv1.3;
+	ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+	ssl_prefer_server_ciphers off;
+	resolver 8.8.8.8 8.8.4.4 valid=300s;
+	resolver_timeout 5s;
+	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+	add_header X-Frame-Options DENY;
+	add_header X-Content-Type-Options nosniff;
+	add_header X-XSS-Protection "1; mode=block";
+	client_max_body_size 10M;
+	root /var/www/html;
+	index index.html;
+	autoindex on;
 
 	location /files/ {
-                try_files $uri $uri/ =404;
-                auth_basic "Restricted Content";
-                auth_basic_user_file /etc/nginx/.htpasswd;
-        }
+		try_files $uri $uri/ =404;
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/.htpasswd;
+	}
 
-        location /egg/ {
-                try_files $uri $uri/ =404;
-        }
+	location /egg/ {
+		try_files $uri $uri/ =404;
+	}
 
-        location /torrents/ {
-                proxy_pass http://127.0.0.1:8080/;
-                proxy_buffering off;
-                auth_basic "Restricted Content";
-                auth_basic_user_file /etc/nginx/.htpasswd;
-        }
+	location /torrents/ {
+		proxy_pass http://127.0.0.1:8080/;
+		proxy_buffering off;
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/.htpasswd;
+	}
 
-        location /print/ {
-                auth_basic "Restricted Content";
-                auth_basic_user_file /etc/nginx/.htpasswd;
-        }
+	location /print/ {
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/.htpasswd;
+	}
 
-        location /print/print.php {
-                include /etc/nginx/fastcgi_params;
-                fastcgi_pass unix:/run/php/php-fpm.sock;
-                fastcgi_index print.php;
-                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                fastcgi_intercept_errors on;
-                track_uploads uploads 300s;
-                auth_basic "Restricted Content";
-                auth_basic_user_file /etc/nginx/.htpasswd;
-        }
-
-        location = /browser {return 301 $scheme://$http_host/firefox/;}
-        location /browser/ {
-                proxy_pass http://docker-firefox/;
-                location /browser/websockify/ {
-                        proxy_pass http://docker-firefox/websockify/;
-                        proxy_http_version 1.1;
-                        proxy_set_header Upgrade $http_upgrade;
-                        proxy_set_header Connection $connection_upgrade;
-                        proxy_read_timeout 86400;
-                }
-        }
+	location /print/print.php {
+		include /etc/nginx/fastcgi_params;
+		fastcgi_pass unix:/run/php/php-fpm.sock;
+		fastcgi_index print.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		fastcgi_intercept_errors on;
+		track_uploads uploads 300s;
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/.htpasswd;
+	}
 }
 EOT
 sed -i '/http {/a\\tclient_max_body_size 10M;\n\tupload_progress uploads 1m;' /etc/nginx/nginx.conf
@@ -453,6 +434,49 @@ openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-se
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 systemctl restart php*
 systemctl restart nginx
+
+#firefox
+echo
+echo "Setting up Firefox."
+if [ $(awk '/^MemTotal:/{print $2}' /proc/meminfo) -ge 2000000 ]
+then
+apt install -y docker.io apparmor
+docker pull jlesage/firefox
+docker run -d --name=firefox -e USER_ID=0 -e GROUP_ID=0 -p 5800:5800 -v /docker/appdata/firefox:/config:rw --shm-size 2g --restart unless-stopped jlesage/firefox
+tee insert.txt > /dev/null <<'EOT'
+map $http_upgrade $connection_upgrade {
+	default upgrade;
+	''      close;
+}
+
+upstream docker-firefox {
+	server 127.0.0.1:5800;
+}
+##
+EOT
+sed -i '1 rinsert.txt' /etc/nginx/sites-available/default
+tee insert.txt > /dev/null <<'EOT'
+
+location = /firefox {return 301 $scheme://$http_host/firefox/;}
+	location /firefox/ {
+		proxy_pass http://docker-firefox/;
+		location /firefox/websockify {
+			proxy_pass http://docker-firefox/websockify/;
+			proxy_http_version 1.1;
+			proxy_set_header Upgrade $http_upgrade;
+			proxy_set_header Connection $connection_upgrade;
+			proxy_read_timeout 86400;
+		}
+	}
+EOT
+sed -i '/autoindex on;/rinsert.txt' /etc/nginx/sites-available/default
+rm insert.txt
+systemctl restart nginx
+ln -s /docker/appdata/firefox/downloads /var/www/html/egg
+else
+echo "System does not have sufficient RAM to support this feature."
+ln -s /root/Downloads /var/www/html/egg
+fi
 
 #ufw
 echo
