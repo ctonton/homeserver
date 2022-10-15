@@ -357,6 +357,7 @@ Description=novnc websockify service
 After=network.target
 [Service]
 Type=forking
+User=root
 ExecStart=/usr/bin/websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5900
 ExecStop=/usr/bin/killall websockify
 [Install]
