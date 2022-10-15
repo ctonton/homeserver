@@ -456,6 +456,7 @@ upstream docker-firefox {
 EOT
 sed -i '1 rinsert.txt' /etc/nginx/sites-available/default
 tee insert.txt > /dev/null <<'EOT'
+
 	location = /firefox {return 301 $scheme://$http_host/firefox/;}
 	location /firefox/ {
 		proxy_pass http://docker-firefox/;
@@ -468,7 +469,7 @@ tee insert.txt > /dev/null <<'EOT'
 		}
 	}
 EOT
-sed -i '/autoindex on;//rinsert.txt' /etc/nginx/sites-available/default
+sed -i '/autoindex on;/rinsert.txt' /etc/nginx/sites-available/default
 rm insert.txt
 systemctl restart nginx
 ln -s /docker/appdata/firefox/downloads /var/www/html/egg
