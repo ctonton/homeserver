@@ -475,6 +475,7 @@ systemctl restart nginx
 ln -s /docker/appdata/firefox/downloads /var/www/html/egg
 else
 echo "System does not have sufficient RAM to support this feature."
+mkdir /root/Downloads
 ln -s /root/Downloads /var/www/html/egg
 fi
 
