@@ -559,6 +559,17 @@ do
   openssl passwd -apr1 >> /etc/nginx/.htpasswd
   read -p "Add another user? (y/n): " loo
 done
+echo "Add users to web server."
+loo="y"
+until [ ${loo} != "y" ]
+do
+  read -p "Enter a user name: " use
+  echo -n "${use}:" >> /etc/nginx/.htpasswd
+  openssl passwd -apr1 >> /etc/nginx/.htpasswd
+  read -p "Add another user? (y/n): " loo
+done
+EOT
+chmod +x /root/webusers.sh
 echo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
