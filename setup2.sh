@@ -350,7 +350,7 @@ After=network.target
 [Service]
 Type=forking
 User=root
-ExecStart=/usr/bin/tigervncserver -localhost no -SecurityTypes None --I-KNOW-THIS-IS-INSECURE :0
+ExecStart=/usr/bin/tigervncserver -Log *:syslog:0 -localhost no -SecurityTypes None --I-KNOW-THIS-IS-INSECURE :0
 ExecStop=/usr/bin/tigervncserver -kill :0
 [Install]
 WantedBy=multi-user.target
