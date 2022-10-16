@@ -329,6 +329,7 @@ tee /root/.jwmrc > /dev/null <<EOT
 EOT
 tee /root/.ignite.sh > /dev/null <<'EOT'
 #!/bin/bash
+websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5900
 ecode=0
 while [ $ecode -eq 0 ]
 do
@@ -351,21 +352,6 @@ WantedBy=multi-user.target
 EOT
 systemctl enable tigervnc
 systemctl start tigervnc
-tee /etc/systemd/system/websockify.service > /dev/null <<'EOT'
-[Unit]
-Description=novnc websockify service
-Requires=tigervnc.service
-After=tigervnc.service
-[Service]
-Type=simple
-User=root
-ExecStart=/usr/bin/websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5900
-ExecStop=/usr/bin/killall websockify
-[Install]
-WantedBy=multi-user.target
-EOT
-systemctl enable websockify
-systemctl start websockify
 
 #nginx
 echo
