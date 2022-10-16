@@ -19,7 +19,7 @@ then
 fi
 echo "This server and the default printer need to be have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports forwarded in the router."
 read -p "Do you wish to continue? (y/n): " cont
-if [ ${cont} != "y" ]
+if [ $cont != "y" ]
 then
   exit
 fi
@@ -153,7 +153,7 @@ curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4add
 EOT
 chmod +x /root/.ddns/duck.sh
 read -p "Do you wish to set up Dynamic DNS now? (y/n): " cont
-if [ ${cont} == "y" ]
+if [ $cont == "y" ]
 then
   read -p "Enter the token from duckdns.org: " token
   sed -i "s/enter token here/$token/g" /root/.ddns/duck.sh
@@ -552,25 +552,55 @@ sed -i '/http {/a\\tclient_max_body_size 10M;\n\tupload_progress uploads 1m;' /e
 echo
 echo "Add users to web server."
 loo="y"
-until [ ${loo} != "y" ]
+until [ $loo != "y" ]
 do
   read -p "Enter a user name: " use
   echo -n "${use}:" >> /etc/nginx/.htpasswd
   openssl passwd -apr1 >> /etc/nginx/.htpasswd
   read -p "Add another user? (y/n): " loo
 done
-echo "Add users to web server."
-loo="y"
-until [ ${loo} != "y" ]
+tee /root/webusers.sh > /dev/null <<'EOT'
+#!/bin/bash
+clear
+loo=0
+until [ $loo -eq 4 ]
 do
-  read -p "Enter a user name: " use
-  echo -n "${use}:" >> /etc/nginx/.htpasswd
-  openssl passwd -apr1 >> /etc/nginx/.htpasswd
-  read -p "Add another user? (y/n): " loo
+  echo
+  echo "1 - List users"
+  echo "2 - Add user"
+  echo "3 - Remove user"
+  echo "4 - quit"
+  echo
+  read -p "Enter selection: :" loo
+  if [ $loo -eq 1 ]
+  then
+    echo
+    cat /etc/nginx/.htpasswd
+    loo=0
+  fi
+  if [ $loo -eq 2 ]
+  then
+    read -p "Enter a user name: " use
+    echo -n "${use}:" >> /etc/nginx/.htpasswd
+    openssl passwd -apr1 >> /etc/nginx/.htpasswd
+    loo=0
+  fi
+  if [ $loo -eq 3 ]
+  then
+    read -p "Enter a user name to remove: " use
+    sed -i "/$use/d" /etc/nginx/.htpasswd
+    loo=0
+  fi
+  fi
+  if [ $loo -ne 0 ]
+  then
+    echo "Invalid selection."
+    echo
+  fi
 done
+exit
 EOT
 chmod +x /root/webusers.sh
-echo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 systemctl restart php*
@@ -593,7 +623,7 @@ echo
 echo "Downloading WireGuard script."
 curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
 read -p "Do you wish to set up WireGuard now? (y/n): " cont
-if [ ${cont} == "y" ]
+if [ $cont == "y" ]
 then
   bash /root/wireguard-install.sh
 fi
