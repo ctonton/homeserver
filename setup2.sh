@@ -132,18 +132,6 @@ systemctl start ngrok
 #ddns
 echo
 echo "Setting up Duck DNS."
-mkdir /root/.ddns
-read -p "Enter the token from duckdns.org: " token
-read -p "Enter the domain from duckdns.org: " domain
-tee /root/.ddns/duck.sh > /dev/null <<EOT
-#!/bin/bash
-domain=${domain}
-token=${token}
-ipv6addr=$(curl -s https://api6.ipify.org)
-ipv4addr=$(curl -s https://api.ipify.org)
-curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
-EOT
-chmod +x /root/.ddns/duck.sh
 tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
 [Unit]
 Description=DynDNS Updater services
@@ -155,8 +143,25 @@ ExecStart=/root/.ddns/duck.sh
 [Install]
 WantedBy=multi-user.target
 EOT
-systemctl enable ddns
-systemctl start ddns
+tee /root/.ddns/duck.sh > /dev/null <<'EOT'
+#!/bin/bash
+domain=enter domain here
+token=enter token here
+ipv6addr=$(curl -s https://api6.ipify.org)
+ipv4addr=$(curl -s https://api.ipify.org)
+curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
+EOT
+chmod +x /root/.ddns/duck.sh
+read -p "Do you wish to set up Dynamic DNS now? (y/n): " cont
+if [ ${cont} == "y" ]
+then
+  read -p "Enter the token from duckdns.org: " token
+  sed -i "s/enter token here/$token/g" /root/.ddns/duck.sh
+  read -p "Enter the domain from duckdns.org: " domain
+  sed -i "s/enter domain here/$domain/g" /root/.ddns/duck.sh
+  systemctl enable ddns
+  systemctl start ddns
+fi
 
 #qbittorrent
 echo
@@ -577,9 +582,8 @@ echo
 echo "Downloading WireGuard script."
 curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
 read -p "Do you wish to set up WireGuard now? (y/n): " cont
-if [ ${cont} != "y" ]
+if [ ${cont} == "y" ]
 then
-  exit
+  bash /root/wireguard-install.sh
 fi
-bash /root/wireguard-install.sh
 exit
