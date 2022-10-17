@@ -290,25 +290,6 @@ tee /root/.jwmrc > /dev/null <<EOT
             <Opacity>1.0</Opacity>
         </Active>
     </WindowStyle>
-    <IconPath>/usr/share/icons/hicolor/256x256/apps</IconPath>
-    <IconPath>/usr/share/icons/hicolor/256x256/mimetypes</IconPath>
-    <IconPath>/usr/share/icons/hicolor/32x32/actions</IconPath>
-    <IconPath>/usr/share/icons/hicolor/32x32/apps</IconPath>
-    <IconPath>/usr/share/icons/hicolor/32x32/categories</IconPath>
-    <IconPath>/usr/share/icons/hicolor/32x32/devices</IconPath>
-    <IconPath>/usr/share/icons/hicolor/32x32/emblems</IconPath>
-    <IconPath>/usr/share/icons/hicolor/32x32/mimetypes</IconPath>
-    <IconPath>/usr/share/icons/hicolor/32x32/status</IconPath>
-    <IconPath>/usr/share/icons/hicolor/512x512/apps</IconPath>
-    <IconPath>/usr/share/icons/hicolor/512x512/mimetypes</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/actions</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/apps</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/categories</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/devices</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/emblems</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/mimetypes</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/places</IconPath>
-    <IconPath>/usr/share/icons/hicolor/scalable/status</IconPath>
     <IconPath>/usr/share/icons</IconPath>
     <IconPath>/usr/share/pixmaps</IconPath>
     <IconPath>/usr/local/share/jwm</IconPath>
@@ -321,12 +302,6 @@ tee /root/.jwmrc > /dev/null <<EOT
     <SnapMode distance="10">border</SnapMode>
     <MoveMode>opaque</MoveMode>
     <ResizeMode>opaque</ResizeMode>
-    <Key key="Up">up</Key>
-    <Key key="Down">down</Key>
-    <Key key="Right">right</Key>
-    <Key key="Left">left</Key>
-    <Key key="Return">select</Key>
-    <Key key="Escape">escape</Key>
     <StartupCommand>/root/.ignite.sh</StartupCommand>
 </JWM>
 EOT
