@@ -3,12 +3,7 @@
 clear
 if [ $EUID -ne 0 ]
 then
-  read -n 1 -s -r -p "Please run as "root". Press any key to exit."
-  exit
-fi
-if [ $(dpkg --print-architecture) != "armhf" ]
-then
-  read -n 1 -s -r -p "This script works on ARM devices only. Press any key to exit."
+  read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
@@ -80,7 +75,7 @@ systemctl restart smbd
 
 #cups
 echo
-echo "Setting up print server."
+echo "Setting up CUPS."
 usermod -aG lpadmin root
 cupsctl --remote-admin --user-cancel-any
 read -p "Enter the static IP address of the default printer. (ex. 10.10.10.11): " defip
@@ -131,7 +126,7 @@ systemctl start ngrok
 
 #ddns
 echo
-echo "Setting up Duck DNS."
+echo "Setting up DuckDNS."
 tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
 [Unit]
 Description=DynDNS Updater services
@@ -173,7 +168,9 @@ qbittorrent-nox
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
-tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
+if [ $(dpkg --print-architecture) == "armhf" ]
+then
+  tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=false
 program=
@@ -243,6 +240,7 @@ WebUI\SessionTimeout=3600
 WebUI\UseUPnP=true
 WebUI\Username=admin
 EOT
+fi
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
@@ -360,7 +358,7 @@ systemctl start tigervnc
 
 #nginx
 echo
-echo "Setting up web server."
+echo "Setting up NGINX."
 if [ ! -f /var/www/html/index.bak ]
 then
   mv /var/www/html/index* /var/www/html/index.bak
@@ -608,7 +606,7 @@ systemctl restart nginx
 
 #ufw
 echo
-echo "Setting up firewall."
+echo "Setting up UFW."
 ufw allow 80
 ufw allow 443
 ufw allow 51820/udp
@@ -622,7 +620,7 @@ sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
 echo
 echo "Downloading WireGuard script."
 curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
-read -p "Do you wish to set up WireGuard now? (y/n): " cont
+read -p "Set up WireGuard now? (y/n): " cont
 if [ $cont == "y" ]
 then
   bash /root/wireguard-install.sh
