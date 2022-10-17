@@ -24,6 +24,9 @@ echo "Installing software."
 apt update
 apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
 apt install -y --no-install-recommends jwm
+echo "0 4 * * 1 reboot" > tempcron
+crontab tempcron
+rm tempcron
 
 #storage
 clear
