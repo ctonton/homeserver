@@ -34,7 +34,8 @@ rm tempcron
 cp $0 /root/resume.sh
 sed -i '2,42d' /root/resume.sh
 chmod +x /root/resume.sh
-echo "bash /root/resume.sh >>/root/.bashrc
+echo "bash /root/resume.sh > /root/.bash_profile
+chmod +x /root/.bash_profile
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
@@ -613,6 +614,6 @@ then
   bash /root/wireguard-install.sh
 fi
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
-sed -i '/resume.sh/d' /root/.bashrc
+rm /root/.bash_profile
 rm /root/resume.sh
 reboot
