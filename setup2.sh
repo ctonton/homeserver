@@ -31,9 +31,10 @@ apt upgrade -y
 echo "0 4 * * 1 reboot" > tempcron
 crontab tempcron
 rm tempcron
-cp -i $0 /root/.bashrc/resume.sh
-sed -e '2,40d' /root/.bashrc/resume.sh
-chmod +x /root/.bashrc/resume.sh
+cp -i $0 /root/resume.sh
+sed -e '2,42d' /root/resume.sh
+chmod +x /root/resume.sh
+echo /root/resume.sh >>/root/.bashrc
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
@@ -612,5 +613,6 @@ then
   bash /root/wireguard-install.sh
 fi
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
-rm /root/.bashrc/resume.sh
+sed -i '/resume.sh/d' /root/.bashrc
+rm /root/resume.sh
 reboot
