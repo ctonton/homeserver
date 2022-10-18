@@ -13,8 +13,8 @@ then
   read -n 1 -s -r -p "Network is not online. Press any key to exit."
   exit
 fi
-echo "This server and the default printer need to be have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports forwarded in the router."
-read -p "Do you wish to continue? (y/n): " cont
+echo "This server and the default printer need to be have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports 80, 443, and 51820 forwarded to it."
+read -p "Do you want to proceed with the installation? (y/n): " cont
 if [ $cont != "y" ]
 then
   exit
@@ -43,9 +43,9 @@ chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
 blkid
 echo
-read -p "Enter disk partition (ex. sda1): " device
-uniq=$(blkid -o value -s UUID /dev/${device})
-type=$(blkid -o value -s TYPE /dev/${device})
+read -p "Enter the storage partition (ex. sda2): " part
+uniq=$(blkid -o value -s UUID /dev/${part})
+type=$(blkid -o value -s TYPE /dev/${part})
 tee -a /etc/fstab > /dev/null <<EOT
 UUID=${uniq}  /srv/NAS  ${type}  defaults,nofail,uid=65534,gid=65534  0  0
 EOT
@@ -153,7 +153,7 @@ ipv4addr=$(curl -s https://api.ipify.org)
 curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
 EOT
 chmod +x /root/.ddns/duck.sh
-read -p "Do you wish to set up Dynamic DNS now? (y/n): " cont
+read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
 if [ $cont == "y" ]
 then
   read -p "Enter the token from duckdns.org: " token
