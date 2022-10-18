@@ -21,6 +21,9 @@ then
 fi
 
 #initialize
+read -p "Enter a hostname for this server. : " serv
+hostnamectl set-hostname $serv
+sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt update
