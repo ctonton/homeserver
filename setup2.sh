@@ -55,9 +55,9 @@ chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
 blkid
 echo
-read -p "Enter the storage partition (ex. sda2): " part
-uniq=$(blkid -o value -s UUID /dev/${part})
-type=$(blkid -o value -s TYPE /dev/${part})
+read -p "Enter the storage partition (ex. sda2): " parti
+uniq=$(blkid -o value -s UUID /dev/${parti})
+type=$(blkid -o value -s TYPE /dev/${parti})
 tee -a /etc/fstab > /dev/null <<EOT
 UUID=${uniq}  /srv/NAS  ${type}  defaults,nofail,uid=65534,gid=65534  0  0
 EOT
