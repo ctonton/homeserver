@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#prerequisites
 clear
 if [ $EUID -ne 0 ]
 then
@@ -19,14 +20,20 @@ then
   exit
 fi
 
-#install
-echo "Installing software."
+#initialize
+dpkg-reconfigure locales
+dpkg-reconfigure tzdata
 apt update
-apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc avahi-daemon
-apt install -y --no-install-recommends jwm
+apt upgrade -y
 echo "0 4 * * 1 reboot" > tempcron
 crontab tempcron
 rm tempcron
+
+#install
+echo
+echo "Installing software."
+apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc avahi-daemon
+apt install -y --no-install-recommends jwm
 
 #storage
 clear
@@ -50,7 +57,6 @@ echo "Setting up NFS."
 tee -a /etc/exports > /dev/null <<EOT
 /srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)
 EOT
-systemctl restart nfs-kernel-server
 
 #samba
 echo
@@ -74,7 +80,6 @@ tee /etc/samba/smb.conf > /dev/null <<'EOT'
    create mask = 0777
    directory mask = 0777
 EOT
-systemctl restart smbd
 
 #cups
 echo
@@ -86,7 +91,6 @@ subip=${defip%.*}
 read -p "Enter a name for the default printer: " defpr
 lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
 lpadmin -d $defpr
-systemctl restart cups
 
 #ngrok
 echo
@@ -125,7 +129,6 @@ Type=simple
 WantedBy=multi-user.target
 EOT
 systemctl enable ngrok
-systemctl start ngrok
 
 #ddns
 echo
@@ -158,7 +161,6 @@ then
   read -p "Enter the domain from duckdns.org: " domain
   sed -i "s/enter domain here/$domain/g" /root/.ddns/duck.sh
   systemctl enable ddns
-  systemctl start ddns
 fi
 
 #qbittorrent
@@ -259,7 +261,6 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOT
 systemctl enable qbittorrent
-systemctl start qbittorrent
 
 #firefox
 echo
@@ -332,7 +333,6 @@ ExecStop=/usr/bin/tigervncserver -kill :0
 WantedBy=multi-user.target
 EOT
 systemctl enable tigervnc
-systemctl start tigervnc
 
 #nginx
 echo
@@ -579,8 +579,6 @@ EOT
 chmod +x /root/webusers.sh
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
-systemctl restart php*
-systemctl restart nginx
 
 #ufw
 echo
@@ -603,4 +601,5 @@ if [ $cont == "y" ]
 then
   bash /root/wireguard-install.sh
 fi
-exit
+read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
+reboot
