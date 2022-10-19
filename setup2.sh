@@ -148,8 +148,8 @@ echo "Setting up DuckDNS."
 mkdir /root/.ddns
 tee /root/.ddns/duck.sh > /dev/null <<'EOT'
 #!/bin/bash
-domain=enter domain here
-token=enter token here
+domain=enter_domain
+token=enter_token
 ipv6addr=$(curl -s https://api6.ipify.org)
 ipv4addr=$(curl -s https://api.ipify.org)
 curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
@@ -170,9 +170,9 @@ read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
 if [ $cont == "y" ]
 then
   read -p "Enter the token from duckdns.org: " token
-  sed -i "s/enter token here/$token/g" /root/.ddns/duck.sh
+  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
   read -p "Enter the domain from duckdns.org: " domain
-  sed -i "s/enter domain here/$domain/g" /root/.ddns/duck.sh
+  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
   systemctl enable ddns
 fi
 
