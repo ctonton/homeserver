@@ -145,6 +145,16 @@ systemctl enable ngrok
 #ddns
 echo
 echo "Setting up DuckDNS."
+mkdir /root/.ddns
+tee /root/.ddns/duck.sh > /dev/null <<'EOT'
+#!/bin/bash
+domain=enter domain here
+token=enter token here
+ipv6addr=$(curl -s https://api6.ipify.org)
+ipv4addr=$(curl -s https://api.ipify.org)
+curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
+EOT
+chmod +x /root/.ddns/duck.sh
 tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
 [Unit]
 Description=DynDNS Updater services
@@ -156,15 +166,6 @@ ExecStart=/root/.ddns/duck.sh
 [Install]
 WantedBy=multi-user.target
 EOT
-tee /root/.ddns/duck.sh > /dev/null <<'EOT'
-#!/bin/bash
-domain=enter domain here
-token=enter token here
-ipv6addr=$(curl -s https://api6.ipify.org)
-ipv4addr=$(curl -s https://api.ipify.org)
-curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
-EOT
-chmod +x /root/.ddns/duck.sh
 read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
 if [ $cont == "y" ]
 then
@@ -178,6 +179,7 @@ fi
 #qbittorrent
 echo
 echo "Setting up qBittorrent."
+echo
 echo
 echo "Accept the Legal Notice and then pres ctl+c to exit qBittorrent."
 echo
