@@ -44,7 +44,7 @@ reboot
 #install
 echo
 echo "Installing software."
-apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc avahi-daemon
+apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
 apt install -y --no-install-recommends jwm
 
 #storage
