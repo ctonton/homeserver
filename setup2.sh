@@ -37,7 +37,7 @@ echo "0 4 * * 1 reboot" > tempcron
 crontab tempcron
 rm tempcron
 cp $0 /root/resume.sh
-sed -i '2,42d' /root/resume.sh
+sed -i '2,47d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
