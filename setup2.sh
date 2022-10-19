@@ -26,8 +26,8 @@ hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
-apt update
-apt upgrade -y
+apt-get update
+apt-get upgrade -y --fix-missing
 echo "0 4 * * 1 reboot" > tempcron
 crontab tempcron
 rm tempcron
@@ -44,8 +44,8 @@ reboot
 #install
 echo
 echo "Installing software."
-apt install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
-apt install -y --no-install-recommends jwm
+apt-get install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
+apt install -y --no-install-recommends --autoremove jwm
 
 #storage
 clear
