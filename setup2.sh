@@ -27,7 +27,7 @@ sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
-apt-get upgrade -y --fix-missing
+apt-get full-upgrade -y --fix-missing
 echo "0 4 * * 1 reboot" > tempcron
 crontab tempcron
 rm tempcron
