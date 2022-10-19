@@ -7,6 +7,11 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
+if [ $(dpkg --print-architecture) != "armhf" ]
+then
+  read -n 1 -s -r -p "This script is for ARM devices only. Press any key to exit."
+  exit
+fi
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
@@ -195,11 +200,9 @@ chown -R nobody:nogroup $1
 exit
 EOT
 chmod +x /root/.config/qBittorrent/setp.sh
-if [ $(dpkg --print-architecture) == "armhf" ]
-then
-  tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
+tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
-enabled=false
+enabled=true
 program="/root/.config/qBittorrent/setp.sh \"%F\""
 
 [BitTorrent]
@@ -267,7 +270,6 @@ WebUI\SessionTimeout=3600
 WebUI\UseUPnP=true
 WebUI\Username=admin
 EOT
-fi
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
