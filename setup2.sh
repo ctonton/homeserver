@@ -611,6 +611,7 @@ sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
 echo
 echo "Downloading WireGuard script."
 curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
+chmod +x /root/wireguard-install.sh
 read -p "Set up WireGuard now? (y/n): " cont
 if [ $cont == "y" ]
 then
