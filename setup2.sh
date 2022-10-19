@@ -193,7 +193,7 @@ then
   tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=false
-program="chmod -R 777 \"%F\" ; chown -R nobody:nogroup \"%F\""
+program="chmod -R 777 \"%F\""
 
 [BitTorrent]
 Session\GlobalMaxSeedingMinutes=1
