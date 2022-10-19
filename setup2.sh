@@ -34,7 +34,7 @@ rm tempcron
 cp $0 /root/resume.sh
 sed -i '2,42d' /root/resume.sh
 chmod +x /root/resume.sh
-echo "bash /root/resume.sh > /root/.bash_profile
+echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
@@ -55,9 +55,9 @@ chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
 blkid
 echo
-read -p "Enter disk partition (ex. sda1): " device
-uniq=$(blkid -o value -s UUID /dev/${device})
-type=$(blkid -o value -s TYPE /dev/${device})
+read -p "Enter disk partition (ex. sda1): " part
+uniq=$(blkid -o value -s UUID /dev/${part})
+type=$(blkid -o value -s TYPE /dev/${part})
 tee -a /etc/fstab > /dev/null <<EOT
 UUID=${uniq}  /srv/NAS  ${type}  defaults,nofail,uid=65534,gid=65534  0  0
 EOT
