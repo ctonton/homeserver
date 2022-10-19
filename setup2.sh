@@ -56,11 +56,11 @@ chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
 blkid
 echo
-read -p "Enter disk partition (ex. sda1): " part
+read -p "Enter disk partition (ex. sda2): " part
 uniq=$(blkid -o value -s UUID /dev/${part})
 type=$(blkid -o value -s TYPE /dev/${part})
 tee -a /etc/fstab > /dev/null <<EOT
-UUID=${uniq}  /srv/NAS  ${type}  defaults,nofail,uid=65534,gid=65534  0  0
+UUID=${uniq}  /srv/NAS  ${type}  defaults,nofail  0  0
 EOT
 mount -a
 
@@ -193,7 +193,7 @@ then
   tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=false
-program=
+program="chmod -R 777 \"%F\" ; chown -R nobody:nogroup \"%F\""
 
 [BitTorrent]
 Session\GlobalMaxSeedingMinutes=1
@@ -397,7 +397,7 @@ tee /var/www/html/index.html > /dev/null <<'EOT'
         <br>
         <br>
         <h1>Web Browser</h1>
-        <a href="/firefox/"><img src="ff.png" alt="Firefox"></a>
+        <a href="/novnc/vnc.html?path=novnc/websockify"><img src="ff.png" alt="Firefox"></a>
         <br>
         <br>
 	  </div>
@@ -452,7 +452,7 @@ map $http_upgrade $connection_upgrade {
 	default upgrade;
 	''      close;
 }
-upstream novpn-firefox {
+upstream novnc-firefox {
 	server 127.0.0.1:5800;
 }
 ##
@@ -522,13 +522,13 @@ server {
 	}
 
 	location /novnc/ {
-		proxy_pass http://novpn-firefox/;
+		proxy_pass http://novnc-firefox/;
 		auth_basic "Restricted Content";
 		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /novnc/websockify {
-		proxy_pass http://novpn-firefox/;
+		proxy_pass http://novnc-firefox/;
 		proxy_http_version 1.1;
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection $connection_upgrade;
