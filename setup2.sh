@@ -188,12 +188,19 @@ qbittorrent-nox
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
+tee /root/.config/qBittorrent/setp.sh > /dev/null <<'EOT'
+#!/bin/bash
+chmod -R 777 $1
+chown -R nobody:nogroup $1
+exit
+EOT
+chmod +x /root/.config/qBittorrent/setp.sh
 if [ $(dpkg --print-architecture) == "armhf" ]
 then
   tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=false
-program="chmod -R 777 \"%F\""
+program="/root/.config/qBittorrent/setp.sh \"%F\""
 
 [BitTorrent]
 Session\GlobalMaxSeedingMinutes=1
