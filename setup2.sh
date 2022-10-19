@@ -45,7 +45,7 @@ reboot
 echo
 echo "Installing software."
 apt-get install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
-apt install -y --no-install-recommends --autoremove jwm
+apt-get install -y --no-install-recommends --autoremove jwm
 
 #storage
 clear
