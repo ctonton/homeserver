@@ -162,7 +162,7 @@ Description=DynDNS Updater services
 Wants=network-online.target
 After=network-online.target
 [Service]
-Type=simple
+Type=forking
 ExecStart=/root/.ddns/duck.sh
 [Install]
 WantedBy=multi-user.target
