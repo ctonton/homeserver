@@ -50,7 +50,9 @@ reboot
 echo
 echo "Installing software."
 apt upgrade
-apt-get install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc firefox-esr
+apt-get install -y ntfs-3g samba nfs-kernel-server cups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
+apt-get install -y firefox-esr
+apt-get install -y firefox
 apt-get install -y --no-install-recommends --autoremove jwm
 
 #storage
@@ -195,15 +197,15 @@ unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
 tee /root/.config/qBittorrent/setp.sh > /dev/null <<'EOT'
 #!/bin/bash
-chmod -R 777 $1
-chown -R nobody:nogroup $1
+chmod -R 777 /srv/NAS/Public/Unsorted
+chown -R nobody:nogroup /srv/NAS/Public/Unsorted
 exit
 EOT
 chmod +x /root/.config/qBittorrent/setp.sh
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
-program="/root/.config/qBittorrent/setp.sh \"%F\""
+program="/root/.config/qBittorrent/setp.sh"
 
 [BitTorrent]
 Session\GlobalMaxSeedingMinutes=1
@@ -335,11 +337,11 @@ tee /root/.jwmrc > /dev/null <<EOT
 EOT
 tee /root/.ignite.sh > /dev/null <<'EOT'
 #!/bin/bash
-websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5900
+websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
 ecode=0
 while [ $ecode -eq 0 ]
 do
-  DISPLAY=:0 firefox
+  DISPLAY=:1 firefox
   ecode=$?
 done
 EOT
@@ -351,8 +353,8 @@ After=network.target
 [Service]
 Type=forking
 User=root
-ExecStart=/usr/bin/tigervncserver -Log *:syslog:0 -localhost no -SecurityTypes None --I-KNOW-THIS-IS-INSECURE :0
-ExecStop=/usr/bin/tigervncserver -kill :0
+ExecStart=/usr/bin/tigervncserver -Log *:syslog:0 -localhost no -SecurityTypes None --I-KNOW-THIS-IS-INSECURE :1
+ExecStop=/usr/bin/tigervncserver -kill :1
 [Install]
 WantedBy=multi-user.target
 EOT
