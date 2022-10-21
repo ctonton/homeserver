@@ -291,6 +291,7 @@ systemctl enable qbittorrent
 #firefox
 echo
 echo "Setting up Firefox."
+mkdir /root/Downloads
 mkdir /root/.vnc
 tee /root/.vnc/xstartup > /dev/null <<EOT
 #!/bin/bash
