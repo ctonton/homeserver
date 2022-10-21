@@ -47,6 +47,7 @@ rm $0
 reboot
 
 #install
+armbian-config
 echo
 echo "Installing software."
 apt upgrade
