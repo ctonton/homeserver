@@ -183,7 +183,7 @@ then
   read -p "Enter the domain from duckdns.org: " domain
   sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
   systemctl enable ddns
-  cat <(crontab -l) <(echo "0 */12 * * * /root/.ddns/duck.sh") | crontab -  
+  cat <(crontab -l) <(echo "0 */12 * * * /root/.ddns/duck.sh") | crontab -
 fi
 
 #qbittorrent
