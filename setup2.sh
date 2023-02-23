@@ -47,8 +47,7 @@ rm $0
 reboot
 
 #install
-armbian-config
-echo
+clear
 echo "Installing software."
 apt upgrade
 apt-get install -y ntfs-3g samba nfs-kernel-server cups printer-driver-hpcups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
