@@ -203,6 +203,7 @@ fi
 echo
 echo "Setting up qBittorrent."
 apt-get install -y qbittorrent-nox
+mkdir -p /root/.config/qBittorrent
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
