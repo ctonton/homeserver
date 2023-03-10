@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#prerequisites
+#checks
 clear
 if [ $EUID -ne 0 ]
 then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-if [ $(dpkg --print-architecture) != "armhf" ]
+if ! [ $(dpkg --print-architecture) = "armhf" ] || [ $(dpkg --print-architecture) = "arm64" ]
 then
   read -n 1 -s -r -p "This script is for ARM devices only. Press any key to exit."
   exit
@@ -48,12 +48,17 @@ reboot
 
 #install
 clear
-echo "Installing software."
+echo "Installing essential software."
 apt upgrade
-apt-get install -y ntfs-3g samba nfs-kernel-server cups printer-driver-hpcups php-fpm nginx-extras qbittorrent-nox curl tar unzip ufw openssl tigervnc-standalone-server novnc
-apt-get install -y firefox-esr
-apt-get install -y firefox
-apt-get install -y --no-install-recommends --autoremove jwm
+apt-get install -y ntfs-3g curl tar unzip
+
+#ufw
+echo
+echo "Setting up firewall."
+apt-get install -y ufw
+subip=$(/sbin/ip route | awk '/default/ { print $3 }')
+ufw allow from ${subip}.0/24
+ufw enable
 
 #storage
 clear
@@ -74,6 +79,7 @@ mount -a
 #nfs
 echo
 echo "Setting up NFS."
+apt-get install -y nfs-kernel-server
 tee -a /etc/exports > /dev/null <<EOT
 /srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)
 EOT
@@ -81,6 +87,7 @@ EOT
 #samba
 echo
 echo "Setting up SAMBA."
+apt-get install -y samba
 if [ ! -f /etc/samba/smb.bak ]
 then
   mv /etc/samba/smb.conf /etc/samba/smb.bak
@@ -104,10 +111,10 @@ EOT
 #cups
 echo
 echo "Setting up CUPS."
+apt-get install -y cups printer-driver-hpcups
 usermod -aG lpadmin root
 cupsctl --remote-admin --user-cancel-any
 read -p "Enter the static IP address of the default printer. (ex. 10.10.10.11): " defip
-subip=${defip%.*}
 read -p "Enter a name for the default printer: " defpr
 lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
 lpadmin -d $defpr
@@ -115,9 +122,16 @@ lpadmin -d $defpr
 #ngrok
 echo
 echo "Setting up ngrok."
-curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok-stable-linux-arm.tgz
-tar xvf ngrok-stable-linux-arm.tgz -C /usr/local/bin
-rm ngrok-stable-linux-arm.tgz
+if [ $(dpkg --print-architecture) = "armhf" ]
+then
+  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
+  exit
+if [ $(dpkg --print-architecture) = "arm64" ]
+then
+  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -o ngrok.tgz
+  exit
+tar xvf ngrok.tgz -C /usr/local/bin
+rm ngrok.tgz
 mkdir /root/.ngrok2
 read -p "Enter your ngrok Authtoken: " auth
 tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
@@ -188,6 +202,7 @@ fi
 #qbittorrent
 echo
 echo "Setting up qBittorrent."
+apt-get install -y qbittorrent-nox
 echo
 echo
 echo "Accept the Legal Notice and then pres ctl+c to exit qBittorrent."
@@ -292,6 +307,10 @@ systemctl enable qbittorrent
 #firefox
 echo
 echo "Setting up Firefox."
+apt-get install -y tigervnc-standalone-server novnc
+apt-get install -y firefox-esr
+apt-get install -y firefox
+apt-get install -y --no-install-recommends jwm
 mkdir /root/Downloads
 mkdir /root/.vnc
 tee /root/.vnc/xstartup > /dev/null <<EOT
@@ -365,6 +384,7 @@ systemctl enable tigervnc
 #nginx
 echo
 echo "Setting up NGINX."
+apt-get install -y nginx-extras php-fpm openssl
 if [ ! -f /var/www/html/index.bak ]
 then
   mv /var/www/html/index* /var/www/html/index.bak
@@ -607,18 +627,8 @@ EOT
 chmod +x /root/webusers.sh
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
-
-#ufw
-echo
-echo "Setting up UFW."
 ufw allow 80
 ufw allow 443
-ufw allow 51820/udp
-ufw allow from ${subip}.0/24
-ufw allow from 10.7.0.0/24
-ufw enable
-sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
-sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
 
 #wireguard
 echo
@@ -630,6 +640,13 @@ if [ $cont == "y" ]
 then
   bash /root/wireguard-install.sh
 fi
+ufw allow from 10.7.0.0/24
+ufw allow 51820/udp
+sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
+sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+
+#cleanup
+apt-get autoremove
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
 rm /root/resume.sh
