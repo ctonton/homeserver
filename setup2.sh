@@ -56,7 +56,8 @@ apt-get install -y ntfs-3g curl tar unzip
 echo
 echo "Setting up firewall."
 apt-get install -y ufw
-subip=$(/sbin/ip route | awk '/default/ { print $3 }')
+gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
+subip=${gatwy%.*}
 ufw allow from ${subip}.0/24
 ufw enable
 
