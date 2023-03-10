@@ -19,7 +19,8 @@ then
   exit
 fi
 echo "This server and the default printer need to be have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports 80, 443, and 51820 forwarded to it."
-read -p "Do you want to proceed with the installation? (y/n): " cont
+echo "An NGROK account and token is required for remote access to this server."
+read -p "Are you ready to proceed with the installation? (y/n): " cont
 if [ $cont != "y" ]
 then
   exit
@@ -37,7 +38,7 @@ echo "0 4 * * 1 reboot" > tempcron
 crontab tempcron
 rm tempcron
 cp $0 /root/resume.sh
-sed -i '2,47d' /root/resume.sh
+sed -i '2,49d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -116,10 +117,14 @@ echo "Setting up CUPS."
 apt-get install -y cups printer-driver-hpcups
 usermod -aG lpadmin root
 cupsctl --remote-admin --user-cancel-any
-read -p "Enter the static IP address of the default printer. (ex. 10.10.10.11): " defip
-read -p "Enter a name for the default printer: " defpr
-lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
-lpadmin -d $defpr
+read -p "Do you want to set up the default printer now? (y/n): " cont
+if [ $cont == "y" ]
+then
+  read -p "Enter the static IP address of the default printer. (ex. 10.10.10.11): " defip
+  read -p "Enter a name for the default printer: " defpr
+  lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
+  lpadmin -d $defpr
+fi
 
 #ngrok
 echo
@@ -536,16 +541,6 @@ server {
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
 sed -i '/http {/a\\tclient_max_body_size 10M;\n\tupload_progress uploads 1m;' /etc/nginx/nginx.conf
-echo
-echo "Add users to web server."
-loo="y"
-until [ $loo != "y" ]
-do
-  read -p "Enter a user name: " use
-  echo -n "${use}:" >> /etc/nginx/.htpasswd
-  openssl passwd -apr1 >> /etc/nginx/.htpasswd
-  read -p "Add another user? (y/n): " loo
-done
 tee /root/webusers.sh > /dev/null <<'EOT'
 #!/bin/bash
 clear
@@ -588,6 +583,17 @@ done
 exit
 EOT
 chmod +x /root/webusers.sh
+echo
+echo "A script called webusers.sh has been created in the root directory for modifying users of the web server."
+echo "Add a user for the web server now."
+loo="y"
+until [ $loo != "y" ]
+do
+  read -p "Enter a user name: " use
+  echo -n "${use}:" >> /etc/nginx/.htpasswd
+  openssl passwd -apr1 >> /etc/nginx/.htpasswd
+  read -p "Add another user? (y/n): " loo
+done
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 ufw allow 80
@@ -595,7 +601,7 @@ ufw allow 443
 
 #wireguard
 echo
-echo "Downloading WireGuard script."
+echo "Downloading WireGuard setup script to the root directory."
 curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
 chmod +x /root/wireguard-install.sh
 read -p "Set up WireGuard now? (y/n): " cont
