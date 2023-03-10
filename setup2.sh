@@ -7,11 +7,11 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-if ! [[ $(dpkg --print-architecture) =~ ^(armhf|arm64)$ ]]
-then
-  read -n 1 -s -r -p "This script is for ARM devices only. Press any key to exit."
-  exit
-fi
+#if ! [[ $(dpkg --print-architecture) =~ ^(armhf|arm64)$ ]]
+#then
+#  read -n 1 -s -r -p "This script is for ARM devices only. Press any key to exit."
+#  exit
+#fi
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
@@ -126,11 +126,16 @@ echo "Setting up ngrok."
 if [ $(dpkg --print-architecture) = "armhf" ]
 then
   curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
-  exit
-if [ $(dpkg --print-architecture) = "arm64" ]
+elif [ $(dpkg --print-architecture) = "i386" ]
+then
+  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.tgz -o ngrok.tgz
+elif [ $(dpkg --print-architecture) = "arm64" ]
 then
   curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -o ngrok.tgz
-  exit
+elif [ $(dpkg --print-architecture) = "amd64" ]
+then
+  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -o ngrok.tgz
+fi
 tar xvf ngrok.tgz -C /usr/local/bin
 rm ngrok.tgz
 mkdir /root/.ngrok2
