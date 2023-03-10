@@ -59,6 +59,7 @@ apt-get install -y ufw
 gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
 subip=${gatwy%.*}
 ufw allow from ${subip}.0/24
+ufw logging off
 ufw enable
 
 #storage
