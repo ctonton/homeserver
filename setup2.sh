@@ -203,11 +203,6 @@ fi
 echo
 echo "Setting up qBittorrent."
 apt-get install -y qbittorrent-nox
-echo
-echo
-echo "Accept the Legal Notice and then pres ctl+c to exit qBittorrent."
-echo
-qbittorrent-nox
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
@@ -233,59 +228,19 @@ Accepted=true
 Cookies=@Invalid()
 
 [Preferences]
-Advanced\RecheckOnCompletion=false
-Advanced\trackerPort=9000
-Bittorrent\MaxConnecs=255
-Bittorrent\MaxRatio=0.01
-Bittorrent\MaxRatioAction=1
-Connection\GlobalUPLimit=50
-Connection\PortRangeMin=17839
-Connection\ResolvePeerCountries=true
 Downloads\SavePath=/srv/NAS/Public/Unsorted/
-Downloads\ScanDirsV2=@Variant(\0\0\0\x1c\0\0\0\0)
 Downloads\TempPath=/srv/NAS/Public/Unsorted/
-DynDNS\DomainName=changeme.dyndns.org
-DynDNS\Enabled=false
-DynDNS\Password=
-DynDNS\Service=0
-DynDNS\Username=
-General\Locale=
 IPFilter\Enabled=true
 IPFilter\File=/root/.config/qBittorrent/blocklist.p2p
 IPFilter\FilterTracker=true
-MailNotification\email=
-MailNotification\enabled=false
-MailNotification\password=
-MailNotification\req_auth=true
-MailNotification\req_ssl=false
-MailNotification\sender=qBittorrent_notification@example.com
-MailNotification\smtp_server=smtp.changeme.com
-MailNotification\username=
 Queueing\MaxActiveDownloads=2
 Queueing\MaxActiveTorrents=3
 Queueing\MaxActiveUploads=1
 Queueing\QueueingEnabled=true
-WebUI\Address=*
-WebUI\AlternativeUIEnabled=false
 WebUI\AuthSubnetWhitelist=${subip}.0/24
 WebUI\AuthSubnetWhitelistEnabled=true
-WebUI\BanDuration=3600
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
-WebUI\CustomHTTPHeaders=
-WebUI\CustomHTTPHeadersEnabled=false
-WebUI\HTTPS\CertificatePath=
-WebUI\HTTPS\Enabled=false
-WebUI\HTTPS\KeyPath=
-WebUI\HostHeaderValidation=true
-WebUI\LocalHostAuth=false
-WebUI\MaxAuthenticationFailCount=5
-WebUI\Port=8080
-WebUI\RootFolder=
-WebUI\SecureCookie=true
-WebUI\ServerDomains=*
-WebUI\SessionTimeout=3600
-WebUI\UseUPnP=true
 WebUI\Username=admin
 EOT
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
