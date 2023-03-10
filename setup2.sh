@@ -7,7 +7,7 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-if ! [ $(dpkg --print-architecture) = "armhf" ] || [ $(dpkg --print-architecture) = "arm64" ]
+if ! [[ $(dpkg --print-architecture) =~ ^(armhf|arm64)$ ]]
 then
   read -n 1 -s -r -p "This script is for ARM devices only. Press any key to exit."
   exit
