@@ -146,7 +146,7 @@ tar xvf ngrok.tgz -C /usr/local/bin
 rm ngrok.tgz
 mkdir /root/.ngrok2
 read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [ $cont != "y" ]
+if [ $cont == "y" ]
 then
   read -p "Enter your ngrok Authtoken: " auth
 else
@@ -225,7 +225,7 @@ fi
 echo
 echo "Setting up qBittorrent."
 mkdir -p /root/.config/qBittorrent
-curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
+curl -O https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
 tee /root/.config/qBittorrent/setp.sh > /dev/null <<'EOT'
@@ -361,7 +361,7 @@ if [ ! -f /var/www/html/index.bak ]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-curl -LJO https://github.com/ctonton/homeserver/raw/main/icons.zip
+curl -O https://github.com/ctonton/homeserver/raw/main/icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
