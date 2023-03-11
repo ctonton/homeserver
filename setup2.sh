@@ -7,6 +7,12 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
+dist=$(lsb_release -is)
+if ! $dist ==
+then
+  read -n 1 -s -r -p "This script only works on Debian or Ubuntu. Press any key to exit."
+  exit
+fi
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
@@ -43,9 +49,16 @@ reboot
 
 #install
 clear
-echo "Installing essential software."
+echo "Installing software."
 apt upgrade
-apt-get install -y ntfs-3g curl tar unzip openssh-server ufw
+if grep -qs "ubuntu" /etc/os-release
+then
+  ff=firefox
+elif grep -qs "debian" /etc/os-release
+  ff=firefox-esr
+fi
+apt-get install -y $ff ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc
+apt-get install -y --no-install-recommends jwm
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
@@ -73,7 +86,6 @@ mount -a
 #nfs
 echo
 echo "Setting up NFS."
-apt-get install -y nfs-kernel-server
 tee -a /etc/exports > /dev/null <<EOT
 /srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)
 EOT
@@ -81,7 +93,6 @@ EOT
 #samba
 echo
 echo "Setting up SAMBA."
-apt-get install -y samba
 if [ ! -f /etc/samba/smb.bak ]
 then
   mv /etc/samba/smb.conf /etc/samba/smb.bak
@@ -105,7 +116,6 @@ EOT
 #cups
 echo
 echo "Setting up CUPS."
-apt-get install -y cups printer-driver-hpcups
 usermod -aG lpadmin root
 cupsctl --remote-admin --user-cancel-any
 read -p "Do you want to set up the default printer now? (y/n): " cont
@@ -215,7 +225,6 @@ fi
 #qbittorrent
 echo
 echo "Setting up qBittorrent."
-apt-get install -y qbittorrent-nox
 mkdir -p /root/.config/qBittorrent
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
@@ -276,10 +285,6 @@ systemctl enable qbittorrent
 #firefox
 echo
 echo "Setting up Firefox."
-apt-get install -y tigervnc-standalone-server novnc
-apt-get install -y firefox-esr
-apt-get install -y firefox
-apt-get install -y --no-install-recommends jwm
 mkdir /root/Downloads
 mkdir /root/.vnc
 tee /root/.vnc/xstartup > /dev/null <<EOT
@@ -353,7 +358,6 @@ systemctl enable tigervnc
 #nginx
 echo
 echo "Setting up NGINX."
-apt-get install -y nginx-extras php-fpm openssl
 if [ ! -f /var/www/html/index.bak ]
 then
   mv /var/www/html/index* /var/www/html/index.bak
