@@ -225,7 +225,7 @@ fi
 echo
 echo "Setting up qBittorrent."
 mkdir -p /root/.config/qBittorrent
-curl -O https://github.com/ctonton/homeserver/raw/main/blocklist.zip
+curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
 tee /root/.config/qBittorrent/setp.sh > /dev/null <<'EOT'
@@ -361,7 +361,7 @@ if [ ! -f /var/www/html/index.bak ]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-curl -O https://github.com/ctonton/homeserver/raw/main/icons.zip
+curl -LJO https://github.com/ctonton/homeserver/raw/main/icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
@@ -609,7 +609,7 @@ read -p "Do you want to install and set up Wireguard? (y/n): " cont
 if [ $cont == "y" ]
 then
   echo "Downloading WireGuard setup script to the root directory."
-  curl https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
+  curl -LJO https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh
   chmod +x /root/wireguard-install.sh
   bash /root/wireguard-install.sh
   ufw allow from 10.7.0.0/24
