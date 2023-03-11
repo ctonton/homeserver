@@ -51,12 +51,9 @@ reboot
 clear
 echo "Installing essential software."
 apt upgrade
-apt-get install -y ntfs-3g curl tar unzip
-
-#ufw
-echo
-echo "Setting up firewall."
-apt-get install -y ufw
+apt-get install -y ntfs-3g curl tar unzip openssh-server ufw
+sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+systemctl enable ssh
 gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
 subip=${gatwy%.*}
 ufw allow from ${subip}.0/24
