@@ -263,7 +263,7 @@ WebUI\AuthSubnetWhitelist=${subip}.0/24
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
-WebUI\Username=admin
+WebUI\LocalHostAuth=false
 EOT
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
