@@ -250,6 +250,7 @@ Accepted=true
 Cookies=@Invalid()
 
 [Preferences]
+Connection\GlobalUPLimit=10
 Downloads\SavePath=/srv/NAS/Public/Unsorted/
 Downloads\TempPath=/srv/NAS/Public/Unsorted/
 IPFilter\Enabled=true
