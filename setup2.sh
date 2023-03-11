@@ -205,8 +205,9 @@ Wants=network-online.target
 After=network-online.target
 [Service]
 Type=forking
-ExecStartPre=/bin/sleep 60
+ExecStartPre=/bin/sleep 30
 ExecStart=/root/.ddns/duck.sh
+TimeoutSec=60
 [Install]
 WantedBy=multi-user.target
 EOT
