@@ -173,41 +173,6 @@ WantedBy=multi-user.target
 EOT
 systemctl enable ngrok
 
-#ddns
-echo
-echo "Setting up DuckDNS."
-mkdir /root/.ddns
-tee /root/.ddns/duck.sh > /dev/null <<'EOT'
-#!/bin/bash
-domain=enter_domain
-token=enter_token
-ipv6addr=$(curl -s https://api6.ipify.org)
-ipv4addr=$(curl -s https://api.ipify.org)
-curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
-EOT
-chmod +x /root/.ddns/duck.sh
-tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
-[Unit]
-Description=DynDNS Updater services
-Wants=network-online.target
-After=network-online.target
-[Service]
-Type=forking
-ExecStart=/root/.ddns/duck.sh
-[Install]
-WantedBy=multi-user.target
-EOT
-read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
-if [ $cont == "y" ]
-then
-  read -p "Enter the token from duckdns.org: " token
-  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
-  read -p "Enter the domain from duckdns.org: " domain
-  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
-  systemctl enable ddns
-  cat <(crontab -l) <(echo "0 */12 * * * /root/.ddns/duck.sh") | crontab -
-fi
-
 #qbittorrent
 echo
 echo "Setting up qBittorrent."
@@ -596,20 +561,55 @@ curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 ufw allow 80
 ufw allow 443
 
-#wireguard
+#ddns
 echo
-echo "Downloading WireGuard setup script to the root directory."
-curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
-chmod +x /root/wireguard-install.sh
-read -p "Set up WireGuard now? (y/n): " cont
+echo "Setting up DuckDNS."
+mkdir /root/.ddns
+tee /root/.ddns/duck.sh > /dev/null <<'EOT'
+#!/bin/bash
+domain=enter_domain
+token=enter_token
+ipv6addr=$(curl -s https://api6.ipify.org)
+ipv4addr=$(curl -s https://api.ipify.org)
+curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
+EOT
+chmod +x /root/.ddns/duck.sh
+tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
+[Unit]
+Description=DynDNS Updater services
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=forking
+ExecStart=/root/.ddns/duck.sh
+[Install]
+WantedBy=multi-user.target
+EOT
+read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
 if [ $cont == "y" ]
 then
-  bash /root/wireguard-install.sh
+  read -p "Enter the token from duckdns.org: " token
+  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
+  read -p "Enter the domain from duckdns.org: " domain
+  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
+  systemctl enable ddns
+  cat <(crontab -l) <(echo "0 */12 * * * /root/.ddns/duck.sh") | crontab -
 fi
-ufw allow from 10.7.0.0/24
-ufw allow 51820/udp
-sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
-sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+
+#wireguard
+echo
+read -p "Do you want to install and set up Wireguard? (y/n): " cont
+if [ $cont == "y" ]
+then
+  echo "Downloading WireGuard setup script to the root directory."
+  curl https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/wireguard-install.sh
+  chmod +x /root/wireguard-install.sh
+  bash /root/wireguard-install.sh
+  ufw allow from 10.7.0.0/24
+  ufw allow 51820/udp
+  sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
+  sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+fi
 
 #cleanup
 apt-get autoremove
