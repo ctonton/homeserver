@@ -55,7 +55,7 @@ then
 else
   ff=firefox
 fi
-apt-get install -y ${ff} ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc
+apt-get install -y ${ff} ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc wireguard qrencode
 apt-get install -y --no-install-recommends jwm
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
