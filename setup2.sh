@@ -7,11 +7,6 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-#if ! [[ $(dpkg --print-architecture) =~ ^(armhf|arm64)$ ]]
-#then
-#  read -n 1 -s -r -p "This script is for ARM devices only. Press any key to exit."
-#  exit
-#fi
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
@@ -37,7 +32,7 @@ apt-get update
 apt-get full-upgrade -y --fix-missing
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,48d' /root/resume.sh
+sed -i '2,42d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
