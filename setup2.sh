@@ -7,10 +7,9 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-dist=$(lsb_release -is)
-if ! $dist ==
+if [[ $(lsb_release -is) != @(Debian|Ubuntu|Linuxmint) ]]
 then
-  read -n 1 -s -r -p "This script only works on Debian or Ubuntu. Press any key to exit."
+  read -n 1 -s -r -p "This script only works with Debian, Ubuntu, or Linuxmint distrobutions. Press any key to exit."
   exit
 fi
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
@@ -38,7 +37,7 @@ apt-get update
 apt-get full-upgrade -y --fix-missing
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,42d' /root/resume.sh
+sed -i '2,47d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -50,14 +49,13 @@ reboot
 #install
 clear
 echo "Installing software."
-apt upgrade
-if grep -qs "ubuntu" /etc/os-release
+if [ $(lsb_release -is) == "Debian" ]
 then
-  ff=firefox
-elif grep -qs "debian" /etc/os-release
   ff=firefox-esr
+else
+  ff=firefox
 fi
-apt-get install -y $ff ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc
+apt-get install -y ${ff} ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc
 apt-get install -y --no-install-recommends jwm
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
@@ -121,7 +119,8 @@ cupsctl --remote-admin --user-cancel-any
 read -p "Do you want to set up the default printer now? (y/n): " cont
 if [ $cont == "y" ]
 then
-  read -p "Enter the static IP address of the default printer. (ex. 10.10.10.11): " defip
+  read -p "Enter the static IP address of the default printer: ${subip}." pip
+  defip=${subip}.${pip}
   read -p "Enter a name for the default printer: " defpr
   lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
   lpadmin -d $defpr
