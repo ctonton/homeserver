@@ -251,6 +251,7 @@ Accepted=true
 Cookies=@Invalid()
 
 [Preferences]
+Bittorrent\MaxRatioAction=1
 Connection\GlobalUPLimit=10
 Downloads\SavePath=/srv/NAS/Public/Unsorted/
 Downloads\TempPath=/srv/NAS/Public/Unsorted/
@@ -618,6 +619,7 @@ then
   ufw allow 51820/udp
   sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
   sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+  sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
 fi
 
 #cleanup
