@@ -55,7 +55,7 @@ then
 else
   ff=firefox
 fi
-apt-get install -y ${ff} ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc wireguard qrencode
+apt-get install -y ${ff} ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc
 apt-get install -y --no-install-recommends jwm
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
@@ -151,6 +151,17 @@ then
   read -p "Enter your ngrok Authtoken: " auth
 else
   auth=none
+  tee /root/setup-ngrok.sh > /dev/null <<'EOT'
+#!/bin/bash
+clear
+read -p "Enter your ngrok Authtoken: " auth
+sed -i 's/none/$auth/g' /root/.ngrok2/ngrok.yml
+systemctl enable ngrok
+systemctl start ngrok
+rm $0
+exit
+EOT
+  chmod +x /root/setup.ngrok.sh
 fi
 tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
 authtoken: ${auth}
@@ -220,6 +231,20 @@ then
   sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
   systemctl enable ddns
   cat <(crontab -l) <(echo "0 1 * * * /root/.ddns/duck.sh") | crontab -
+else
+  tee /root/setup-ngrok.sh > /dev/null <<'EOT'
+#!/bin/bash
+clear
+read -p "Enter the token from duckdns.org: " token
+sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
+read -p "Enter the domain from duckdns.org: " domain
+sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
+systemctl enable ddns
+systemctl start ddns
+rm $0
+exit
+EOT
+  chmod +x /root/setup.ddns.sh  
 fi
 
 #qbittorrent
@@ -612,14 +637,31 @@ read -p "Do you want to install and set up Wireguard? (y/n): " cont
 if [ $cont == "y" ]
 then
   echo "Downloading WireGuard setup script to the root directory."
-  curl -LJO https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh
-  chmod +x /root/wireguard-install.sh
-  bash /root/wireguard-install.sh
+  curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
+  chmod +x /root/setup-wireguard.sh
+  bash /root/setup-wireguard.sh
   ufw allow from 10.7.0.0/24
   ufw allow 51820/udp
   sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
   sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
   sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
+else
+  tee /root/install-wireguard.sh > /dev/null <<'EOT'
+#!/bin/bash
+clear
+echo "Downloading WireGuard setup script to the root directory."
+curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
+chmod +x /root/setup-wireguard.sh
+bash /root/setup-wireguard.sh
+ufw allow from 10.7.0.0/24
+ufw allow 51820/udp
+sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
+sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
+rm $0
+exit
+EOT
+  chmod +x /root/install-wireguard.sh
 fi
 
 #cleanup
