@@ -101,6 +101,8 @@ tee /etc/samba/smb.conf > /dev/null <<'EOT'
 EOT
 
 #http
+echo
+echo "Setting up http server"
 tee /etc/systemd/system/pyhttp.service > /dev/null <<'EOT'
 [Unit]
 Description=python http server
@@ -153,8 +155,13 @@ fi
 tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
 authtoken: ${auth}
 tunnels:
-  nginx:
+  pyhttp:
     addr: 80
+    proto: http
+    bind_tls: true
+    inspect: false
+  qbittorrent:
+    addr: 8080
     proto: http
     bind_tls: true
     inspect: false
