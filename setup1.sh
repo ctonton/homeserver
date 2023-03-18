@@ -107,7 +107,7 @@ tee /etc/systemd/system/pyhttp.service > /dev/null <<'EOT'
 Description=python http server
 After=network.target
 [Service]
-ExecStart=/usr/bin/python3 -m http.server -d /srv/NAS/Public/ 80
+ExecStart=/usr/bin/python3 -m http.server -d /srv/NAS 80
 Restart=on-failure
 [Install]
 WantedBy=multi-user.target
