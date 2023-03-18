@@ -232,7 +232,7 @@ then
   systemctl enable ddns
   cat <(crontab -l) <(echo "0 1 * * * /root/.ddns/duck.sh") | crontab -
 else
-  tee /root/setup-ngrok.sh > /dev/null <<'EOT'
+  tee /root/setup-ddns.sh > /dev/null <<'EOT'
 #!/bin/bash
 clear
 read -p "Enter the token from duckdns.org: " token
