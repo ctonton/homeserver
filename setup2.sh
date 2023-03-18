@@ -18,7 +18,7 @@ then
   read -n 1 -s -r -p "Network is not online. Press any key to exit."
   exit
 fi
-echo "This server and the default printer need to be have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports 80, 443, and 51820 forwarded to it."
+echo "This server and the default printer need to have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports 80, 443, and 51820 forwarded to it."
 echo "An account at ngrok.com and authtoken are required to setup remote access to this server."
 echo "An account at duckdns.org and token are required to set up the dynamic dns service."
 read -p "Are you ready to proceed with the installation? (y/n): " cont
