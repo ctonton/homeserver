@@ -161,7 +161,7 @@ systemctl start ngrok
 rm $0
 exit
 EOT
-  chmod +x /root/setup.ngrok.sh
+  chmod +x /root/setup-ngrok.sh
 fi
 tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
 authtoken: ${auth}
@@ -244,7 +244,7 @@ systemctl start ddns
 rm $0
 exit
 EOT
-  chmod +x /root/setup.ddns.sh  
+  chmod +x /root/setup-ddns.sh  
 fi
 
 #qbittorrent
