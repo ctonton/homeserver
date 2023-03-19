@@ -256,7 +256,7 @@ fi
 
 #cleanup
 apt-get autoremove
-read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
+read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/resume.sh
 reboot
