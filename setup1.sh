@@ -33,22 +33,24 @@ sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
+apt-get install -y --no-install-recommends openssh-server
 apt-get full-upgrade -y --fix-missing
+sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,47d' /root/resume.sh
+sed -i '2,49d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
-read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
+read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" through ssh to continue."
 rm $0
 reboot
 
 #install
 clear
 echo "Installing software."
-apt-get install -y --no-install-recommends ntfs-3g curl tar unzip openssh-server nfs-kernel-server samba qbittorrent-nox
+apt-get install -y --no-install-recommends ntfs-3g curl tar unzip nfs-kernel-server samba qbittorrent-nox
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
@@ -114,6 +116,68 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOT
 systemctl enable pyhttp
+
+#qbittorrent
+echo
+echo "Setting up qBittorrent."
+mkdir -p /root/.config/qBittorrent
+curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
+unzip -o blocklist.zip -d /root/.config/qBittorrent
+rm blocklist.zip
+tee /root/.config/qBittorrent/setp.sh > /dev/null <<'EOT'
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public/Unsorted
+chown -R nobody:nogroup /srv/NAS/Public/Unsorted
+exit
+EOT
+chmod +x /root/.config/qBittorrent/setp.sh
+tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
+[AutoRun]
+enabled=true
+program="/root/.config/qBittorrent/setp.sh"
+
+[BitTorrent]
+Session\GlobalMaxSeedingMinutes=1
+
+[LegalNotice]
+Accepted=true
+
+[Network]
+Cookies=@Invalid()
+
+[Preferences]
+Bittorrent\MaxRatioAction=1
+Connection\GlobalUPLimit=10
+Downloads\SavePath=/srv/NAS/Public/Unsorted/
+Downloads\TempPath=/srv/NAS/Public/Unsorted/
+IPFilter\Enabled=true
+IPFilter\File=/root/.config/qBittorrent/blocklist.p2p
+IPFilter\FilterTracker=true
+Queueing\MaxActiveDownloads=2
+Queueing\MaxActiveTorrents=3
+Queueing\MaxActiveUploads=1
+Queueing\QueueingEnabled=true
+WebUI\AuthSubnetWhitelist=${subip}.0/24
+WebUI\AuthSubnetWhitelistEnabled=true
+WebUI\CSRFProtection=false
+WebUI\ClickjackingProtection=true
+WebUI\LocalHostAuth=false
+EOT
+tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
+[Unit]
+Description=qBittorrent Command Line Client
+After=network.target
+[Service]
+Type=forking
+User=root
+Group=root
+UMask=777
+ExecStart=/usr/bin/qbittorrent-nox -d
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl enable qbittorrent
 
 #ngrok
 echo
@@ -189,68 +253,6 @@ if [ $auth != "none" ]
 then
   systemctl enable ngrok
 fi
-
-#qbittorrent
-echo
-echo "Setting up qBittorrent."
-mkdir -p /root/.config/qBittorrent
-curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
-unzip -o blocklist.zip -d /root/.config/qBittorrent
-rm blocklist.zip
-tee /root/.config/qBittorrent/setp.sh > /dev/null <<'EOT'
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public/Unsorted
-chown -R nobody:nogroup /srv/NAS/Public/Unsorted
-exit
-EOT
-chmod +x /root/.config/qBittorrent/setp.sh
-tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
-[AutoRun]
-enabled=true
-program="/root/.config/qBittorrent/setp.sh"
-
-[BitTorrent]
-Session\GlobalMaxSeedingMinutes=1
-
-[LegalNotice]
-Accepted=true
-
-[Network]
-Cookies=@Invalid()
-
-[Preferences]
-Bittorrent\MaxRatioAction=1
-Connection\GlobalUPLimit=10
-Downloads\SavePath=/srv/NAS/Public/Unsorted/
-Downloads\TempPath=/srv/NAS/Public/Unsorted/
-IPFilter\Enabled=true
-IPFilter\File=/root/.config/qBittorrent/blocklist.p2p
-IPFilter\FilterTracker=true
-Queueing\MaxActiveDownloads=2
-Queueing\MaxActiveTorrents=3
-Queueing\MaxActiveUploads=1
-Queueing\QueueingEnabled=true
-WebUI\AuthSubnetWhitelist=${subip}.0/24
-WebUI\AuthSubnetWhitelistEnabled=true
-WebUI\CSRFProtection=false
-WebUI\ClickjackingProtection=true
-WebUI\LocalHostAuth=false
-EOT
-tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
-[Unit]
-Description=qBittorrent Command Line Client
-After=network.target
-[Service]
-Type=forking
-User=root
-Group=root
-UMask=777
-ExecStart=/usr/bin/qbittorrent-nox -d
-Restart=on-failure
-[Install]
-WantedBy=multi-user.target
-EOT
-systemctl enable qbittorrent
 
 #cleanup
 apt-get autoremove
