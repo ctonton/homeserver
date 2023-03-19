@@ -110,7 +110,7 @@ tee /etc/systemd/system/pyhttp.service > /dev/null <<'EOT'
 Description=python http server
 After=network.target
 [Service]
-ExecStart=/usr/bin/python3 -m http.server -d /srv/NAS 80
+ExecStart=/usr/bin/python3 -m http.server -d /srv/NAS 8000
 Restart=on-failure
 [Install]
 WantedBy=multi-user.target
@@ -220,7 +220,7 @@ tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
 authtoken: ${auth}
 tunnels:
   pyhttp:
-    addr: 80
+    addr: 8000
     proto: http
     bind_tls: true
     inspect: false
