@@ -48,7 +48,7 @@ reboot
 #install
 clear
 echo "Installing software."
-apt-get install -y ntfs-3g curl tar unzip openssh-server nfs-kernel-server samba qbittorrent-nox
+apt-get install -y --no-install-recommends ntfs-3g curl tar unzip openssh-server nfs-kernel-server samba qbittorrent-nox
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
