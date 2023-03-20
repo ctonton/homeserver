@@ -119,7 +119,7 @@ After=network-online.target
 Wants=network-online.target
 [Service]
 Type=simple
-ExecStart=/usr/bin/wsdd -s
+ExecStart=/usr/bin/wsdd -s -4
 [Install]
 WantedBy=multi-user.target
 EOT
