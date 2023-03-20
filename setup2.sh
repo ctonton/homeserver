@@ -95,9 +95,10 @@ if [ ! -f /etc/samba/smb.bak ]
 then
   mv /etc/samba/smb.conf /etc/samba/smb.bak
 fi
-tee /etc/samba/smb.conf > /dev/null <<'EOT'
+tee /etc/samba/smb.conf > /dev/null <<EOT
 [global]
    workgroup = WORKGROUP
+   netbios name = $HOSTNAME
    log level = 0
    server role = standalone server
    map to guest = bad user
