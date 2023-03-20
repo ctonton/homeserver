@@ -110,6 +110,20 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
+curl -LJ https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -o /usr/bin/wsdd
+chmod +x /usr/bin/wsdd
+tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
+[Unit]
+Description=Web Services Dynamic Discovery host daemon
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+ExecStart=/usr/bin/wsdd -s
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl enable wsdd
 
 #cups
 echo
