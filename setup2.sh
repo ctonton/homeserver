@@ -35,9 +35,12 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
 apt-get full-upgrade -y --fix-missing
+apt-get install -y --no-install-recommends openssh-server
+sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,48d' /root/resume.sh
+sed -i '2,51d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -56,11 +59,7 @@ else
   ff=firefox
 fi
 apt-get install -y --no-install-recommends ${ff} ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba avahi-daemon cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
-sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-systemctl enable ssh
-gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
-subip=${gatwy%.*}
-ufw allow from ${subip}.0/24
+ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
 ufw enable
 
@@ -133,8 +132,8 @@ cupsctl --remote-admin --user-cancel-any
 read -p "Do you want to set up the default printer now? (y/n): " cont
 if [ $cont == "y" ]
 then
-  read -p "Enter the static IP address of the default printer: ${subip}." pip
-  defip=${subip}.${pip}
+  read -p "Enter the static IP address of the default printer: $(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".")." prip
+  defip=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".").${prip}
   read -p "Enter a name for the default printer: " defpr
   lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
   lpadmin -d $defpr
@@ -301,7 +300,7 @@ Queueing\MaxActiveDownloads=2
 Queueing\MaxActiveTorrents=3
 Queueing\MaxActiveUploads=1
 Queueing\QueueingEnabled=true
-WebUI\AuthSubnetWhitelist=${subip}.0/24
+WebUI\AuthSubnetWhitelist=$(/sbin/ip route | awk '/src/ { print $1 }')
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
