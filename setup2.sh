@@ -256,6 +256,7 @@ read -p "Enter the domain from duckdns.org: " domain
 sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
 systemctl enable ddns
 systemctl start ddns
+cat <(crontab -l) <(echo "0 1 * * * /root/.ddns/duck.sh") | crontab -
 rm $0
 exit
 EOT
