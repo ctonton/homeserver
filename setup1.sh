@@ -51,10 +51,6 @@ reboot
 clear
 echo "Installing software."
 apt-get install -y --no-install-recommends ntfs-3g curl tar unzip nfs-kernel-server samba avahi-daemon qbittorrent-nox
-sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-systemctl enable ssh
-gatwy=$(/sbin/ip route | awk '/default/ { print $3 }')
-subip=${gatwy%.*}
 
 #storage
 clear
@@ -146,6 +142,7 @@ chown -R nobody:nogroup /srv/NAS/Public/Unsorted
 exit
 EOT
 chmod +x /root/.config/qBittorrent/setp.sh
+subip=$(/sbin/ip route | awk '/src/ { print $1 }')
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
@@ -172,7 +169,7 @@ Queueing\MaxActiveDownloads=2
 Queueing\MaxActiveTorrents=3
 Queueing\MaxActiveUploads=1
 Queueing\QueueingEnabled=true
-WebUI\AuthSubnetWhitelist=${subip}.0/24
+WebUI\AuthSubnetWhitelist=${subip}
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
