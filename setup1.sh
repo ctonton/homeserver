@@ -48,6 +48,8 @@ read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log 
 rm $0
 reboot
 
+rm /root/.bash_profile
+
 #install
 clear
 echo "Installing software."
@@ -268,7 +270,6 @@ fi
 
 #cleanup
 apt-get autoremove
-rm /root/.bash_profile
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/resume.sh
 reboot
