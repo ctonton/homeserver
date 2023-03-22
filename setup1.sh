@@ -142,7 +142,6 @@ chown -R nobody:nogroup /srv/NAS/Public/Unsorted
 exit
 EOT
 chmod +x /root/.config/qBittorrent/setp.sh
-subip=$(/sbin/ip route | awk '/src/ { print $1 }')
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
@@ -169,7 +168,7 @@ Queueing\MaxActiveDownloads=2
 Queueing\MaxActiveTorrents=3
 Queueing\MaxActiveUploads=1
 Queueing\QueueingEnabled=true
-WebUI\AuthSubnetWhitelist=${subip}
+WebUI\AuthSubnetWhitelist=$(/sbin/ip route | awk '/src/ { print $1 }')
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
