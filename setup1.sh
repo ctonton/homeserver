@@ -109,7 +109,7 @@ Description=Web Services Dynamic Discovery host daemon
 After=network-online.target
 Wants=network-online.target
 [Service]
-Type=simple
+Type=exec
 ExecStart=/usr/bin/wsdd -s -4
 [Install]
 WantedBy=multi-user.target
@@ -124,6 +124,7 @@ tee /etc/systemd/system/pyhttp.service > /dev/null <<'EOT'
 Description=python http server
 After=network.target
 [Service]
+Type=exec
 ExecStart=/usr/bin/python3 -m http.server -d /srv/NAS 8000
 Restart=on-failure
 [Install]
@@ -258,7 +259,7 @@ KillMode=process
 IgnoreSIGPIPE=true
 Restart=always
 RestartSec=3
-Type=simple
+Type=exec
 [Install]
 WantedBy=multi-user.target
 EOT
