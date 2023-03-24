@@ -119,7 +119,7 @@ Description=Web Services Dynamic Discovery host daemon
 After=network-online.target
 Wants=network-online.target
 [Service]
-Type=simple
+Type=exec
 ExecStart=/usr/bin/wsdd -s -4
 [Install]
 WantedBy=multi-user.target
@@ -196,13 +196,13 @@ tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
 Description=ngrok
 After=network.target
 [Service]
+Type=exec
 ExecStart=/usr/local/bin/ngrok start --all
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 IgnoreSIGPIPE=true
 Restart=always
 RestartSec=3
-Type=simple
 [Install]
 WantedBy=multi-user.target
 EOT
@@ -230,7 +230,7 @@ Description=DynDNS Updater services
 Wants=network-online.target
 After=network-online.target
 [Service]
-Type=forking
+Type=simple
 ExecStartPre=/bin/sleep 30
 ExecStart=/root/.ddns/duck.sh
 TimeoutSec=60
