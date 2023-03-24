@@ -620,7 +620,6 @@ do
     sed -i "/$use/d" /etc/nginx/.htpasswd
     loo=0
   fi
-  fi
   if [ $loo -ne 0 ]
   then
     echo "Invalid selection."
