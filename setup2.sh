@@ -38,7 +38,7 @@ apt-get full-upgrade -y --fix-missing
 apt-get install -y --no-install-recommends openssh-server
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
-echo "0 4 * * 1 /sbin/reboot" | crontab -
+echo "0 4 * * 1 /usr/sbin/reboot" | crontab -
 cp $0 /root/resume.sh
 sed -i '2,51d' /root/resume.sh
 chmod +x /root/resume.sh
