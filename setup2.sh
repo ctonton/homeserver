@@ -227,7 +227,6 @@ chmod +x /root/.ddns/duck.sh
 tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
 [Unit]
 Description=DynDNS Updater services
-Wants=network-online.target
 After=network-online.target
 [Service]
 Type=simple
@@ -235,7 +234,7 @@ ExecStartPre=/bin/sleep 30
 ExecStart=/root/.ddns/duck.sh
 TimeoutSec=60
 [Install]
-WantedBy=multi-user.target
+WantedBy=network-online.target
 EOT
 read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
 if [ $cont == "y" ]
