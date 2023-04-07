@@ -64,6 +64,7 @@ apt-get install -y --no-install-recommends ${ff} ntfs-3g curl tar unzip openssh-
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
 ufw enable
+ufw allow 22/tcp
 
 #storage
 clear
@@ -641,8 +642,8 @@ do
 done
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
-ufw allow 80
-ufw allow 443
+ufw allow 80/tcp
+ufw allow 443/tcp
 
 #wireguard
 echo
