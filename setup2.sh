@@ -161,26 +161,8 @@ fi
 tar xvf ngrok.tgz -C /usr/local/bin
 rm ngrok.tgz
 mkdir /root/.ngrok2
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [ $cont == "y" ]
-then
-  read -p "Enter your ngrok Authtoken: " auth
-else
-  auth=none
-  tee /root/setup-ngrok.sh > /dev/null <<'EOT'
-#!/bin/bash
-clear
-read -p "Enter your ngrok Authtoken: " auth
-sed -i "s/none/$auth/g" /root/.ngrok2/ngrok.yml
-systemctl enable ngrok
-systemctl start ngrok
-rm $0
-exit
-EOT
-  chmod +x /root/setup-ngrok.sh
-fi
 tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
-authtoken: ${auth}
+authtoken: noauth
 tunnels:
   nginx:
     addr: 443
@@ -207,9 +189,21 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 EOT
-if [ $auth != "none" ]
+tee /root/setup-ngrok.sh > /dev/null <<'EOT'
+#!/bin/bash
+clear
+read -p "Enter your ngrok Authtoken: " auth
+sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
+systemctl enable ngrok
+systemctl start ngrok
+rm $0
+return
+EOT
+chmod +x /root/setup-ngrok.sh
+read -p "Do you want to set up access to this server through ngrok? y/n: " cont
+if [ $cont == "y" ]
 then
-  systemctl enable ngrok
+  bash /root/setup-ngrok.sh
 fi
 
 #ddns
