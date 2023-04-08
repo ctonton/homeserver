@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "Installing ngrok."
+apt-get install -y --no-install-recommends curl tar
 if [ $(dpkg --print-architecture) = "armhf" ]
 then
   curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
