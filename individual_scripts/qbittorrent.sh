@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "Setting up qBittorrent."
+apt-get install -y --no-install-recommends curl unzip qbittorrent-nox
 mkdir -p /root/.config/qBittorrent
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
