@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "Installing DuckDNS."
+apt-get install -y --no-install-recommends curl
 tee /etc/NetworkManager/dispatcher.d/99-ddns  > /dev/null <<'EOT'
 #!/bin/sh
 token=enter_token
