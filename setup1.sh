@@ -139,17 +139,10 @@ mkdir -p /root/.config/qBittorrent
 curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
 unzip -o blocklist.zip -d /root/.config/qBittorrent
 rm blocklist.zip
-tee /root/.config/qBittorrent/setp.sh > /dev/null <<'EOT'
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public/Unsorted
-chown -R nobody:nogroup /srv/NAS/Public/Unsorted
-exit
-EOT
-chmod +x /root/.config/qBittorrent/setp.sh
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
-program="/root/.config/qBittorrent/setp.sh"
+program=chown -R nobody:nogroup \"%R\"
 
 [BitTorrent]
 Session\GlobalMaxSeedingMinutes=1
