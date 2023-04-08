@@ -44,20 +44,8 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 EOT
-tee /root/setup-ngrok.sh > /dev/null <<'EOT'
-#!/bin/bash
-clear
 read -p "Enter your ngrok Authtoken: " auth
 sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
 systemctl enable ngrok
 systemctl start ngrok
-rm $0
-return
-EOT
-chmod +x /root/setup-ngrok.sh
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [ $cont == "y" ]
-then
-  bash /root/setup-ngrok.sh
-fi
 exit
