@@ -1,7 +1,5 @@
 #!/bin/bash
 echo "Installing DuckDNS."
-tee /root/setup-ddns.sh > /dev/null <<'EOT'
-#!/bin/bash
 tee /etc/NetworkManager/dispatcher.d/99-ddns  > /dev/null <<'EOT'
 #!/bin/sh
 token=enter_token
@@ -21,12 +19,4 @@ sed -i "s/enter_token/$token/g" /etc/NetworkManager/dispatcher.d/99-ddns
 read -p "Enter the domain from duckdns.org: " domain
 sed -i "s/enter_domain/$domain/g" /etc/NetworkManager/dispatcher.d/99-ddns
 cat <(crontab -l) <(echo "0 */2 * * * /etc/NetworkManager/dispatcher.d/99-ddns") | crontab -
-rm $0
-return
-EOT
-read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
-if [ $cont == "y" ]
-then
-bash /root/setup-ddns.sh
-fi
 exit
