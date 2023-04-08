@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Setting up SAMBA."
-apt-get install -y --no-install-recommends samba
+apt-get install -y --no-install-recommends samba curl
 if [ ! -f /etc/samba/smb.bak ]
 then
   mv /etc/samba/smb.conf /etc/samba/smb.bak
