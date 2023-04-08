@@ -60,7 +60,7 @@ then
 else
   ff=firefox
 fi
-apt-get install -y --no-install-recommends ${ff} ntfs-3g curl tar unzip openssh-server ufw nfs-kernel-server samba avahi-daemon cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt-get install -y --no-install-recommends ${ff} ntfs-3g curl tar unzip gzip openssh-server ufw nfs-kernel-server samba avahi-daemon cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
 ufw enable
@@ -243,9 +243,8 @@ fi
 echo
 echo "Setting up qBittorrent."
 mkdir -p /root/.config/qBittorrent
-curl -LJO https://github.com/ctonton/homeserver/raw/main/blocklist.zip
-unzip -o blocklist.zip -d /root/.config/qBittorrent
-rm blocklist.zip
+curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
@@ -291,6 +290,15 @@ ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
 EOT
+tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
+#!/bin/bash
+curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
+systemctl restart qbittorrent
+exit
+EOT
+chmod +x /root/.config/qBittorrent/updatelist.sh
+cat <(crontab -l) <(echo "30 4 * * 1 /root/.config/qBittorrent/updatelist.sh") | crontab -
 systemctl enable qbittorrent
 
 #firefox
