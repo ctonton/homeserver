@@ -183,11 +183,11 @@ tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 Description=qBittorrent Command Line Client
 After=network.target
 [Service]
-Type=exec
+Type=forking
 User=root
 Group=root
 UMask=777
-ExecStart=/usr/bin/qbittorrent-nox
+ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
 EOT
