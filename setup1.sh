@@ -186,7 +186,7 @@ After=network.target
 Type=forking
 User=root
 Group=root
-UMask=777
+UMask=000
 ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
