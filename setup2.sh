@@ -134,7 +134,7 @@ usermod -aG lpadmin root
 cupsctl --remote-admin --user-cancel-any
 read -p "Do you want to set up the default printer now? (y/n): " cont
 if [ $cont == "y" ]
-then
+2then
   read -p "Enter the static IP address of the default printer: $(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".")." prip
   defip=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".").${prip}
   read -p "Enter a name for the default printer: " defpr
@@ -242,6 +242,12 @@ fi
 #qbittorrent
 echo
 echo "Setting up qBittorrent."
+echo "*** Legal Notice ***"
+echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
+echo
+echo"No further notices will be issued."
+echo
+read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
 curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
