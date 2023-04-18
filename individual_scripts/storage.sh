@@ -14,6 +14,6 @@ then
   mount -a
 else
   echo "#UUID=  /srv/NAS    defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
-  read -n 1 -s -r -p "Device is not available. Press any key to continue without mounting storage."
+  read -n 1 -s -r -p "Device is not available. Press any key to exit without mounting storage."
 fi
 exit
