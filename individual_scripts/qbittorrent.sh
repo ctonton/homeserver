@@ -1,6 +1,13 @@
 #!/bin/bash
 echo "Setting up qBittorrent."
 apt-get install -y --no-install-recommends curl gzip qbittorrent-nox
+echo
+echo "*** Legal Notice ***"
+echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
+echo
+echo"No further notices will be issued."
+echo
+read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
 curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
