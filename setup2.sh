@@ -62,9 +62,9 @@ else
 fi
 apt-get install -y --no-install-recommends ${ff} ntfs-3g curl tar unzip gzip openssh-server ufw nfs-kernel-server samba avahi-daemon cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
+ufw allow 22/tcp
 ufw logging off
 ufw enable
-ufw allow 22/tcp
 
 #storage
 clear
@@ -75,19 +75,21 @@ chown nobody:nogroup /srv/NAS
 blkid
 echo
 read -p "Enter disk partition (ex. sda2): " part
-uniq=$(blkid -o value -s UUID /dev/${part})
-type=$(blkid -o value -s TYPE /dev/${part})
-tee -a /etc/fstab > /dev/null <<EOT
-UUID=${uniq}  /srv/NAS  ${type}  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0
-EOT
-mount -a
+if [ -b /dev/$part ] && ! grep -q /dev/$part /proc/mounts
+then
+  uniq=$(blkid -o value -s UUID /dev/${part})
+  type=$(blkid -o value -s TYPE /dev/${part})
+  echo "UUID=${uniq}  /srv/NAS  ${type}  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
+  mount -a
+else
+  echo "#UUID=?  /srv/NAS  ?  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
+  read -n 1 -s -r -p "Device is not available. Press any key to continue without mounting storage."
+fi
 
 #nfs
 echo
 echo "Setting up NFS."
-tee -a /etc/exports > /dev/null <<EOT
-/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)
-EOT
+echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)" >> /etc/exports
 
 #samba
 echo
@@ -134,7 +136,7 @@ usermod -aG lpadmin root
 cupsctl --remote-admin --user-cancel-any
 read -p "Do you want to set up the default printer now? (y/n): " cont
 if [ $cont == "y" ]
-2then
+then
   read -p "Enter the static IP address of the default printer: $(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".")." prip
   defip=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".").${prip}
   read -p "Enter a name for the default printer: " defpr
