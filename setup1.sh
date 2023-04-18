@@ -34,7 +34,8 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
 apt-get full-upgrade -y --fix-missing
-apt-get install -y --no-install-recommends openssh-server
+apt-get install -y --no-install-recommends openssh-server network-manager
+sed -i 's/managed=false/managed=true/' /etc/NetworkManager/NetworkManager.conf
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
@@ -64,19 +65,21 @@ chown nobody:nogroup /srv/NAS
 blkid
 echo
 read -p "Enter disk partition (ex. sda2): " part
-uniq=$(blkid -o value -s UUID /dev/${part})
-type=$(blkid -o value -s TYPE /dev/${part})
-tee -a /etc/fstab > /dev/null <<EOT
-UUID=${uniq}  /srv/NAS  ${type}  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0
-EOT
-mount -a
+if [ -b /dev/$part ] && ! grep -q /dev/$part /proc/mounts
+then
+  uniq=$(blkid -o value -s UUID /dev/${part})
+  type=$(blkid -o value -s TYPE /dev/${part})
+  echo "UUID=${uniq}  /srv/NAS  ${type}  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
+  mount -a
+else
+  echo "#UUID=?  /srv/NAS  ?  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
+  read -n 1 -s -r -p "Device is not available. Press any key to continue without mounting storage."
+fi
 
 #nfs
 echo
 echo "Setting up NFS."
-tee -a /etc/exports > /dev/null <<EOT
-/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)
-EOT
+echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)" >> /etc/exports
 
 #samba
 echo
