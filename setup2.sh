@@ -193,7 +193,7 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 EOT
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
+read -p "Do you want to set up access to this server through ngrok? (y/n): " cont
 if [ $cont == "y" ]
 then
   echo
