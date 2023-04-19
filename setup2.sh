@@ -645,6 +645,8 @@ do
   openssl passwd -apr1 >> /etc/nginx/.htpasswd
   read -p "Add another user? (y/n): " loo
 done
+clear
+echo "Answer the following questions to generate a private SSL key for the web server.
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 ufw allow 80/tcp
