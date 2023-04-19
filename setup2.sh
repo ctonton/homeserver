@@ -506,6 +506,11 @@ tee /var/www/html/print/print.php > /dev/null <<'EOT'
    }
 ?>
 EOT
+tee /var/www/html/print/.user.ini > /dev/null <<'EOT'
+upload_max_filesize = 10M
+post_max_size = 10M
+EOT
+chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
 ##
