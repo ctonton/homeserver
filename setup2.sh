@@ -179,7 +179,8 @@ EOT
 tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
 [Unit]
 Description=ngrok
-After=network.target
+After=network-online.target
+Wants=network-online.target
 [Service]
 Type=exec
 ExecStart=/usr/local/bin/ngrok start --all
