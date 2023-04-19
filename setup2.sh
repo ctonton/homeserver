@@ -134,6 +134,7 @@ echo
 echo "Setting up CUPS."
 usermod -aG lpadmin root
 cupsctl --remote-admin --user-cancel-any
+echo
 read -p "Do you want to set up the default printer now? (y/n): " cont
 if [ $cont == "y" ]
 then
@@ -192,7 +193,15 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 EOT
-tee /root/setup-ngrok.sh > /dev/null <<'EOT'
+read -p "Do you want to set up access to this server through ngrok? y/n: " cont
+if [ $cont == "y" ]
+then
+  echo
+  read -p "Enter your ngrok Authtoken: " auth
+  sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
+  systemctl enable ngrok
+else
+  tee /root/setup-ngrok.sh > /dev/null <<'EOT'
 #!/bin/bash
 clear
 read -p "Enter your ngrok Authtoken: " auth
@@ -200,13 +209,9 @@ sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
 systemctl enable ngrok
 systemctl start ngrok
 rm $0
-return
+exit
 EOT
-chmod +x /root/setup-ngrok.sh
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [ $cont == "y" ]
-then
-  bash /root/setup-ngrok.sh
+  chmod +x /root/setup-ngrok.sh
 fi
 
 #ddns
@@ -235,9 +240,11 @@ TimeoutSec=60
 [Install]
 WantedBy=multi-user.target
 EOT
+echo
 read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
 if [ $cont == "y" ]
 then
+  echo
   read -p "Enter the token from duckdns.org: " token
   sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
   read -p "Enter the domain from duckdns.org: " domain
