@@ -192,7 +192,6 @@ echo "Setting up qBittorrent."
 echo
 echo "*** Legal Notice ***"
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
-echo
 echo "No further notices will be issued."
 echo
 read -n 1 -s -r -p "Press any key to accept and continue..."
@@ -387,6 +386,9 @@ do
   openssl passwd -apr1 >> /etc/nginx/.htpasswd
   read -p "Add another user? (y/n): " loo
 done
+echo
+echo "Answer the following questions to generate a private SSL key for the web server."
+echo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
 
