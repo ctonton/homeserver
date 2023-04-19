@@ -334,10 +334,50 @@ server {
 }
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
-curl -LJ https://raw.githubusercontent.com/ctonton/homeserver/main/individual_scripts/webusers.sh -o /root/webusers.sh
+tee /root/webusers.sh > /dev/null <<'EOT'
+#!/bin/bash
+clear
+loo=0
+until [ $loo -eq 4 ]
+do
+  echo
+  echo "1 - List users"
+  echo "2 - Add user"
+  echo "3 - Remove user"
+  echo "4 - quit"
+  echo
+  read -p "Enter selection: :" loo
+  if [ $loo -eq 1 ]
+  then
+    echo
+    cat /etc/nginx/.htpasswd
+    loo=0
+  fi
+  if [ $loo -eq 2 ]
+  then
+    read -p "Enter a user name: " use
+    echo -n "${use}:" >> /etc/nginx/.htpasswd
+    openssl passwd -apr1 >> /etc/nginx/.htpasswd
+    loo=0
+  fi
+  if [ $loo -eq 3 ]
+  then
+    read -p "Enter a user name to remove: " use
+    sed -i "/$use/d" /etc/nginx/.htpasswd
+    loo=0
+  fi
+  if [ $loo -ne 0 ]
+  then
+    echo "Invalid selection."
+    echo
+  fi
+done
+exit
+EOT
 chmod +x /root/webusers.sh
 echo
 echo "A script called webusers.sh has been added the root directory for modifying users of the web server."
+echo
 echo "Add a user for the web server now."
 loo="y"
 until [ $loo != "y" ]
