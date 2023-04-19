@@ -636,6 +636,7 @@ EOT
 chmod +x /root/webusers.sh
 echo
 echo "A script called webusers.sh has been created in the root directory for modifying users of the web server."
+echo
 echo "Add a user for the web server now."
 loo="y"
 until [ $loo != "y" ]
