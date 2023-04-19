@@ -34,8 +34,7 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
 apt-get full-upgrade -y --fix-missing
-apt-get install -y --no-install-recommends openssh-server network-manager
-sed -i 's/managed=false/managed=true/' /etc/NetworkManager/NetworkManager.conf
+apt-get install -y --no-install-recommends openssh-server
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
