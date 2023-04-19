@@ -264,10 +264,10 @@ fi
 #qbittorrent
 echo
 echo "Setting up qBittorrent."
+echo
 echo "*** Legal Notice ***"
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
-echo
-echo"No further notices will be issued."
+echo "No further notices will be issued."
 echo
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
