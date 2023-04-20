@@ -35,7 +35,7 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
 apt-get full-upgrade -y --fix-missing
-apt-get install -y --no-install-recommends openssh-server
+apt-get install -y openssh-server
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
@@ -60,7 +60,7 @@ then
 else
   ff=firefox
 fi
-apt-get install -y --no-install-recommends ${ff} ntfs-3g curl tar unzip gzip openssh-server ufw nfs-kernel-server samba avahi-daemon cups cups-browsed printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt-get install -y ${ff} ntfs-3g curl tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw allow 22/tcp
 ufw logging off
