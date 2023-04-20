@@ -60,7 +60,7 @@ then
 else
   ff=firefox
 fi
-apt-get install -y ${ff} ntfs-3g curl tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt-get install -y --install-recommends ${ff} ntfs-3g curl tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw allow 22/tcp
 ufw logging off
