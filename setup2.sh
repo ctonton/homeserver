@@ -35,7 +35,7 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
 apt-get full-upgrade -y --fix-missing
-apt-get install -y --no-install-recommends openssh-server
+apt-get install -y openssh-server
 sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
@@ -60,7 +60,7 @@ then
 else
   ff=firefox
 fi
-apt-get install -y --no-install-recommends ${ff} ntfs-3g curl tar unzip gzip openssh-server ufw nfs-kernel-server samba avahi-daemon cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt-get install -y ${ff} ntfs-3g curl tar unzip gzip openssh-server ufw nfs-kernel-server samba avahi-daemon cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw allow 22/tcp
 ufw logging off
@@ -133,17 +133,16 @@ systemctl enable wsdd
 echo
 echo "Setting up CUPS."
 usermod -aG lpadmin root
-cupsctl --remote-admin --user-cancel-any
+lpstat -e > list
 echo
-read -p "Do you want to set up the default printer now? (y/n): " cont
-if [ $cont == "y" ]
-then
-  read -p "Enter the static IP address of the default printer: $(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".")." prip
-  defip=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -f1-3 -d".").${prip}
-  read -p "Enter a name for the default printer: " defpr
-  lpadmin -p $defpr -E -v ipp://${defip}/ipp/print -m everywhere
-  lpadmin -d $defpr
-fi
+echo "Enter the number for the default printer."
+select defpr in $(<list)
+do
+lpadmin -d $defpr
+break
+done
+rm list
+cupsctl --remote-admin --user-cancel-any --no-share-printers
 
 #ngrok
 echo
