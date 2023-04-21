@@ -162,7 +162,7 @@ ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 IgnoreSIGPIPE=true
 Restart=always
-RestartSec=3
+RestartSec=120
 [Install]
 WantedBy=multi-user.target
 EOT
