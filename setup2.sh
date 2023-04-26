@@ -12,10 +12,11 @@ then
   read -n 1 -s -r -p "This script only works with Debian, Ubuntu, or Linuxmint distrobutions. Press any key to exit."
   exit
 fi
-echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
-if [ $? -ne 0 ]
+if ping -q -c 1 -W 1 google.com >/dev/null
 then
-  read -n 1 -s -r -p "Network is not online. Press any key to exit."
+  echo "The network is up."
+else
+  read -n 1 -s -r -p "The network is not online. Press any key to exit."
   exit
 fi
 echo "This server and the default printer need to have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports 80, 443, and 51820 forwarded to it."
