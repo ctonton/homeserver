@@ -79,7 +79,7 @@ fi
 #nfs
 echo
 echo "Setting up NFS."
-echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check)" >> /etc/exports
+echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" >> /etc/exports
 
 #samba
 echo
