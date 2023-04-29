@@ -7,15 +7,16 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-if [[ $(lsb_release -is) != @(Debian|Ubuntu|Linuxmint) ]]
+if [ $(lsb_release -is) != "Debian" ]
 then
-  read -n 1 -s -r -p "This script only works with Debian, Ubuntu, or Linuxmint distrobutions. Press any key to exit."
+  read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
   exit
 fi
-echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
-if [ $? -ne 0 ]
+if ping -q -c 1 -W 1 google.com >/dev/null
 then
-  read -n 1 -s -r -p "Network is not online. Press any key to exit."
+  echo "The network is up."
+else
+  read -n 1 -s -r -p "The network is not online. Press any key to exit."
   exit
 fi
 echo "This server needs to have a static IP addresses on the local network."
@@ -39,7 +40,7 @@ sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,50d' /root/resume.sh
+sed -i '2,51d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
