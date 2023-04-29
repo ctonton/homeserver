@@ -7,9 +7,9 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-if [[ $(lsb_release -is) != @(Debian|Ubuntu|Linuxmint) ]]
+if [ $(lsb_release -is) != "Debian" ]
 then
-  read -n 1 -s -r -p "This script only works with Debian, Ubuntu, or Linuxmint distrobutions. Press any key to exit."
+  read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
   exit
 fi
 if ping -q -c 1 -W 1 google.com >/dev/null
@@ -55,13 +55,7 @@ rm /root/.bash_profile
 #install
 clear
 echo "Installing software."
-if [ $(lsb_release -is) == "Debian" ]
-then
-  ff=firefox-esr
-else
-  ff=firefox
-fi
-apt-get install -y --install-recommends ${ff} ntfs-3g curl tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt-get install -y --install-recommends firefox-esr ntfs-3g curl tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw allow 22/tcp
 ufw logging off
