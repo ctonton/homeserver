@@ -208,58 +208,58 @@ EOT
 fi
 
 #ddns
-echo
-echo "Installing DuckDNS."
-mkdir /root/.ddns
-tee /root/.ddns/duck.sh > /dev/null <<'EOT'
-#!/bin/bash
-domain=enter_domain
-token=enter_token
-ipv6addr=$(curl -s https://api6.ipify.org)
-ipv4addr=$(curl -s https://api.ipify.org)
-curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
-EOT
-chmod +x /root/.ddns/duck.sh
-tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
-[Unit]
-Description=DynDNS Updater services
-Wants=network-online.target
-After=network-online.target
-[Service]
-Type=simple
-ExecStartPre=/bin/sleep 30
-ExecStart=/root/.ddns/duck.sh
-TimeoutSec=60
-[Install]
-WantedBy=multi-user.target
-EOT
-echo
-read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
-if [ $cont == "y" ]
-then
-  echo
-  read -p "Enter the token from duckdns.org: " token
-  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
-  read -p "Enter the domain from duckdns.org: " domain
-  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
-  systemctl enable ddns
-  cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
-else
-  tee /root/setup-ddns.sh > /dev/null <<'EOT'
-#!/bin/bash
-clear
-read -p "Enter the token from duckdns.org: " token
-sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
-read -p "Enter the domain from duckdns.org: " domain
-sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
-systemctl enable ddns
-systemctl start ddns
-cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
-rm $0
-exit
-EOT
-  chmod +x /root/setup-ddns.sh  
-fi
+#echo
+#echo "Installing DuckDNS."
+#mkdir /root/.ddns
+#tee /root/.ddns/duck.sh > /dev/null <<'EOT'
+##!/bin/bash
+#domain=enter_domain
+#token=enter_token
+#ipv6addr=$(curl -s https://api6.ipify.org)
+#ipv4addr=$(curl -s https://api.ipify.org)
+#curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
+#EOT
+#chmod +x /root/.ddns/duck.sh
+#tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
+#[Unit]
+#Description=DynDNS Updater services
+#Wants=network-online.target
+#After=network-online.target
+#[Service]
+#Type=simple
+#ExecStartPre=/bin/sleep 30
+#ExecStart=/root/.ddns/duck.sh
+#TimeoutSec=60
+#[Install]
+#WantedBy=multi-user.target
+#EOT
+#echo
+#read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
+#if [ $cont == "y" ]
+#then
+#  echo
+#  read -p "Enter the token from duckdns.org: " token
+#  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
+#  read -p "Enter the domain from duckdns.org: " domain
+#  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
+#  systemctl enable ddns
+#  cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
+#else
+#  tee /root/setup-ddns.sh > /dev/null <<'EOT'
+##!/bin/bash
+#clear
+#read -p "Enter the token from duckdns.org: " token
+#sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
+#read -p "Enter the domain from duckdns.org: " domain
+#sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
+#systemctl enable ddns
+#systemctl start ddns
+#cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
+#rm $0
+#exit
+#EOT
+#  chmod +x /root/setup-ddns.sh  
+#fi
 
 #qbittorrent
 echo
@@ -663,37 +663,37 @@ ufw allow 80/tcp
 ufw allow 443/tcp
 
 #wireguard
-echo
-read -p "Do you want to install and set up Wireguard? (y/n): " cont
-if [ $cont == "y" ]
-then
-  echo "Downloading WireGuard setup script to the root directory."
-  curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
-  chmod +x /root/setup-wireguard.sh
-  bash /root/setup-wireguard.sh
-  ufw allow from 10.7.0.0/24
-  ufw allow 51820/udp
-  sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
-  sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
-  sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
-else
-  tee /root/install-wireguard.sh > /dev/null <<'EOT'
-#!/bin/bash
-clear
-echo "Downloading WireGuard setup script to the root directory."
-curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
-chmod +x /root/setup-wireguard.sh
-bash /root/setup-wireguard.sh
-ufw allow from 10.7.0.0/24
-ufw allow 51820/udp
-sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
-sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
-sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
-rm $0
-exit
-EOT
-  chmod +x /root/install-wireguard.sh
-fi
+#echo
+#read -p "Do you want to install and set up Wireguard? (y/n): " cont
+#if [ $cont == "y" ]
+#then
+#  echo "Downloading WireGuard setup script to the root directory."
+#  curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
+#  chmod +x /root/setup-wireguard.sh
+#  bash /root/setup-wireguard.sh
+#  ufw allow from 10.7.0.0/24
+#  ufw allow 51820/udp
+#  sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
+#  sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+#  sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
+#else
+#  tee /root/install-wireguard.sh > /dev/null <<'EOT'
+##!/bin/bash
+#clear
+#echo "Downloading WireGuard setup script to the root directory."
+#curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
+#chmod +x /root/setup-wireguard.sh
+#bash /root/setup-wireguard.sh
+#ufw allow from 10.7.0.0/24
+#ufw allow 51820/udp
+#sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
+#sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+#sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
+#rm $0
+#exit
+#EOT
+#  chmod +x /root/install-wireguard.sh
+#fi
 
 #cleanup
 apt-get -y autoremove
