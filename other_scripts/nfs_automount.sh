@@ -1,7 +1,7 @@
 #!/bin/bash
 
 sudo apt update
-sudo apt install -y --no-install-recommends nfs-common autofs
+sudo apt install -y nfs-common autofs
 if [ ! -f /etc/auto.master.bak ]
 then
   sudo cp /etc/auto.master /etc/auto.master.bak
