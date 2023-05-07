@@ -19,7 +19,7 @@ else
   read -n 1 -s -r -p "The network is not online. Press any key to exit."
   exit
 fi
-echo "This server and the default printer need to have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports 80, 443, and 51820 forwarded to it."
+echo "This server should have a static IP addresses on the local network and have ports 80 and 443 forwarded to it."
 echo "An account at ngrok.com and authtoken are required to setup remote access to this server."
 read -p "Are you ready to proceed with the installation? (y/n): " cont
 if [ $cont != "y" ]
