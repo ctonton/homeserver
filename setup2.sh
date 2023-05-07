@@ -21,7 +21,6 @@ else
 fi
 echo "This server and the default printer need to have static IP addresses on the local network and this server should either be added to the demilitarized zone or have ports 80, 443, and 51820 forwarded to it."
 echo "An account at ngrok.com and authtoken are required to setup remote access to this server."
-echo "An account at duckdns.org and token are required to set up the dynamic dns service."
 read -p "Are you ready to proceed with the installation? (y/n): " cont
 if [ $cont != "y" ]
 then
@@ -41,7 +40,7 @@ sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,52d' /root/resume.sh
+sed -i '2,51d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -206,60 +205,6 @@ exit
 EOT
   chmod +x /root/setup-ngrok.sh
 fi
-
-#ddns
-#echo
-#echo "Installing DuckDNS."
-#mkdir /root/.ddns
-#tee /root/.ddns/duck.sh > /dev/null <<'EOT'
-##!/bin/bash
-#domain=enter_domain
-#token=enter_token
-#ipv6addr=$(curl -s https://api6.ipify.org)
-#ipv4addr=$(curl -s https://api.ipify.org)
-#curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
-#EOT
-#chmod +x /root/.ddns/duck.sh
-#tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
-#[Unit]
-#Description=DynDNS Updater services
-#Wants=network-online.target
-#After=network-online.target
-#[Service]
-#Type=simple
-#ExecStartPre=/bin/sleep 30
-#ExecStart=/root/.ddns/duck.sh
-#TimeoutSec=60
-#[Install]
-#WantedBy=multi-user.target
-#EOT
-#echo
-#read -p "Do you want to set up Dynamic DNS now? (y/n): " cont
-#if [ $cont == "y" ]
-#then
-#  echo
-#  read -p "Enter the token from duckdns.org: " token
-#  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
-#  read -p "Enter the domain from duckdns.org: " domain
-#  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
-#  systemctl enable ddns
-#  cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
-#else
-#  tee /root/setup-ddns.sh > /dev/null <<'EOT'
-##!/bin/bash
-#clear
-#read -p "Enter the token from duckdns.org: " token
-#sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
-#read -p "Enter the domain from duckdns.org: " domain
-#sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
-#systemctl enable ddns
-#systemctl start ddns
-#cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
-#rm $0
-#exit
-#EOT
-#  chmod +x /root/setup-ddns.sh  
-#fi
 
 #qbittorrent
 echo
