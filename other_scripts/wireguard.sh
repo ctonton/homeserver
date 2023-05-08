@@ -93,6 +93,7 @@ PersistentKeepalive = 25
 EOT
     clear
     echo
+    qrencode -t PNG -o /root/clients/"$new.png" /root/clients/"$new.conf"
     qrencode -t UTF8 < /root/clients/"$new.conf"
     echo "That is a QR code containing ${new}'s client configuration."
     echo "$new added. Configuration available in /root/clients/"
