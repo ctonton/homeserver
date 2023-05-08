@@ -56,7 +56,7 @@ EOT
   if [ $loo -eq 2 ]
   then
     mkdir -p /root/wgusers
-    read "Input a name for the new user: " new
+    read -p "Input a name for the new user: " new
     key=$(wg genkey)
     psk=$(wg genpsk)
     ip6=$(cat /etc/wireguard/wg0.conf | grep Address | awk '{print $4}' | cut -c-16)
@@ -112,9 +112,14 @@ EOT
   if [ $loo -eq 5 ]
   then
     exit 0
+  fi
+  if [ $loo -eq 0 ]
+  then
+    clear
+    echo "Setup Wireguard"
   else
     clear
-    echo "Invalid selection."
+    echo "Invalid selection"
     loo=0
   fi
 done
