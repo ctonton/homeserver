@@ -24,7 +24,7 @@ do
     sed -i 's/..../&:/g' ip6
     sed -i 's/  -/:/' ip6
     eth=$(ip route | grep default | awk '{print $5}')
-    read "Enter the public ip address or name of this server: " ddns
+    read -p "Enter the public ip address or name of this server: " ddns
     tee /etc/wireguard/wg0.conf > /dev/null << EOT
 [Interface]
 PrivateKey = $(cat /etc/wireguard/private.key)
@@ -42,11 +42,10 @@ EOT
     ufw allow from 10.10.100.0/24
     ufw allow 51820/udp
     ufw disable
-    ufw enable
+    ufw enable -y
     sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
     sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
     sysctl -p
-    sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.10.100.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
     systemctl enable wg-quick@wg0.service
     systemctl start wg-quick@wg0.service
     rm ip6
