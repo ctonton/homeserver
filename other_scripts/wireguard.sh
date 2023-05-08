@@ -96,7 +96,7 @@ EOT
     qrencode -t PNG -o /root/clients/"$new.png" /root/clients/"$new.conf"
     qrencode -t UTF8 < /root/clients/"$new.conf"
     echo "That is a QR code containing ${new}'s client configuration."
-    echo "$new added. Configuration available in /root/clients/"
+    echo "${new}'s configuration files are available in /root/clients"
     read -n 1 -s -r -p "Press any key to continue."
     clear
     echo "Client added"
