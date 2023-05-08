@@ -60,12 +60,22 @@ EOT
     key=$(wg genkey)
     psk=$(wg genpsk)
     ip6=$(cat /etc/wireguard/wg0.conf | grep Address | awk '{print $4}' | cut -c-16)
+    octet=2
+    while grep AllowedIPs /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"
+    do
+      (( octet++ ))
+    done
+    if [[ "$octet" -eq 255 ]]
+    then
+      echo "253 clients are already configured. The WireGuard internal subnet is full!"
+      exit
+    fi
     tee -a /etc/wireguard/wg0.conf > /dev/null << EOT
 # BEGIN_PEER $new
 [Peer]
 PublicKey = $(wg pubkey <<< $key)
 PresharedKey = $psk
-AllowedIPs = 10.10.100.${oct}/32, ${ip6}${oct}/128
+AllowedIPs = 10.10.100.${octet}/32, ${ip6}${octet}/128
 # END_PEER $new
 EOT
     tee /root/wgusers/${new}.conf > /dev/null << EOT
