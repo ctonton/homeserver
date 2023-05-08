@@ -43,7 +43,7 @@ EOT
     ufw allow from 10.10.100.0/24
     ufw allow 51820/udp
     ufw disable
-    ufw enable -y
+    ufw --force enable
     sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
     sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
     sysctl -p
