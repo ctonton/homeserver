@@ -6,8 +6,8 @@ until [ $loo -eq 5 ]
 do
   echo
   echo "1 - Install WireGuard"
-  echo "2 - Add user"
-  echo "3 - Remove user"
+  echo "2 - Add client"
+  echo "3 - Remove client"
   echo "4 - Uninstall Wireguard"
   echo "5 - Quit"
   echo
@@ -55,8 +55,8 @@ EOT
   fi
   if [ $loo -eq 2 ]
   then
-    mkdir -p /root/wgusers
-    read -p "Input a name for the new user: " new
+    mkdir -p /root/clients
+    read -p "Input a name for the new client: " new
     key=$(wg genkey)
     psk=$(wg genpsk)
     ip6=$(cat /etc/wireguard/wg0.conf | grep Address | awk '{print $4}' | cut -c-16)
@@ -78,7 +78,7 @@ PresharedKey = $psk
 AllowedIPs = 10.10.100.${octet}/32, ${ip6}${octet}/128
 # END_PEER $new
 EOT
-    tee /root/wgusers/${new}.conf > /dev/null << EOT
+    tee /root/clients/${new}.conf > /dev/null << EOT
 [Interface]
 Address = 10.10.100.${oct}/24, ${ip6}${oct}/64
 DNS = 8.8.8.8, 8.8.4.4
@@ -93,10 +93,9 @@ PersistentKeepalive = 25
 EOT
     clear
     echo
-    qrencode -t UTF8 < /root/wgusers/"$new.conf"
-    echo -e '\xE2\x86\x91 That is a QR code containing your client configuration.'
-    echo
-    echo "$new added. Configuration available in /root/wgusers/"
+    qrencode -t UTF8 < /root/clients/"$new.conf"
+    echo "That is a QR code containing ${new}'s client configuration."
+    echo "$new added. Configuration available in /root/clients/"
     read -n 1 -s -r -p "Press any key to continue."
     clear
     echo "Client added"
@@ -104,7 +103,7 @@ EOT
   fi
   if [ $loo -eq 3 ]
   then
-    read "Input the name of the user to remove: " old
+    read "Input the name of the client to remove: " old
     clear
     loo=0
   fi
