@@ -42,8 +42,7 @@ PreDown = ip6tables -t nat -D POSTROUTING -o $eth -j MASQUERADE
 EOT
     ufw allow from 10.10.100.0/24
     ufw allow 51820/udp
-    ufw disable
-    ufw --force enable
+    ufw reload
     sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
     sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
     sysctl -p
@@ -117,6 +116,10 @@ EOT
     apt-get remove -y --purge --autoremove wireguard qrencode
     ufw delete allow from 10.10.100.0/24
     ufw delete allow 51820/udp
+    ufw reload
+    sed -i '/forward=1/ s/./#&/' /etc/sysctl.conf
+    sed -i '/forwarding=1/ s/./#&/' /etc/sysctl.conf
+    sysctl -p
     clear
     loo=0
   fi
