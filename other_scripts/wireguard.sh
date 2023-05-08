@@ -24,6 +24,7 @@ do
     sed -i 's/..../&:/g' ip6
     sed -i 's/  -/:/' ip6
     eth=$(ip route | grep default | awk '{print $5}')
+    clear
     read -p "Enter the public ip address or name of this server: " ddns
     tee /etc/wireguard/wg0.conf > /dev/null << EOT
 [Interface]
@@ -51,7 +52,7 @@ EOT
     rm ip6
     clear
     echo "WireGuard server is running."
-    loo=2
+    loo=0
   fi
   if [ $loo -eq 2 ]
   then
