@@ -103,7 +103,7 @@ EOT
     systemctl stop wg-quick@wg0.service
     systemctl disable wg-quick@wg0.service
     rm -rf /root/wgusers
-    apt-get remove --purge --autoremove wireguard qrencode
+    apt-get remove -y --purge --autoremove wireguard qrencode
     ufw delete allow from 10.10.100.0/24
     ufw delete allow 51820/udp
     clear
