@@ -11,7 +11,7 @@ do
   echo "4 - Uninstall Wireguard"
   echo "5 - Quit"
   echo
-  read -p "Enter selection: :" loo
+  read -p "Enter selection: " loo
   if [ $loo -eq 1 ]
   then
     apt-get update
