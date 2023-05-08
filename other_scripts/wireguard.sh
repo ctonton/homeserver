@@ -125,6 +125,7 @@ EOT
   fi
   if [ $loo -eq 5 ]
   then
+    clear
     exit 0
   fi
   if [ $loo -eq 0 ]
