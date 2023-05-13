@@ -7,11 +7,6 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-if [ $(lsb_release -is) != "Debian" ]
-then
-  read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
-  exit
-fi
 if ping -q -c 1 -W 1 google.com >/dev/null
 then
   echo "The network is up."
@@ -40,7 +35,7 @@ sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,51d' /root/resume.sh
+sed -i '2,46d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -49,9 +44,8 @@ read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log 
 rm $0
 reboot
 
-rm /root/.bash_profile
-
 #install
+rm /root/.bash_profile
 clear
 echo "Installing software."
 apt-get install -y --no-install-recommends ntfs-3g curl tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
