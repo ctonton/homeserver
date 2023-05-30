@@ -98,8 +98,8 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-curl -LJ https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -o /usr/bin/wsdd
-chmod +x /usr/bin/wsdd
+curl -LJ https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -o /usr/local/bin/wsdd
+chmod +x /usr/local/bin/wsdd
 tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
 [Unit]
 Description=Web Services Dynamic Discovery host daemon
@@ -107,7 +107,7 @@ After=network-online.target
 Wants=network-online.target
 [Service]
 Type=exec
-ExecStart=/usr/bin/wsdd -s -4
+ExecStart=/usr/local/bin/wsdd -s -4
 [Install]
 WantedBy=multi-user.target
 EOT
@@ -115,24 +115,27 @@ systemctl enable wsdd
 
 #ngrok
 echo
-echo "Installing ngrok."
-if [ $(dpkg --print-architecture) = "armhf" ]
+read -p "Do you want to set up access to this server through ngrok? y/n: " cont
+if [ $cont == "y" ]
 then
-  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
-elif [ $(dpkg --print-architecture) = "i386" ]
-then
-  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.tgz -o ngrok.tgz
-elif [ $(dpkg --print-architecture) = "arm64" ]
-then
-  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -o ngrok.tgz
-elif [ $(dpkg --print-architecture) = "amd64" ]
-then
-  curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -o ngrok.tgz
-fi
-tar xvf ngrok.tgz -C /usr/local/bin
-rm ngrok.tgz
-mkdir /root/.ngrok2
-tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
+  echo "Installing ngrok."
+  if [ $(dpkg --print-architecture) = "armhf" ]
+  then
+    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
+  elif [ $(dpkg --print-architecture) = "i386" ]
+  then
+    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.tgz -o ngrok.tgz
+  elif [ $(dpkg --print-architecture) = "arm64" ]
+  then
+    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -o ngrok.tgz
+  elif [ $(dpkg --print-architecture) = "amd64" ]
+  then
+    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -o ngrok.tgz
+  fi
+  tar xvf ngrok.tgz -C /usr/local/bin
+  rm ngrok.tgz
+  mkdir /root/.ngrok2
+  tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
 authtoken: noauth
 tunnels:
   nginx:
@@ -145,7 +148,7 @@ tunnels:
     proto: tcp
     inspect: false
 EOT
-tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
+  tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
 [Unit]
 Description=ngrok
 After=network-online.target
@@ -161,24 +164,9 @@ RestartSec=120
 [Install]
 WantedBy=multi-user.target
 EOT
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [ $cont == "y" ]
-then
   read -p "Enter your ngrok Authtoken: " auth
   sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
   systemctl enable ngrok
-else
-  tee /root/setup-ngrok.sh > /dev/null <<'EOT'
-#!/bin/bash
-clear
-read -p "Enter your ngrok Authtoken: " auth
-sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
-systemctl enable ngrok
-systemctl start ngrok
-rm $0
-exit
-EOT
-  chmod +x /root/setup-ngrok.sh
 fi
 
 #qbittorrent
