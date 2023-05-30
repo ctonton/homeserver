@@ -1,3 +1,5 @@
+#!/bin/bash
+
 clear
 echo "Installing DuckDNS."
 mkdir /root/.ddns
