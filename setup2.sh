@@ -12,7 +12,8 @@ then
   read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
   exit
 fi
-if ping -q -c 1 -W 1 google.com >/dev/null
+wget -q --spider http://google.com
+if [ $? -eq 0 ]
 then
   echo "The network is up."
 else
