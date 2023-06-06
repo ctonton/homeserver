@@ -41,7 +41,7 @@ sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,51d' /root/resume.sh
+sed -i '2,52d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
