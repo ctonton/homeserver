@@ -98,7 +98,7 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    netbios name = $HOSTNAME
    log level = 0
    server role = standalone server
-   map to guest = bad user
+   map to guest = Bad User
 [Public]
    comment = Public
    path = /srv/NAS/Public
