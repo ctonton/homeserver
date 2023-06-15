@@ -30,7 +30,7 @@ else
 fi
 break
 done
-sed -i "/$part1/s/$/\*/" list
+sed -i "/$part1/d/" list
 clear
 lsblk -o NAME,TYPE,SIZE,LABEL
 echo
