@@ -58,11 +58,11 @@ echo "The data on $part2 will be irreversibly changed."
 read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
 if [ $cont == "dry" ]
 then
-  sudo rsync -auPn --delete-before --inplace $mount1/Public/ $mount2/Public
+  sudo rsync -auPn --delete-before $mount1/Public/ $mount2/Public
 fi
 if [ $cont == "yes" ]
 then
-  sudo rsync -auP --delete-before --inplace $mount1/Public/ $mount2/Public
+  sudo rsync -auP --delete-before $mount1/Public/ $mount2/Public
 else
   echo "No changes made."
 fi
