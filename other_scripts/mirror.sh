@@ -19,7 +19,7 @@ do
 if [ $part1 == "network" ]
 then
   read -p "Enter the IP address of the NFS server: $net." nfs
-  sudo mount -t nfs $net.$nfs:/srv/NAS /mnt/part1
+  sudo mount $net.$nfs:/srv/NAS /mnt/part1
   mount1=/mnt/part1
 else
   if [ ! $(findmnt -m /dev/$part1) ]
@@ -41,7 +41,7 @@ do
 if [ $part2 == "network" ]
 then
   read -p "Enter the IP address of the NFS server: $net." nfs
-  sudo mount -t nfs $net.$nfs:/srv/NAS /mnt/part2
+  sudo mount $net.$nfs:/srv/NAS /mnt/part2
   mount2=/mnt/part2
 else
   if [ ! $(findmnt -m /dev/$part2) ]
