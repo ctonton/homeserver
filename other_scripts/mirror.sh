@@ -54,7 +54,7 @@ break
 done
 clear
 echo "**WARNING**"
-echo "The data on /dev/$part2 will be irreversibly changed."
+echo "The data on $part2 will be irreversibly changed."
 read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
 if [ $cont == "dry" ]
 then
