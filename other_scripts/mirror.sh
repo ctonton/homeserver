@@ -30,7 +30,7 @@ else
 fi
 break
 done
-sed -i "/$part1/d/" list
+sed -i "/$part1/d" list
 clear
 lsblk -o NAME,TYPE,SIZE,LABEL
 echo
@@ -70,4 +70,5 @@ sudo umount -q /mnt/part2
 sudo umount -q /mnt/part1
 sudo rmdir /mnt/part2
 sudo rmdir /mnt/part1
+rm list
 exit
