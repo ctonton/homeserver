@@ -49,6 +49,7 @@ WantedBy=multi-user.target
 EOT
 read -p "Enter your ngrok Authtoken: " auth
 sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
+systemctl enable NetworkManager-wait-online.service
 systemctl enable ngrok
 systemctl start ngrok
 exit
