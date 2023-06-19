@@ -187,12 +187,16 @@ tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
 program=chown -R nobody:nogroup \"%R\"
+
 [BitTorrent]
 Session\GlobalMaxSeedingMinutes=1
+
 [LegalNotice]
 Accepted=true
+
 [Network]
 Cookies=@Invalid()
+
 [Preferences]
 Bittorrent\MaxRatioAction=1
 Connection\GlobalUPLimit=10
