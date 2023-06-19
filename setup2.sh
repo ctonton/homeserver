@@ -12,19 +12,9 @@ then
   read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
   exit
 fi
-wget -q --spider http://google.com
-if [ $? -eq 0 ]
+if ! wget -q --spider http://google.com
 then
-  echo "The network is up."
-else
   read -n 1 -s -r -p "The network is not online. Press any key to exit."
-  exit
-fi
-echo "This server should have a static IP addresses on the local network and have ports 80 and 443 forwarded to it."
-echo "An account at ngrok.com and authtoken are required to setup remote access to this server."
-read -p "Are you ready to proceed with the installation? (y/n): " cont
-if [ $cont != "y" ]
-then
   exit
 fi
 
@@ -36,12 +26,12 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
 apt-get full-upgrade -y --fix-missing
-apt-get install -y openssh-server
-sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+apt install -y openssh-server
+sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,52d' /root/resume.sh
+sed -i '2,43d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -200,9 +190,7 @@ echo
 echo "Setting up qBittorrent."
 echo
 echo "*** Legal Notice ***"
-echo
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
-echo
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
