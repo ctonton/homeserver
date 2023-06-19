@@ -35,10 +35,11 @@ sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,46d' /root/resume.sh
+sed -i '2,47d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
+systemctl enable NetworkManager-wait-online.service
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" through ssh to continue."
 rm $0
@@ -226,7 +227,7 @@ chmod +x /root/.config/qBittorrent/lanchk.sh
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
-After=network.target
+After=network-online.target
 [Service]
 Type=forking
 User=root
