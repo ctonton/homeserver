@@ -65,6 +65,7 @@ if [ -b /dev/$part ] && ! grep -q /dev/$part /proc/mounts
 then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
   mount -a
+  mkdir -p /srv/NAS/Public
 else
   echo "#UUID=?  /srv/NAS  ?  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
   echo "Device is not available. Manually edit fstab later."
