@@ -15,13 +15,10 @@ chmod +x /root/.ddns/duck.sh
 tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
 [Unit]
 Description=DynDNS Updater services
-Wants=network-online.target
 After=network-online.target
 [Service]
 Type=simple
-ExecStartPre=/bin/sleep 30
 ExecStart=/root/.ddns/duck.sh
-TimeoutSec=60
 [Install]
 WantedBy=multi-user.target
 EOT
@@ -30,6 +27,7 @@ read -p "Enter the token from duckdns.org: " token
 sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
 read -p "Enter the domain from duckdns.org: " domain
 sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
+systemctl enable NetworkManager-wait-online.service
 systemctl enable ddns
 systemctl start ddns
 cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
