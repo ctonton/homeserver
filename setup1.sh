@@ -238,7 +238,6 @@ ExecStart=/usr/bin/qbittorrent-nox -d
 WantedBy=multi-user.target
 EOT
 systemctl enable qbittorrent
-systemctl start qbittorrent
 tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
 #!/bin/bash
 curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
