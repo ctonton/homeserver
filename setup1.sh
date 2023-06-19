@@ -228,6 +228,7 @@ tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
 After=network-online.target
+Wants=network-online.target
 [Service]
 Type=forking
 User=root
