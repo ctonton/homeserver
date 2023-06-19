@@ -45,6 +45,7 @@ sed -i '2,52d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
+systemctl enable NetworkManager-wait-online.service
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
@@ -256,7 +257,8 @@ chmod +x /root/.config/qBittorrent/lanchk.sh
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
-After=network.target
+After=network-online.target
+Wants=network-online.target
 [Service]
 Type=forking
 User=root
@@ -267,6 +269,7 @@ ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
 EOT
+systemctl enable qbittorrent
 tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
 #!/bin/bash
 curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
@@ -276,7 +279,6 @@ exit
 EOT
 chmod +x /root/.config/qBittorrent/updatelist.sh
 cat <(crontab -l) <(echo "30 4 * * 1 /root/.config/qBittorrent/updatelist.sh") | crontab -
-systemctl enable qbittorrent
 
 #firefox
 echo
