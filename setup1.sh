@@ -209,6 +209,17 @@ WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
 WebUI\LocalHostAuth=false
 EOT
+tee /root/.config/qBittorrent/lanchk.sh > /dev/null <<'EOT'
+#!/bin/bash
+OLD=$(cat /root/.config/qBittorrent/qBittorrent.conf | grep "AuthSubnetWhitelist=" | cut -d '=' -f 2 | cut -d '/' -f 1)
+NEW=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d '/' -f 1)
+if [ $OLD != $NEW ]
+then
+  sed -i "s/$OLD/$NEW/g" /root/.config/qBittorrent/qBittorrent.conf
+fi
+exit
+EOT
+chmod +x /root/.config/qBittorrent/lanchk.sh
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
@@ -218,6 +229,7 @@ Type=forking
 User=root
 Group=root
 UMask=000
+ExecStartPre=/root/.config/qBittorrent/lanchk.sh
 ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
