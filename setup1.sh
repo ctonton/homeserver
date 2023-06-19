@@ -211,11 +211,14 @@ WebUI\LocalHostAuth=false
 EOT
 tee /root/.config/qBittorrent/lanchk.sh > /dev/null <<'EOT'
 #!/bin/bash
-OLD=$(cat /root/.config/qBittorrent/qBittorrent.conf | grep "AuthSubnetWhitelist=" | cut -d '=' -f 2 | cut -d '/' -f 1)
-NEW=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d '/' -f 1)
-if [ $OLD != $NEW ]
+if /sbin/ip route | grep "default"
 then
-  sed -i "s/$OLD/$NEW/g" /root/.config/qBittorrent/qBittorrent.conf
+  OLD=$(cat /root/.config/qBittorrent/qBittorrent.conf | grep "AuthSubnetWhitelist=" | cut -d '=' -f 2 | cut -d '/' -f 1)
+  NEW=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d '/' -f 1)
+  if [ $OLD != $NEW ]
+  then
+    sed -i "s/$OLD/$NEW/g" /root/.config/qBittorrent/qBittorrent.conf
+  fi
 fi
 exit
 EOT
