@@ -45,8 +45,9 @@ read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log 
 rm $0
 reboot
 
-#install
 rm /root/.bash_profile
+
+#install
 clear
 echo "Installing software."
 apt-get install -y --no-install-recommends ntfs-3g curl tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
