@@ -16,6 +16,7 @@ tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
 [Unit]
 Description=DynDNS Updater services
 After=network-online.target
+Wants=network-online.target
 [Service]
 Type=simple
 ExecStart=/root/.ddns/duck.sh
