@@ -57,19 +57,31 @@ echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-blkid
+lsblk -l -o TYPE,NAME > list
+sed -i '/disk/d' list
+sed -i '1d' list
+sed -i 's/[^ ]* //' list
+echo "other" >> list
+clear
+lsblk -o NAME,TYPE,SIZE,LABEL
 echo
-read -p "Enter disk partition (ex. sda2): " part
+echo
+PS3="Select the partition to use as storage: "
+select part in $(<list)
+do
 if [ -b /dev/$part ] && ! grep -q /dev/$part /proc/mounts
 then
-  uniq=$(blkid -o value -s UUID /dev/${part})
-  type=$(blkid -o value -s TYPE /dev/${part})
-  echo "UUID=${uniq}  /srv/NAS  ${type}  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
+  echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
   mount -a
+  mkdir -p /srv/NAS/Public
 else
   echo "#UUID=?  /srv/NAS  ?  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
-  read -n 1 -s -r -p "Device is not available. Press any key to continue without mounting storage."
+  echo "Device is not available. Manually edit fstab later."
+  read -n 1 -s -r -p "Press any key to continue without mounting storage."
 fi
+break
+done
+rm list
 
 #nfs
 echo
