@@ -282,7 +282,10 @@ wget -q https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
-mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+if [[ ! -f /etc/nginx/sites-available/default.bak ]]
+then
+  mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+fi
 tee /var/www/html/index.html > /dev/null <<'EOT'
 <html>
   <head>
@@ -357,7 +360,7 @@ tee /root/webusers.sh > /dev/null <<'EOT'
 #!/bin/bash
 clear
 loo=0
-until [ $loo -eq 4 ]
+until [[ $loo -eq 4 ]]
 do
   echo
   echo "1 - List users"
@@ -366,26 +369,26 @@ do
   echo "4 - quit"
   echo
   read -p "Enter selection: :" loo
-  if [ $loo -eq 1 ]
+  if [[ $loo -eq 1 ]]
   then
     echo
     cat /etc/nginx/.htpasswd
     loo=0
   fi
-  if [ $loo -eq 2 ]
+  if [[ $loo -eq 2 ]]
   then
     read -p "Enter a user name: " use
     echo -n "${use}:" >> /etc/nginx/.htpasswd
     openssl passwd -apr1 >> /etc/nginx/.htpasswd
     loo=0
   fi
-  if [ $loo -eq 3 ]
+  if [[ $loo -eq 3 ]]
   then
     read -p "Enter a user name to remove: " use
     sed -i "/$use/d" /etc/nginx/.htpasswd
     loo=0
   fi
-  if [ $loo -ne 0 ]
+  if [[ $loo -ne 0 ]]
   then
     echo "Invalid selection."
     echo
@@ -395,7 +398,7 @@ exit
 EOT
 chmod +x /root/webusers.sh
 echo
-echo "A script called webusers.sh has been added the root directory for modifying users of the web server."
+echo "A script called webusers.sh has been created in the root directory for modifying users of the web server."
 echo
 echo "Add a user for the web server now."
 loo="y"
@@ -413,7 +416,7 @@ openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-se
 wget -q https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #cleanup
-apt-get autoremove
+apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/resume.sh
 reboot
