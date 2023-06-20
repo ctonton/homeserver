@@ -47,7 +47,7 @@ rm /root/.bash_profile
 #install
 clear
 echo "Installing software."
-apt-get install -y --no-install-recommends ntfs-3g curl tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
+apt-get install -y --no-install-recommends ntfs-3g tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
 
 #storage
 clear
@@ -109,7 +109,7 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-curl -LJ https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -o /usr/local/bin/wsdd
+wget https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
 chmod +x /usr/local/bin/wsdd
 tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
 [Unit]
@@ -132,16 +132,13 @@ then
   echo "Installing ngrok."
   if [[ $(dpkg --print-architecture) = "armhf" ]]
   then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
-  elif [[ $(dpkg --print-architecture) = "i386" ]]
-  then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.tgz -o ngrok.tgz
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -O ngrok.tgz
   elif [[ $(dpkg --print-architecture) = "arm64" ]]
   then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -o ngrok.tgz
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -O ngrok.tgz
   elif [[ $(dpkg --print-architecture) = "amd64" ]]
   then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -o ngrok.tgz
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -O ngrok.tgz
   fi
   tar xvf ngrok.tgz -C /usr/local/bin
   rm ngrok.tgz
@@ -189,7 +186,7 @@ echo "qBittorrent is a file sharing program. When you run a torrent, its data wi
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
-curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
+wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
@@ -270,7 +267,7 @@ if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-curl -LJO https://github.com/ctonton/homeserver/raw/main/icons.zip
+wget https://github.com/ctonton/homeserver/raw/main/icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
@@ -402,7 +399,7 @@ echo
 echo "Answer the following questions to generate a private SSL key for the web server."
 echo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
-curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
+wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #cleanup
 apt-get autoremove
