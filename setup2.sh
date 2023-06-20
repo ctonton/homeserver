@@ -24,18 +24,35 @@ hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
-apt-get update
-apt-get full-upgrade -y --fix-missing
-apt install -y openssh-server
+apt update
+apt full-upgrade -y --fix-missing
+if ! dpkg -s openssh-server &>/dev/null
+then
+  apt install -y openssh-server
+fi
+if ! systemctl is-enabled --quiet ssh
+then
+  systemctl enable ssh
+fi
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-systemctl enable ssh
+if dpkg -s network-manager &>/dev/null
+then
+  if ! systemctl is-enabled --quiet NetworkManager-wait-online.service
+  then
+    systemctl enable NetworkManager-wait-online.service
+  fi
+else
+  if ! systemctl is-enabled --quiet systemd-networkd-wait-online.service
+  then
+    systemctl enable systemd-networkd-wait-online.service
+  fi
+fi
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,43d' /root/resume.sh
+sed -i '2,60d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
-systemctl enable NetworkManager-wait-online.service
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
