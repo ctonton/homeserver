@@ -48,10 +48,6 @@ sed -i '2,44d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
-if ! systemctl is-active --quiet systemd-networkd-wait-online.service
-then
-  systemctl enable NetworkManager-wait-online.service
-fi
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
