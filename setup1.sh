@@ -137,24 +137,21 @@ systemctl enable wsdd
 
 #ngrok
 echo
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [[ $cont == "y" ]]
+echo "Installing ngrok."
+if [[ $(dpkg --print-architecture) = "armhf" ]]
 then
-  echo "Installing ngrok."
-  if [[ $(dpkg --print-architecture) = "armhf" ]]
-  then
-    wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -O ngrok.tgz
-  elif [[ $(dpkg --print-architecture) = "arm64" ]]
-  then
-    wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -O ngrok.tgz
-  elif [[ $(dpkg --print-architecture) = "amd64" ]]
-  then
-    wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -O ngrok.tgz
-  fi
-  tar xvf ngrok.tgz -C /usr/local/bin
-  rm ngrok.tgz
-  mkdir /root/.ngrok2
-  tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
+  wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -O ngrok.tgz
+elif [[ $(dpkg --print-architecture) = "arm64" ]]
+then
+  wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -O ngrok.tgz
+elif [[ $(dpkg --print-architecture) = "amd64" ]]
+then
+  wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -O ngrok.tgz
+fi
+tar xvf ngrok.tgz -C /usr/local/bin
+rm ngrok.tgz
+mkdir /root/.ngrok2
+tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
 authtoken: noauth
 tunnels:
   nginx:
@@ -167,7 +164,7 @@ tunnels:
     proto: tcp
     inspect: false
 EOT
-  tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
+tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
 [Unit]
 Description=ngrok
 After=network-online.target
@@ -183,6 +180,9 @@ RestartSec=120
 [Install]
 WantedBy=multi-user.target
 EOT
+read -p "Do you want to set up access to this server through ngrok? y/n: " cont
+if [[ $cont == "y" ]]
+then
   read -p "Enter your ngrok Authtoken: " auth
   sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
   systemctl enable ngrok
