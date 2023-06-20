@@ -19,9 +19,9 @@ hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
-apt-get update
-apt-get full-upgrade -y --fix-missing
-if [[ ! -z openssh-server ]]
+apt update
+apt full-upgrade -y --fix-missing
+if [[ -z openssh-server ]]
 then
   apt install -y openssh-server
 fi
@@ -58,7 +58,7 @@ rm /root/.bash_profile
 #install
 clear
 echo "Installing software."
-apt-get install -y --no-install-recommends ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
+apt install -y --no-install-recommends ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
 
 #storage
 clear
