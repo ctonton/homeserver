@@ -2,7 +2,7 @@
 
 #checks
 clear
-if [ $EUID -ne 0 ]
+if [[ $EUID -ne 0 ]]
 then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
@@ -21,9 +21,15 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt-get update
 apt-get full-upgrade -y --fix-missing
-apt install -y openssh-server
+if [[ -z openssh-server ]]
+then
+  apt install -y openssh-server
+fi
+if [[ $(systemctl is-enabled ssh) != enabled ]]
+then
+  systemctl enable ssh
+fi
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-systemctl enable ssh
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
 sed -i '2,38d' /root/resume.sh
@@ -61,7 +67,7 @@ echo
 PS3="Select the partition to use as storage: "
 select part in $(<list)
 do
-if [ -b /dev/$part ] && ! grep -q /dev/$part /proc/mounts
+if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
 then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
   mount -a
@@ -83,7 +89,7 @@ echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" >> /etc/e
 #samba
 echo
 echo "Setting up SAMBA."
-if [ ! -f /etc/samba/smb.bak ]
+if [[ ! -f /etc/samba/smb.bak ]]
 then
   mv /etc/samba/smb.conf /etc/samba/smb.bak
 fi
@@ -121,19 +127,19 @@ systemctl enable wsdd
 #ngrok
 echo
 read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [ $cont == "y" ]
+if [[ $cont == "y" ]]
 then
   echo "Installing ngrok."
-  if [ $(dpkg --print-architecture) = "armhf" ]
+  if [[ $(dpkg --print-architecture) = "armhf" ]]
   then
     curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
-  elif [ $(dpkg --print-architecture) = "i386" ]
+  elif [[ $(dpkg --print-architecture) = "i386" ]]
   then
     curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.tgz -o ngrok.tgz
-  elif [ $(dpkg --print-architecture) = "arm64" ]
+  elif [[ $(dpkg --print-architecture) = "arm64" ]]
   then
     curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -o ngrok.tgz
-  elif [ $(dpkg --print-architecture) = "amd64" ]
+  elif [[ $(dpkg --print-architecture) = "amd64" ]]
   then
     curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -o ngrok.tgz
   fi
@@ -260,7 +266,7 @@ cat <(crontab -l) <(echo "30 4 * * 1 /root/.config/qBittorrent/updatelist.sh") |
 #nginx
 echo
 echo "Setting up NGINX."
-if [ ! -f /var/www/html/index.bak ]
+if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
@@ -385,7 +391,7 @@ echo "A script called webusers.sh has been added the root directory for modifyin
 echo
 echo "Add a user for the web server now."
 loo="y"
-until [ $loo != "y" ]
+until [[ $loo != "y" ]]
 do
   read -p "Enter a user name: " use
   echo -n "${use}:" >> /etc/nginx/.htpasswd
