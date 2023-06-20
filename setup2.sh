@@ -2,12 +2,12 @@
 
 #checks
 clear
-if [ $EUID -ne 0 ]
+if [[ $EUID -ne 0 ]]
 then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-if [ $(lsb_release -is) != "Debian" ]
+if [[ $(lsb_release -is) != "Debian" ]]
 then
   read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
   exit
@@ -63,7 +63,7 @@ rm /root/.bash_profile
 #install
 clear
 echo "Installing software."
-apt-get install -y --install-recommends firefox-esr ntfs-3g exfat-fuse curl tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt-get install -y --install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
 ufw enable
@@ -86,7 +86,7 @@ echo
 PS3="Select the partition to use as storage: "
 select part in $(<list)
 do
-if [ -b /dev/$part ] && ! grep -q /dev/$part /proc/mounts
+if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
 then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
   mount -a
@@ -108,7 +108,7 @@ echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" >> /etc/e
 #samba
 echo
 echo "Setting up SAMBA."
-if [ ! -f /etc/samba/smb.bak ]
+if [[ ! -f /etc/samba/smb.bak ]]
 then
   mv /etc/samba/smb.conf /etc/samba/smb.bak
 fi
@@ -128,7 +128,7 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-curl -LJ https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -o /usr/local/bin/wsdd
+wget https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
 chmod +x /usr/local/bin/wsdd
 tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
 [Unit]
@@ -161,21 +161,18 @@ cupsctl --remote-admin --no-share-printers --user-cancel-any
 #ngrok
 echo
 read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [ $cont == "y" ]
+if [[ $cont == "y" ]]
 then
   echo "Installing ngrok."
-  if [ $(dpkg --print-architecture) = "armhf" ]
+  if [[ $(dpkg --print-architecture) = "armhf" ]]
   then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -o ngrok.tgz
-  elif [ $(dpkg --print-architecture) = "i386" ]
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.tgz -O ngrok.tgz
+  elif [[ $(dpkg --print-architecture) = "arm64" ]]
   then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.tgz -o ngrok.tgz
-  elif [ $(dpkg --print-architecture) = "arm64" ]
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -O ngrok.tgz
+  elif [[ $(dpkg --print-architecture) = "amd64" ]]
   then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -o ngrok.tgz
-  elif [ $(dpkg --print-architecture) = "amd64" ]
-  then
-    curl https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -o ngrok.tgz
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -O ngrok.tgz
   fi
   tar xvf ngrok.tgz -C /usr/local/bin
   rm ngrok.tgz
@@ -263,7 +260,7 @@ if /sbin/ip route | grep "default"
 then
   OLD=$(cat /root/.config/qBittorrent/qBittorrent.conf | grep "AuthSubnetWhitelist=" | cut -d '=' -f 2 | cut -d '/' -f 1)
   NEW=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d '/' -f 1)
-  if [ $OLD != $NEW ]
+  if [[ $OLD != $NEW ]]
   then
     sed -i "s/$OLD/$NEW/g" /root/.config/qBittorrent/qBittorrent.conf
   fi
@@ -289,7 +286,7 @@ EOT
 systemctl enable qbittorrent
 tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
 #!/bin/bash
-curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
+wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 systemctl restart qbittorrent
 exit
@@ -349,7 +346,7 @@ tee /root/.ignite.sh > /dev/null <<'EOT'
 #!/bin/bash
 websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
 ecode=0
-while [ $ecode -eq 0 ]
+while [[ $ecode -eq 0 ]]
 do
   DISPLAY=:1 firefox
   ecode=$?
@@ -373,16 +370,19 @@ systemctl enable tigervnc
 #nginx
 echo
 echo "Setting up NGINX."
-if [ ! -f /var/www/html/index.bak ]
+if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-curl -LJO https://github.com/ctonton/homeserver/raw/main/icons.zip
+wget https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
 ln -s /root/Downloads /var/www/html/egg
-mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+if [[ ! -f /etc/nginx/sites-available/default.bak ]]
+then
+  mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+fi
 tee /var/www/html/index.html > /dev/null <<'EOT'
 <html>
   <head>
@@ -572,7 +572,7 @@ tee /root/webusers.sh > /dev/null <<'EOT'
 #!/bin/bash
 clear
 loo=0
-until [ $loo -eq 4 ]
+until [[ $loo -eq 4 ]]
 do
   echo
   echo "1 - List users"
@@ -581,26 +581,26 @@ do
   echo "4 - quit"
   echo
   read -p "Enter selection: :" loo
-  if [ $loo -eq 1 ]
+  if [[ $loo -eq 1 ]]
   then
     echo
     cat /etc/nginx/.htpasswd
     loo=0
   fi
-  if [ $loo -eq 2 ]
+  if [[ $loo -eq 2 ]]
   then
     read -p "Enter a user name: " use
     echo -n "${use}:" >> /etc/nginx/.htpasswd
     openssl passwd -apr1 >> /etc/nginx/.htpasswd
     loo=0
   fi
-  if [ $loo -eq 3 ]
+  if [[ $loo -eq 3 ]]
   then
     read -p "Enter a user name to remove: " use
     sed -i "/$use/d" /etc/nginx/.htpasswd
     loo=0
   fi
-  if [ $loo -ne 0 ]
+  if [[ $loo -ne 0 ]]
   then
     echo "Invalid selection."
     echo
@@ -614,7 +614,7 @@ echo "A script called webusers.sh has been created in the root directory for mod
 echo
 echo "Add a user for the web server now."
 loo="y"
-until [ $loo != "y" ]
+until [[ $loo != "y" ]]
 do
   read -p "Enter a user name: " use
   echo -n "${use}:" >> /etc/nginx/.htpasswd
@@ -625,42 +625,9 @@ echo
 echo "Answer the following questions to generate a private SSL key for the web server."
 echo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
-curl https://ssl-config.mozilla.org/ffdhe4096.txt > /etc/nginx/dhparam.pem
+wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 ufw allow 80/tcp
 ufw allow 443/tcp
-
-#wireguard
-#echo
-#read -p "Do you want to install and set up Wireguard? (y/n): " cont
-#if [ $cont == "y" ]
-#then
-#  echo "Downloading WireGuard setup script to the root directory."
-#  curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
-#  chmod +x /root/setup-wireguard.sh
-#  bash /root/setup-wireguard.sh
-#  ufw allow from 10.7.0.0/24
-#  ufw allow 51820/udp
-#  sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
-#  sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
-#  sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
-#else
-#  tee /root/install-wireguard.sh > /dev/null <<'EOT'
-##!/bin/bash
-#clear
-#echo "Downloading WireGuard setup script to the root directory."
-#curl -LJ https://github.com/Nyr/wireguard-install/raw/master/wireguard-install.sh -o /root/setup-wireguard.sh
-#chmod +x /root/setup-wireguard.sh
-#bash /root/setup-wireguard.sh
-#ufw allow from 10.7.0.0/24
-#ufw allow 51820/udp
-#sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
-#sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
-#sed -i '/^WebUI\\AuthSubnetWhitelist=/ s/$/,10.7.0.0\/24/' /root/.config/qBittorrent/qBittorrent.conf
-#rm $0
-#exit
-#EOT
-#  chmod +x /root/install-wireguard.sh
-#fi
 
 #cleanup
 apt-get -y autoremove
