@@ -63,7 +63,7 @@ rm /root/.bash_profile
 #install
 clear
 echo "Installing software."
-apt-get install -y --install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt install -y --install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
 ufw enable
@@ -220,7 +220,7 @@ echo "qBittorrent is a file sharing program. When you run a torrent, its data wi
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
-curl -LJ https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -o /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
@@ -286,7 +286,7 @@ EOT
 systemctl enable qbittorrent
 tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
 #!/bin/bash
-wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 systemctl restart qbittorrent
 exit
@@ -374,7 +374,7 @@ if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-wget https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
+wget -q https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
@@ -625,12 +625,12 @@ echo
 echo "Answer the following questions to generate a private SSL key for the web server."
 echo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
-wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+wget -q https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 ufw allow 80/tcp
 ufw allow 443/tcp
 
 #cleanup
-apt-get -y autoremove
+apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/resume.sh
 reboot
