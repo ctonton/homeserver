@@ -30,6 +30,18 @@ then
   systemctl enable ssh
 fi
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
+if [[ ! -z network-manager ]]
+then
+  if ! systemctl is-active --quiet NetworkManager-wait-online.service
+  then
+    systemctl enable NetworkManager-wait-online.service
+  fi
+else
+  if ! systemctl is-active --quiet systemd-networkd-wait-online.service
+  then
+    systemctl enable systemd-networkd-wait-online.service
+  fi
+fi
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
 sed -i '2,44d' /root/resume.sh
