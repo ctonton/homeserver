@@ -66,7 +66,7 @@ echo "Installing software."
 apt install -y --install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
-ufw enable
+ufw --force enable
 
 #storage
 clear
