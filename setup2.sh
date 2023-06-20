@@ -63,7 +63,7 @@ sed -i '1d' list
 sed -i 's/[^ ]* //' list
 echo "other" >> list
 clear
-lsblk -o NAME,TYPE,SIZE,LABEL
+lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
 echo
 PS3="Select the partition to use as storage: "
