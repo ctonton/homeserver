@@ -21,7 +21,7 @@ dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 apt update
 apt full-upgrade -y --fix-missing
-if [[ -z openssh-server ]]
+if ! dpkg -s openssh-server &>/dev/null
 then
   apt install -y openssh-server
 fi
@@ -30,7 +30,7 @@ then
   systemctl enable ssh
 fi
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-if [[ -z network-manager ]]
+if dpkg -s network-manager &>/dev/null
 then
   if ! systemctl is-enabled --quiet NetworkManager-wait-online.service
   then
