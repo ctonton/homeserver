@@ -47,7 +47,7 @@ rm /root/.bash_profile
 #install
 clear
 echo "Installing software."
-apt-get install -y --no-install-recommends ntfs-3g tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
+apt-get install -y --no-install-recommends ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
 
 #storage
 clear
