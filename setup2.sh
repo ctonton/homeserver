@@ -63,7 +63,8 @@ rm /root/.bash_profile
 #install
 clear
 echo "Installing software."
-apt install -y --install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt install -y --no-install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt install cups-browsed
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
 ufw --force enable
@@ -254,23 +255,23 @@ WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
 WebUI\LocalHostAuth=false
 EOT
-tee /root/.config/qBittorrent/lanchk.sh > /dev/null <<'EOT'
+#tee /root/.config/qBittorrent/lanchk.sh > /dev/null <<'EOT'
 #!/bin/bash
-if /sbin/ip route | grep "default"
-then
-  OLD=$(cat /root/.config/route | cut -d '/' -f 1)
-  NEW=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d '/' -f 1)
-  if [[ $OLD != $NEW ]]
-  then
-    sed -i "s/$OLD/$NEW/g" /root/.config/qBittorrent/qBittorrent.conf
-    ufw delete allow from $(cat /root/.config/route)
-    ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
-    echo $(/sbin/ip route | awk '/src/ { print $1 }') > /root/.config/route
-  fi
-fi
-exit
-EOT
-chmod +x /root/.config/qBittorrent/lanchk.sh
+##if /sbin/ip route | grep "default"
+#then
+#  OLD=$(cat /root/.config/route | cut -d '/' -f 1)
+#  NEW=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d '/' -f 1)
+#  if [[ $OLD != $NEW ]]
+#  then
+#    sed -i "s/$OLD/$NEW/g" /root/.config/qBittorrent/qBittorrent.conf
+#    ufw delete allow from $(cat /root/.config/route)
+#    ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
+#    echo $(/sbin/ip route | awk '/src/ { print $1 }') > /root/.config/route
+#  fi
+#fi
+#exit
+#EOT
+#chmod +x /root/.config/qBittorrent/lanchk.sh
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
@@ -281,7 +282,6 @@ Type=forking
 User=root
 Group=root
 UMask=000
-ExecStartPre=/root/.config/qBittorrent/lanchk.sh
 ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
