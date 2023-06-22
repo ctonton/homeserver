@@ -3,7 +3,7 @@ board_name=hc1
 usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u
 EOT
 systemctl disable NetworkManager
-apt autopurge network-manager netplan.io
+apt autopurge -y network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
 apt install -y ifupdown
 systemctl unmask systemd-networkd
