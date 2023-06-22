@@ -1,10 +1,24 @@
+tee /boot/armbianEnv.txt > /dev/null <<'EOT'
+board_name=hc1
+usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u
+EOT
 apt disable NetworkManager
-apt autopurge network-manager natplan.io
+apt autopurge network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
 apt install -y ifupdown
 apt unmask systemd-networkd
 apt enable systemd-networkd
-tee /etc/network/interfaces
+tee /etc/network/interfaces > /dev/null <<'EOT'
+auto lo
+iface lo inet loopback
+
+auto enx001e0630bfc5
+iface enx001e0630bfc5 inet static
+	address 10.10.10.10/24
+	gateway  10.10.10.1
+	dns-nameservers 8.8.8.8 1.1.1.1
+EOT
+
 if dpkg -s network-manager &>/dev/null
 then
   if ! systemctl is-enabled --quiet NetworkManager-wait-online.service
