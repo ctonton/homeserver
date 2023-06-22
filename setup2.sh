@@ -64,7 +64,7 @@ rm /root/.bash_profile
 clear
 echo "Installing software."
 apt install -y --no-install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
-apt install cups-browsed
+apt install -y cups-browsed
 ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
 ufw logging off
 ufw --force enable
