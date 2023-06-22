@@ -47,6 +47,7 @@ reboot
 
 rm /root/.bash_profile
 
+
 #storage
 echo
 echo "Mounting storage."
