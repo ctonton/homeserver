@@ -1,23 +1,25 @@
 #!/bin/bash
-tee /boot/armbianEnv.txt > /dev/null <<'EOT'
+tee /boot/armbianEnv.txt > /dev/null <<EOT
 board_name=hc1
 usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u
 EOT
 apt update
-systemctl disable NetworkManager
+systemctl --quiet disable NetworkManager
 apt autopurge -y network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
 apt install -y --install-recommends ifupdown
-systemctl unmask systemd-networkd
-systemctl enable systemd-networkd
-tee /etc/network/interfaces > /dev/null <<'EOT'
+systemctl --quiet unmask systemd-networkd
+systemctl --quiet enable systemd-networkd
+net=$(ip route | awk '/src/ { print $1 }' | cut -d "." -f 1-3)
+read -p "Enter a static IP address for the server: $net." add
+tee /etc/network/interfaces > /dev/null <<EOT
 auto lo
 iface lo inet loopback
 
-auto enx001e0630bfc5
-iface enx001e0630bfc5 inet static
-        address 10.10.10.10/24
-        gateway  10.10.10.1
+auto $(ls /sys/class/net | grep en)
+iface $(ls /sys/class/net | grep en) inet static
+        address $net.$add/24
+        gateway $(ip route | awk '/via/ { print $3 }')
         dns-nameservers 8.8.8.8 1.1.1.1
 EOT
 wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O setup.sh
