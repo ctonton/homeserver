@@ -2,10 +2,11 @@ tee /boot/armbianEnv.txt > /dev/null <<'EOT'
 board_name=hc1
 usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u
 EOT
+apt update
 systemctl disable NetworkManager
 apt autopurge -y network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
-apt install -y ifupdown
+apt install -y --install-recommends ifupdown
 systemctl unmask systemd-networkd
 systemctl enable systemd-networkd
 tee /etc/network/interfaces > /dev/null <<'EOT'
