@@ -1,3 +1,15 @@
+if dpkg -s network-manager &>/dev/null
+then
+  if ! systemctl is-enabled --quiet NetworkManager-wait-online.service
+  then
+    systemctl enable NetworkManager-wait-online.service
+  fi
+else
+  if ! systemctl is-enabled --quiet systemd-networkd-wait-online.service
+  then
+    systemctl enable systemd-networkd-wait-online.service
+  fi
+fi
 #tee /root/.config/qBittorrent/lanchk.sh > /dev/null <<'EOT'
 #!/bin/bash
 ##if /sbin/ip route | grep "default"
