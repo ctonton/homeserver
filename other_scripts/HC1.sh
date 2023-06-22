@@ -10,7 +10,7 @@ rm -rf /etc/NetworkManager /etc/netplan
 apt install -y --install-recommends ifupdown
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
-net=$(ip route | awk '/src/ { print $1 }' | cut -d "." -f 1-3)
+net=$(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3)
 read -p "Enter a static IP address for the server: $net." add
 tee /etc/network/interfaces > /dev/null <<EOT
 auto lo
@@ -19,7 +19,7 @@ iface lo inet loopback
 auto $(ls /sys/class/net | grep en)
 iface $(ls /sys/class/net | grep en) inet static
         address $net.$add/24
-        gateway $(ip route | awk '/via/ { print $3 }')
+        gateway $(ip route | awk '/default/ { print $3 }')
         dns-nameservers 8.8.8.8 1.1.1.1
 EOT
 wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O setup.sh
