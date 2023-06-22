@@ -1,3 +1,10 @@
+apt disable NetworkManager
+apt autopurge network-manager natplan.io
+rm -rf /etc/NetworkManager /etc/netplan
+apt install -y ifupdown
+apt unmask systemd-networkd
+apt enable systemd-networkd
+tee /etc/network/interfaces
 if dpkg -s network-manager &>/dev/null
 then
   if ! systemctl is-enabled --quiet NetworkManager-wait-online.service
