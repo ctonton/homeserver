@@ -136,8 +136,6 @@ break
 done
 rm list
 cupsctl --no-share-printers
-cupsctl --user-cancel-any
-cupsctl --remote-admin
 
 #ngrok
 echo
