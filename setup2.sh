@@ -24,20 +24,19 @@ hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
+echo "0 4 * * 1 /sbin/reboot" | crontab -
+
+#install
+echo
+echo "Installing software."
 apt update
 apt full-upgrade -y --fix-missing
-if ! dpkg -s openssh-server &>/dev/null
-then
-  apt install -y openssh-server
-fi
-if ! systemctl is-enabled --quiet ssh
-then
-  systemctl enable ssh
-fi
+apt install -y --no-install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt install -y --install-recommends cups-browsed openssh-server
+systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-echo "0 4 * * 1 /sbin/reboot" | crontab -
 cp $0 /root/resume.sh
-sed -i '2,48d' /root/resume.sh
+sed -i '2,47d' /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -48,17 +47,8 @@ reboot
 
 rm /root/.bash_profile
 
-#install
-clear
-echo "Installing software."
-apt install -y --no-install-recommends firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
-apt install -y --install-recommends cups-browsed 
-ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
-ufw logging off
-ufw --force enable
-
 #storage
-clear
+echo
 echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
@@ -600,8 +590,15 @@ echo "Answer the following questions to generate a private SSL key for the web s
 echo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
 wget -q https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+
+#ufw
+echo
+echo "Setting up firewall."
 ufw allow 80/tcp
 ufw allow 443/tcp
+ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
+ufw logging off
+ufw --force enable
 
 #cleanup
 apt -y autopurge
