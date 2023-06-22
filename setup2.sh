@@ -585,10 +585,17 @@ do
   openssl passwd -apr1 >> /etc/nginx/.htpasswd
   read -p "Add another user? (y/n): " loo
 done
-echo
-echo "Answer the following questions to generate a private SSL key for the web server."
-echo
-openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
+curl -s ipinfo.io | tr -d ' ' | tr -d '"' | tr -d ',' > ipinfo
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt << ANSWERS
+$(cat ipinfo | grep "country" | cut -d ':' -f 2)
+$(cat ipinfo | grep "region" | cut -d ':' -f 2)
+$(cat ipinfo | grep "city" | cut -d ':' -f 2)
+NA
+NA
+localhost
+admin@localhost
+ANSWERS
+rm ipinfo
 wget -q https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #ufw
