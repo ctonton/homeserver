@@ -227,7 +227,7 @@ Queueing\MaxActiveDownloads=2
 Queueing\MaxActiveTorrents=3
 Queueing\MaxActiveUploads=1
 Queueing\QueueingEnabled=true
-WebUI\AuthSubnetWhitelist=$(/sbin/ip route | awk '/src/ { print $1 }')
+WebUI\AuthSubnetWhitelist=$(/sbin/ip route | awk '/kernel/ { print $1 }')
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
@@ -603,7 +603,7 @@ echo
 echo "Setting up firewall."
 ufw allow 80/tcp
 ufw allow 443/tcp
-ufw allow from $(/sbin/ip route | awk '/src/ { print $1 }')
+ufw allow from $(/sbin/ip route | awk '/kernel/ { print $1 }')
 ufw logging off
 ufw --force enable
 
