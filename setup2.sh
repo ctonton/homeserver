@@ -135,7 +135,9 @@ lpadmin -d $defpr
 break
 done
 rm list
-cupsctl --remote-admin --no-share-printers --user-cancel-any
+cupsctl --no-share-printers
+cupsctl --user-cancel-any
+cupsctl --remote-admin
 
 #ngrok
 echo
