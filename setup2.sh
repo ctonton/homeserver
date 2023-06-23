@@ -128,7 +128,7 @@ echo "Setting up CUPS."
 usermod -aG lpadmin root
 lpstat -e > list
 echo
-echo "Enter the number for the default printer."
+PS3="Enter the number for the default printer: "
 select defpr in $(<list)
 do
 lpadmin -d $defpr
