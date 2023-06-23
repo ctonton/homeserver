@@ -578,7 +578,7 @@ localhost
 admin@localhost
 ANSWERS
 rm ipinfo
-wget -q https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #ufw
 echo
