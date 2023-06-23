@@ -58,7 +58,7 @@ sed -i '/disk/d' list
 sed -i '1d' list
 sed -i 's/[^ ]* //' list
 echo "other" >> list
-clear
+echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
 echo
