@@ -35,8 +35,7 @@ apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar u
 apt install -y --install-recommends cups-browsed avahi-autoipd openssh-server
 systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-cp $0 /root/resume.sh
-sed -i '2,47d' /root/resume.sh
+sed '2,46d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
