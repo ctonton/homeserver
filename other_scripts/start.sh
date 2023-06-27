@@ -58,9 +58,9 @@ iface $eth inet dhcp
 iface $eth inet6 dhcp
 EOT
 fi
-wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O setup.sh
-chmod +x setup.sh
-sed -i '2,/^reboot$/d'
+wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
+chmod +x /root/setup.sh
+sed -i '2,/^reboot$/d' /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
