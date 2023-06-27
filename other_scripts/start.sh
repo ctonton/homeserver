@@ -49,14 +49,12 @@ iface $eth inet static
         address $net.$add/24
         gateway $(ip route | awk '/default/ { print $3 }')
         dns-nameservers 8.8.8.8 1.1.1.1
-iface $eth inet6 dhcp
 EOT
 else
   tee -a /etc/network/interfaces > /dev/null <<EOT
 
 auto $eth
 iface $eth inet dhcp
-iface $eth inet6 dhcp
 EOT
 fi
 wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
