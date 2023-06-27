@@ -19,32 +19,18 @@ hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
+echo "0 4 * * 1 /sbin/reboot" | crontab -
+
+#install
+echo
+echo "Installing software."
 apt update
 apt full-upgrade -y --fix-missing
-if ! dpkg -s openssh-server &>/dev/null
-then
-  apt install -y openssh-server
-fi
-if ! systemctl is-enabled --quiet ssh
-then
-  systemctl enable ssh
-fi
+apt install -y --no-install-recommends ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl
+apt install -y --install-recommends openssh-server
+systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-if dpkg -s network-manager &>/dev/null
-then
-  if ! systemctl is-enabled --quiet NetworkManager-wait-online.service
-  then
-    systemctl enable NetworkManager-wait-online.service
-  fi
-else
-  if ! systemctl is-enabled --quiet systemd-networkd-wait-online.service
-  then
-    systemctl enable systemd-networkd-wait-online.service
-  fi
-fi
-echo "0 4 * * 1 /sbin/reboot" | crontab -
-cp $0 /root/resume.sh
-sed -i '2,55d' /root/resume.sh
+sed '2,41d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -55,13 +41,8 @@ reboot
 
 rm /root/.bash_profile
 
-#install
-clear
-echo "Installing software."
-apt install -y --no-install-recommends ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon qbittorrent-nox nginx openssl
-
 #storage
-clear
+echo
 echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
@@ -71,7 +52,7 @@ sed -i '/disk/d' list
 sed -i '1d' list
 sed -i 's/[^ ]* //' list
 echo "other" >> list
-clear
+echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
 echo
@@ -140,52 +121,34 @@ echo
 echo "Installing ngrok."
 if [[ $(dpkg --print-architecture) = "armhf" ]]
 then
-  wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz -O ngrok.tgz
+  wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
 elif [[ $(dpkg --print-architecture) = "arm64" ]]
 then
-  wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz -O ngrok.tgz
+  wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
 elif [[ $(dpkg --print-architecture) = "amd64" ]]
 then
-  wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz -O ngrok.tgz
+  wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
 fi
 tar xvf ngrok.tgz -C /usr/local/bin
 rm ngrok.tgz
-mkdir /root/.ngrok2
-tee /root/.ngrok2/ngrok.yml > /dev/null <<EOT
-authtoken: noauth
-tunnels:
-  nginx:
-    addr: 443
-    proto: http
-    bind_tls: true
-    inspect: false
-  ssh:
-    addr: 22
-    proto: tcp
-    inspect: false
-EOT
-tee /etc/systemd/system/ngrok.service > /dev/null <<'EOT'
-[Unit]
-Description=ngrok
-After=network-online.target
-Wants=network-online.target
-[Service]
-Type=exec
-ExecStart=/usr/local/bin/ngrok start --all
-ExecReload=/bin/kill -HUP $MAINPID
-KillMode=process
-IgnoreSIGPIPE=true
-Restart=always
-RestartSec=120
-[Install]
-WantedBy=multi-user.target
-EOT
 read -p "Do you want to set up access to this server through ngrok? y/n: " cont
 if [[ $cont == "y" ]]
 then
   read -p "Enter your ngrok Authtoken: " auth
-  sed -i "s/noauth/$auth/g" /root/.ngrok2/ngrok.yml
-  systemctl enable ngrok
+  ngrok config add-authtoken $auth
+  ngrok service install --config /root/.config/ngrok/ngrok.yml
+  tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
+tunnels:
+  nginx:
+    addr: 443
+    proto: http
+    schemes:
+      - https
+    inspect: false
+  ssh:
+    addr: 22
+    proto: tcp
+EOT
 fi
 
 #qbittorrent
@@ -231,21 +194,6 @@ WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
 WebUI\LocalHostAuth=false
 EOT
-tee /root/.config/qBittorrent/lanchk.sh > /dev/null <<'EOT'
-#!/bin/bash
-if /sbin/ip route | grep "default"
-then
-  OLD=$(cat /root/.config/route | cut -d '/' -f 1)
-  NEW=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d '/' -f 1)
-  if [[ $OLD != $NEW ]]
-  then
-    sed -i "s/$OLD/$NEW/g" /root/.config/qBittorrent/qBittorrent.conf
-    echo $(/sbin/ip route | awk '/src/ { print $1 }') > /root/.config/route
-  fi
-fi
-exit
-EOT
-chmod +x /root/.config/qBittorrent/lanchk.sh
 tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
@@ -256,7 +204,6 @@ Type=forking
 User=root
 Group=root
 UMask=000
-ExecStartPre=/root/.config/qBittorrent/lanchk.sh
 ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
@@ -410,10 +357,17 @@ do
   openssl passwd -apr1 >> /etc/nginx/.htpasswd
   read -p "Add another user? (y/n): " loo
 done
-echo
-echo "Answer the following questions to generate a private SSL key for the web server."
-echo
-openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt
+curl -s ipinfo.io | tr -d ' ' | tr -d '"' | tr -d ',' > ipinfo
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt << ANSWERS
+$(cat ipinfo | grep "country" | cut -d ':' -f 2)
+$(cat ipinfo | grep "region" | cut -d ':' -f 2)
+$(cat ipinfo | grep "city" | cut -d ':' -f 2)
+NA
+NA
+localhost
+admin@localhost
+ANSWERS
+rm ipinfo
 wget -q https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #cleanup
