@@ -31,11 +31,16 @@ rm -rf /etc/NetworkManager /etc/netplan
 apt install -y --install-recommends ifupdown
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
+eth=$(ip route | awk '/kernel/ { print $3 }')
+tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf > /dev/null <<EOT
+[Service]
+ExecStart=
+ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=$eth --timeout=30
+EOT
 tee /etc/network/interfaces > /dev/null <<EOT
 auto lo
 iface lo inet loopback
 EOT
-eth=$(ip route | awk '/kernel/ { print $3 }')
 read -n 1 -p "Do you want to setup a static IP address on this server? y/n: " cont
 if [[ $cont == "y" ]]
 then
