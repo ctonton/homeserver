@@ -40,6 +40,7 @@ read -n 1 -p "Do you want to setup a static IP address on this server? y/n: " co
 if [[ $cont == "y" ]]
 then
   net=$(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3)
+  echo
   read -p "Enter a static IP address for the server: $net." add
   tee -a /etc/network/interfaces > /dev/null <<EOT
 
