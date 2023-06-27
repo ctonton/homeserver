@@ -24,7 +24,6 @@ hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
-echo "0 4 * * 1 /sbin/reboot" | crontab -
 
 #install
 echo
@@ -35,6 +34,7 @@ apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar u
 apt install -y --install-recommends cups-browsed openssh-server
 systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
+echo "0 4 * * 1 /sbin/reboot" | crontab -
 sed '2,46d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
