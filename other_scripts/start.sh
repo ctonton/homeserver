@@ -41,7 +41,7 @@ tee /etc/network/interfaces > /dev/null <<EOT
 auto lo
 iface lo inet loopback
 EOT
-read -n 1 -p "Do you want to setup a static IP address on this server? y/n: " cont
+read -p "Do you want to setup a static IP address on this server? y/n: " cont
 if [[ $cont == "y" ]]
 then
   net=$(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3)
@@ -62,7 +62,23 @@ auto $eth
 iface $eth inet dhcp
 EOT
 fi
-wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
+echo
+cont=0
+until [[ $cont == 1 ]] || [[ $cont == 2 ]]
+do
+  echo "1 - install lite version server"
+  echo "2 - install full version server"
+  read -p "Make your selection: "
+  if [[ $cont == 1 ]]
+  then
+    wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
+  elif [[ $cont == 2 ]]
+  then
+    wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
+  else
+    echo "Invalid selection"
+  fi
+done
 chmod +x /root/setup.sh
 sed -i '2,/^reboot$/d' /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
