@@ -79,7 +79,7 @@ do
   fi
 done
 chmod +x /root/setup.sh
-sed -i '2,/^reboot$/d' /root/setup.sh
+sed -i '2,/#install/d' /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
