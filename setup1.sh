@@ -36,6 +36,7 @@ echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
+rm $0
 reboot
 sleep 10
 
