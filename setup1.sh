@@ -36,6 +36,7 @@ chmod +x /root/.bash_profile
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 reboot
+sleep 10
 #reboot
 
 #storage
