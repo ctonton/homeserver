@@ -19,12 +19,12 @@ then
 fi
 
 #initialize
-read -p "Enter a hostname for this server. : " serv
-hostnamectl set-hostname $serv
-sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 clear
+read -p "Enter a hostname for this server. : " serv
+hostnamectl set-hostname $serv
+sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 apt update
 systemctl --quiet disable NetworkManager
 apt autopurge -y network-manager netplan.io
