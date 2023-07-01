@@ -42,6 +42,7 @@ tee /etc/network/interfaces > /dev/null <<EOT
 auto lo
 iface lo inet loopback
 EOT
+echo
 read -p "Do you want to setup a static IP address on this server? y/n: " cont
 if [[ $cont == "y" ]]
 then
