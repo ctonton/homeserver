@@ -67,7 +67,7 @@ until [[ $cont == 1 ]] || [[ $cont == 2 ]]
 do
   echo "1 - install lite version server"
   echo "2 - install full version server"
-  read -p "Make your selection: "
+  read -p "Make your selection: " cont
   if [[ $cont == 1 ]]
   then
     wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
