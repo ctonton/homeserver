@@ -53,7 +53,6 @@ auto $eth
 iface $eth inet static
         address $net.$add/24
         gateway $(ip route | awk '/default/ { print $3 }')
-        dns-nameservers 8.8.8.8 1.1.1.1
 EOT
 else
   tee -a /etc/network/interfaces > /dev/null <<EOT
