@@ -32,6 +32,7 @@ apt install -y --install-recommends ifupdown
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
 eth=$(ip route | awk '/kernel/ { print $3 }')
+mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
 tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf > /dev/null <<EOT
 [Service]
 ExecStart=
