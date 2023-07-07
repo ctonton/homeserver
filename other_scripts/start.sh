@@ -56,15 +56,16 @@ auto $eth
 iface $eth inet static
         address $net.$add/24
         gateway $(ip route | awk '/default/ { print $3 }')
+iface $eth inet6 auto
 EOT
 else
   tee -a /etc/network/interfaces > /dev/null <<EOT
 
 auto $eth
 iface $eth inet dhcp
+iface $eth inet6 auto
 EOT
 fi
-echo "iface $eth inet6 auto" >> /etc/network/interfaces
 echo
 cont=0
 until [[ $cont == 1 ]] || [[ $cont == 2 ]]
