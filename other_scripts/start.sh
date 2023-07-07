@@ -64,6 +64,7 @@ auto $eth
 iface $eth inet dhcp
 EOT
 fi
+echo "iface $eth inet6 auto" >> /etc/network/interfaces
 echo
 cont=0
 until [[ $cont == 1 ]] || [[ $cont == 2 ]]
