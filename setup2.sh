@@ -35,7 +35,7 @@ apt install -y --install-recommends openssh-server cups-browsed avahi-daemon ava
 systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 echo "0 4 * * 1 /sbin/reboot" | crontab -
-sed '2,46d' $0 > /root/resume.sh
+sed '2,/^sleep/d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
@@ -43,6 +43,7 @@ echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
 reboot
+sleep 10
 
 rm /root/.bash_profile
 
