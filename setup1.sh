@@ -367,7 +367,7 @@ localhost
 admin@localhost
 ANSWERS
 rm ipinfo
-wget -nv https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #cleanup
 apt -y autopurge
