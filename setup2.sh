@@ -45,8 +45,6 @@ rm $0
 reboot
 sleep 10
 
-rm /root/.bash_profile
-
 #storage
 echo
 echo "Mounting storage."
@@ -107,7 +105,7 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-wget -q https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
+wget https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
 chmod +x /usr/local/bin/wsdd
 tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
 [Unit]
@@ -142,13 +140,13 @@ echo
 echo "Installing ngrok."
 if [[ $(dpkg --print-architecture) = "armhf" ]]
 then
-  wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
+  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
 elif [[ $(dpkg --print-architecture) = "arm64" ]]
 then
-  wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
+  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
 elif [[ $(dpkg --print-architecture) = "amd64" ]]
 then
-  wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
+  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
 fi
 tar xvf ngrok.tgz -C /usr/local/bin
 rm ngrok.tgz
@@ -181,7 +179,7 @@ echo "qBittorrent is a file sharing program. When you run a torrent, its data wi
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
-wget -q https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
@@ -232,7 +230,7 @@ EOT
 systemctl enable qbittorrent
 tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
 #!/bin/bash
-wget -q https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 systemctl restart qbittorrent
 exit
@@ -320,7 +318,7 @@ if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-wget -q https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
+wget https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
@@ -578,7 +576,7 @@ localhost
 admin@localhost
 ANSWERS
 rm ipinfo
-wget -q https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #ufw
 echo
@@ -592,5 +590,6 @@ ufw --force enable
 #cleanup
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
+rm /root/.bash_profile
 rm /root/resume.sh
 reboot
