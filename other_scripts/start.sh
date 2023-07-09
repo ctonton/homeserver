@@ -42,6 +42,9 @@ EOT
 tee /etc/network/interfaces > /dev/null <<EOT
 auto lo
 iface lo inet loopback
+
+auto $eth
+iface $eth inet6 dhcp
 EOT
 echo
 read -p "Do you want to setup a static IP address on this server? y/n: " cont
@@ -51,20 +54,12 @@ then
   echo
   read -p "Enter a static IP address for the server: $net." add
   tee -a /etc/network/interfaces > /dev/null <<EOT
-
-auto $eth
 iface $eth inet static
         address $net.$add/24
         gateway $(ip route | awk '/default/ { print $3 }')
-iface $eth inet6 auto
 EOT
 else
-  tee -a /etc/network/interfaces > /dev/null <<EOT
-
-auto $eth
-iface $eth inet dhcp
-iface $eth inet6 auto
-EOT
+echo "iface $eth inet dhcp" >> /etc/network/interfaces
 fi
 echo
 cont=0
