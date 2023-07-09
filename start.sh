@@ -44,7 +44,7 @@ auto lo
 iface lo inet loopback
 
 auto $eth
-iface $eth inet6 dhcp
+iface $eth inet6 auto
 EOT
 echo
 read -p "Do you want to setup a static IP address on this server? y/n: " cont
