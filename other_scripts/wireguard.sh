@@ -56,7 +56,7 @@ EOT
     psk=$(wg genpsk)
     ip6=$(cat /etc/wireguard/wg0.conf | grep Address | awk '{print $4}' | cut -c-16)
     octet=2
-    while grep AllowedIPs /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"
+    while grep 'AllowedIPs' /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"
     do
       (( octet++ ))
     done
@@ -80,10 +80,10 @@ DNS = 8.8.8.8, 8.8.4.4
 PrivateKey = $key
 
 [Peer]
-PublicKey = $(grep PrivateKey /etc/wireguard/wg0.conf | cut -d " " -f 3 | wg pubkey)
+PublicKey = $(awk '/PrivateKey/ {print $3}' /etc/wireguard/wg0.conf | wg pubkey)
 PresharedKey = $psk
 AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = $(cat /etc/wireguard/wg0.conf | awk '/#ENDPOINT/ {print $2}')
+Endpoint = $(awk '/#ENDPOINT/ {print $2}' /etc/wireguard/wg0.conf)
 PersistentKeepalive = 25
 EOT
     clear
