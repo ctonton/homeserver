@@ -100,7 +100,7 @@ EOT
     read -n 1 -s -r -p "Press any key to continue."
     systemctl reload wg-quick@wg0
     clear
-    echo "Client added"
+    echo "$new added"
     loo=0
   fi
   if [ $loo -eq 3 ]
