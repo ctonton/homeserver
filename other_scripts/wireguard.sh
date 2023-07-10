@@ -35,7 +35,7 @@ PostUp = ip6tables -t nat -I POSTROUTING -o $eth -j MASQUERADE
 PreDown = ufw route delete allow in on wg0 out on $eth
 PreDown = iptables -t nat -D POSTROUTING -o $eth -j MASQUERADE
 PreDown = ip6tables -t nat -D POSTROUTING -o $eth -j MASQUERADE
-#ENDPOINT $ddns
+#ENDPOINT ${ddns}:51820
 EOT
     ufw allow from 10.10.100.0/24
     ufw allow 51820/udp
