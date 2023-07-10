@@ -80,7 +80,7 @@ AllowedIPs = 10.10.100.${octet}/32, ${ip6}${octet}/128
 EOT
     tee /root/clients/${new}.conf > /dev/null << EOT
 [Interface]
-Address = 10.10.100.${oct}/24, ${ip6}${oct}/64
+Address = 10.10.100.${octet}/24, ${ip6}${octet}/64
 DNS = 8.8.8.8, 8.8.4.4
 PrivateKey = $key
 
