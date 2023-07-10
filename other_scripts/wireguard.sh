@@ -99,16 +99,16 @@ EOT
   fi
   if [ $loo -eq 3 ]
   then
-    ls /root/clients | grep '.conf' | cut -d '.' -f1 > list
+    #ls /root/clients | grep '.conf' | cut -d '.' -f1 > list
     PS3="Select the name of the client to remove: "
-    select old in $(<list)
+    select old in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
     do
     sed -i "/#BEGIN_$old/,/#END_$old/d" /etc/wireguard/wg0.conf
     rm /root/clients/$old.*
     systemctl reload wg-quick@wg0
     break
     done
-    rm list
+    #rm list
     clear
     echo "$old removed"
   fi
