@@ -12,7 +12,7 @@ then
   read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
   exit
 fi
-if ! wget -q --spider http://google.com
+if ! wget -q --spider www.google.com
 then
   read -n 1 -s -r -p "The network is not online. Press any key to exit."
   exit
