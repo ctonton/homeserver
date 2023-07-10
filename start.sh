@@ -44,6 +44,7 @@ auto lo
 iface lo inet loopback
 
 auto $eth
+allow-hotplug $eth
 iface $eth inet6 auto
 EOT
 echo
