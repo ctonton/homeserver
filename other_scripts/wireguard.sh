@@ -83,7 +83,7 @@ PrivateKey = $key
 PublicKey = $(awk '/PrivateKey/ {print $3}' /etc/wireguard/wg0.conf | wg pubkey)
 PresharedKey = $psk
 AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = $(awk '/#ENDPOINT/ {print $2}' /etc/wireguard/wg0.conf)$(awk '/ListenPort/ {print $3}' /etc/wireguard/wg0.conf)
+Endpoint = $(awk '/#ENDPOINT/ {print $2}' /etc/wireguard/wg0.conf):51820
 PersistentKeepalive = 25
 EOT
     clear
