@@ -14,8 +14,8 @@ do
   read -p "Enter selection: " loo
   if [ $loo -eq 1 ]
   then
-    apt-get update
-    apt-get install -y wireguard qrencode
+    apt update
+    apt install -y wireguard qrencode
     wg genkey | tee /etc/wireguard/private.key
     chmod go= /etc/wireguard/private.key
     cat /etc/wireguard/private.key | wg pubkey | tee /etc/wireguard/public.key
