@@ -19,17 +19,14 @@ do
     wg genkey | tee /etc/wireguard/private.key
     chmod go= /etc/wireguard/private.key
     cat /etc/wireguard/private.key | wg pubkey | tee /etc/wireguard/public.key
-    printf $(date +%s%N)$(cat /var/lib/dbus/machine-id) | sha1sum | cut -c 31- | tee ip6
-    sed -i '1 s/./fd&/' ip6
-    sed -i 's/..../&:/g' ip6
-    sed -i 's/  -/:/' ip6
-    eth=$(ip route | grep default | awk '{print $5}')
+    ip6=$(echo $(date +%s%N)$(cat /var/lib/dbus/machine-id) | sha1sum | cut -c 31- | sed '1 s/./fd&/' | sed 's/..../&:/g' | sed 's/  -/:/')
+    eth=$(ip route | awk '/kernel/ { print $3 }')
     clear
     read -p "Enter the public ip address or name of this server: " ddns
     tee /etc/wireguard/wg0.conf > /dev/null << EOT
 [Interface]
 PrivateKey = $(cat /etc/wireguard/private.key)
-Address = 10.10.100.1/24, $(cat ./ip6)1/64
+Address = 10.10.100.1/24, ${ip6}1/64
 ListenPort = 51820
 SaveConfig = true
 PostUp = ufw route allow in on wg0 out on $eth
@@ -48,10 +45,8 @@ EOT
     sysctl -p
     systemctl enable wg-quick@wg0.service
     systemctl start wg-quick@wg0.service
-    rm ip6
     clear
     echo "WireGuard server is running."
-    loo=0
   fi
   if [ $loo -eq 2 ]
   then
@@ -88,7 +83,7 @@ PrivateKey = $key
 PublicKey = $(grep PrivateKey /etc/wireguard/wg0.conf | cut -d " " -f 3 | wg pubkey)
 PresharedKey = $psk
 AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = $(grep '^#ENDPOINT' /etc/wireguard/wg0.conf | awk '{print $2}'):$(grep ListenPort /etc/wireguard/wg0.conf | cut -d " " -f 3)
+Endpoint = $(cat /etc/wireguard/wg0.conf | awk '/#ENDPOINT/ {print $2}')
 PersistentKeepalive = 25
 EOT
     clear
@@ -101,7 +96,6 @@ EOT
     systemctl reload wg-quick@wg0
     clear
     echo "$new added"
-    loo=0
   fi
   if [ $loo -eq 3 ]
   then
@@ -117,14 +111,13 @@ EOT
     rm list
     clear
     echo "$old removed"
-    loo=0
   fi
   if [ $loo -eq 4 ]
   then
     systemctl stop wg-quick@wg0.service
     systemctl disable wg-quick@wg0.service
     rm -rf /root/clients
-    apt autopurge wireguard qrencode
+    apt autopurge -y wireguard qrencode
     rm -rf /etc/wireguard
     ufw delete allow from 10.10.100.0/24
     ufw delete allow 51820/udp
@@ -133,7 +126,7 @@ EOT
     sed -i '/forwarding=1/ s/./#&/' /etc/sysctl.conf
     sysctl -p
     clear
-    loo=0
+    echo "Wireguard uninstalled"
   fi
 done
 exit
