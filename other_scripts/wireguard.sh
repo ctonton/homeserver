@@ -93,7 +93,7 @@ PersistentKeepalive = 25
 EOT
     clear
     echo
-    #qrencode -t PNG -o /root/clients/"$new.png" -r /root/clients/"$new.conf"
+    qrencode -t PNG -o /root/clients/"$new.png" -r /root/clients/"$new.conf"
     qrencode -t UTF8 < /root/clients/"$new.conf"
     echo "This is a QR code containing ${new}'s client configuration."
     echo "${new}'s configuration files is available in /root/clients"
@@ -105,12 +105,12 @@ EOT
   fi
   if [ $loo -eq 3 ]
   then
-    ls /root/clients | cut -d '.' -f1 > list
+    ls /root/clients | grep '.conf' | cut -d '.' -f1 > list
     PS3="Select the name of the client to remove: "
     select old in $(<list)
     do
     sed -i "/#BEGIN_$old/,/#END_$old/d" /etc/wireguard/wg0.conf
-    rm /root/clients/$old.conf
+    rm /root/clients/$old.*
     systemctl reload wg-quick@wg0
     break
     done
@@ -135,18 +135,5 @@ EOT
     clear
     loo=0
   fi
-  if [ $loo -eq 5 ]
-  then
-    clear
-    exit 0
-  fi
-  if [ $loo -eq 0 ]
-  then
-    clear
-    echo "Setup Wireguard"
-  else
-    clear
-    echo "Invalid selection"
-    loo=0
-  fi
 done
+exit
