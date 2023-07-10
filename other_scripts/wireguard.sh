@@ -124,7 +124,8 @@ EOT
     systemctl stop wg-quick@wg0.service
     systemctl disable wg-quick@wg0.service
     rm -rf /root/clients
-    apt-get autopurge wireguard qrencode
+    apt autopurge wireguard qrencode
+    rm -rf /etc/wireguard
     ufw delete allow from 10.10.100.0/24
     ufw delete allow 51820/udp
     ufw reload
