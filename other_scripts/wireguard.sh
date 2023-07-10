@@ -71,12 +71,12 @@ EOT
       exit
     fi
     tee -a /etc/wireguard/wg0.conf > /dev/null << EOT
-# BEGIN_PEER $new
+#BEGIN_$new
 [Peer]
 PublicKey = $(wg pubkey <<< $key)
 PresharedKey = $psk
 AllowedIPs = 10.10.100.${octet}/32, ${ip6}${octet}/128
-# END_PEER $new
+#END_$new
 EOT
     tee /root/clients/${new}.conf > /dev/null << EOT
 [Interface]
@@ -93,19 +93,30 @@ PersistentKeepalive = 25
 EOT
     clear
     echo
-    qrencode -t PNG -o /root/clients/"$new.png" -r /root/clients/"$new.conf"
+    #qrencode -t PNG -o /root/clients/"$new.png" -r /root/clients/"$new.conf"
     qrencode -t UTF8 < /root/clients/"$new.conf"
-    echo "That is a QR code containing ${new}'s client configuration."
-    echo "${new}'s configuration files are available in /root/clients"
+    echo "This is a QR code containing ${new}'s client configuration."
+    echo "${new}'s configuration files is available in /root/clients"
     read -n 1 -s -r -p "Press any key to continue."
+    systemctl reload wg-quick@wg0
     clear
     echo "Client added"
     loo=0
   fi
   if [ $loo -eq 3 ]
   then
-    read "Input the name of the client to remove: " old
+    ls /root/clients | cut -d '.' -f1 > list
+    PS3="Select the name of the client to remove: "
+    select old in $(<list)
+    do
+    sed -i "/#BEGIN_$old/,/#END_$old/d" /etc/wireguard/wg0.conf
+    rm /root/clients/$old.conf
+    systemctl reload wg-quick@wg0
+    break
+    done
+    rm list
     clear
+    echo "$old removed"
     loo=0
   fi
   if [ $loo -eq 4 ]
@@ -113,7 +124,7 @@ EOT
     systemctl stop wg-quick@wg0.service
     systemctl disable wg-quick@wg0.service
     rm -rf /root/clients
-    apt-get remove -y --purge --autoremove wireguard qrencode
+    apt-get autopurge wireguard qrencode
     ufw delete allow from 10.10.100.0/24
     ufw delete allow 51820/udp
     ufw reload
