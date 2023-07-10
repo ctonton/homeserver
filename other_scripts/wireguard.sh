@@ -125,8 +125,7 @@ EOT
     sed -i '/forward=1/ s/./#&/' /etc/sysctl.conf
     sed -i '/forwarding=1/ s/./#&/' /etc/sysctl.conf
     sysctl -p
-    clear
-    echo "Wireguard uninstalled"
+    exit
   fi
 done
 exit
