@@ -16,6 +16,7 @@ do
   then
     apt update
     apt install -y wireguard qrencode
+    mkdir -q /etc/wireguard
     wg genkey | tee /etc/wireguard/private.key
     chmod go= /etc/wireguard/private.key
     cat /etc/wireguard/private.key | wg pubkey | tee /etc/wireguard/public.key
@@ -118,7 +119,7 @@ EOT
     systemctl disable wg-quick@wg0.service
     rm -rf /root/clients
     apt autopurge -y wireguard qrencode
-    rm -rf /etc/wireguard
+    rm -rf /etc/wireguard/*
     ufw delete allow from 10.10.100.0/24
     ufw delete allow 51820/udp
     ufw reload
