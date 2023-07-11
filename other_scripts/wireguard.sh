@@ -7,9 +7,10 @@ do
   echo
   echo "1 - Install WireGuard"
   echo "2 - Add client"
-  echo "3 - Remove client"
-  echo "4 - Uninstall Wireguard"
-  echo "5 - Quit"
+  echo "3 - Show client QR"
+  echo "4 - Remove client"
+  echo "5 - Uninstall Wireguard"
+  echo "6 - Quit"
   echo
   read -p "Enter selection: " loo
   if [ $loo -eq 1 ]
@@ -100,22 +101,32 @@ EOT
     clear
     echo "$new added"
   fi
-  if [ $loo -eq 3 ]
+    if [ $loo -eq 3 ]
   then
-    #ls /root/clients | grep '.conf' | cut -d '.' -f1 > list
+    PS3="Select the name of the client to display: "
+    select use in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
+    do
+      qrencode -t UTF8 < /root/clients/"$use.conf"
+      echo "This is a QR code containing ${use}'s client configuration."
+      break
+    done
+    clear
+    echo "Setup WireGuard"
+  fi
+  if [ $loo -eq 4 ]
+  then
     PS3="Select the name of the client to remove: "
     select old in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
     do
-    sed -i "/#BEGIN_$old/,/#END_$old/d" /etc/wireguard/wg0.conf
-    rm /root/clients/$old.*
-    systemctl reload wg-quick@wg0
-    break
+      sed -i "/#BEGIN_$old/,/#END_$old/d" /etc/wireguard/wg0.conf
+      rm /root/clients/$old.*
+      systemctl reload wg-quick@wg0
+      break
     done
-    #rm list
     clear
     echo "$old removed"
   fi
-  if [ $loo -eq 4 ]
+  if [ $loo -eq 5 ]
   then
     systemctl stop wg-quick@wg0.service
     systemctl disable wg-quick@wg0.service
