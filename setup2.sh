@@ -7,11 +7,11 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
-#if [[ $(lsb_release -is) != "Debian" ]]
-#then
-#  read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
-#  exit
-#fi
+if [[ $(lsb_release -is) != "Debian" ]]
+then
+  read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
+  exit
+fi
 if ! wget -q --spider www.google.com
 then
   read -n 1 -s -r -p "The network is not online. Press any key to exit."
@@ -30,7 +30,7 @@ echo
 echo "Installing software."
 apt update
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends curl firefox ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 apt install -y --install-recommends openssh-server cups-browsed avahi-daemon avahi-autoipd
 systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
