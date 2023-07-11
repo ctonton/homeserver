@@ -15,7 +15,9 @@ do
   if [ $loo -eq 1 ]
   then
     apt update
-    apt install -y wireguard qrencode
+    apt install -y wireguard qrencode ufw
+    ufw allow ssh
+    ufw --force enable
     mkdir -p /etc/wireguard
     wg genkey | tee /etc/wireguard/private.key
     chmod go= /etc/wireguard/private.key
