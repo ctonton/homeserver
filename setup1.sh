@@ -30,8 +30,6 @@ apt install -y --install-recommends openssh-server
 systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 echo "0 4 * * 1 /sbin/reboot" | crontab -
-wget https://raw.githubusercontent.com/ctonton/homeserver/main/other_scripts/wireguard.sh -O /root/wireguard.sh
-chmod +x /root/wireguard.sh
 sed '2,/^sleep/d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
 echo "bash /root/resume.sh" > /root/.bash_profile
