@@ -581,8 +581,9 @@ wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 #ufw
 echo
 echo "Setting up firewall."
-ufw allow 80/tcp
-ufw allow 443/tcp
+ufw allow ssh
+ufw allow http
+ufw allow https
 ufw allow from $(/sbin/ip route | awk '/kernel/ { print $1 }')
 ufw logging off
 ufw --force enable
