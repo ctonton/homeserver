@@ -21,15 +21,17 @@ do
     sudo mkdir -p /mnt/part1
     sudo mount $nfs:/srv/NAS /mnt/part1
     mount1=/mnt/part1
-  else
+  fi
+  if [ ! -z $dir ]
+  then
     if [ $(findmnt -m /dev/$part1 >/dev/null) ]
     then
       sudo mkdir -p /mnt/part1
       sudo mount /dev/$part1 /mnt/part1
     fi
     mount1=$(lsblk -lno MOUNTPOINT /dev/$part1)
+    break
   fi
-  break
 done
 sed -i "/$part1/d" list
 clear
@@ -45,15 +47,17 @@ do
     sudo mkdir -p /mnt/part2
     sudo mount $nfs:/srv/NAS /mnt/part2
     mount2=/mnt/part2
-  else
+  fi
+  if [ ! -z $dir ]
+  then
     if [ $(findmnt -m /dev/$part2 >/dev/null) ]
     then
       sudo mkdir -p /mnt/part2
       sudo mount /dev/$part2 /mnt/part2
     fi
     mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
+    break
   fi
-  break
 done
 PS3="Select directory to mirror: "
 select dir in $mount1/Public $(ls -d $mount1/Public/*)
