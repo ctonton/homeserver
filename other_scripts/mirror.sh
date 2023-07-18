@@ -56,7 +56,7 @@ if [ $cont == "dry" ]
 then
   sudo rsync -auPn $mount1/Public/ $mount2/Public
   echo
-  read -p "Do you want to commit the changes (y/n)?" comt
+  read -p "Do you want to commit the changes (y/n)? " comt
   if [ $comt == y ]
   then
     sudo rsync -auP --delete-before $mount1/Public/ $mount2/Public
