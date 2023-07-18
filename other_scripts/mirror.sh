@@ -53,23 +53,37 @@ else
 fi
 break
 done
+select dir in Public $(ls -d $mount1/Public/*)
+PS3="Select directory to mirror: "
+select dir in $(<list)
+do
+  if [ ! -z $dir ]
+  then
+    break
+  fi
+done
 clear
 echo "**WARNING**"
-echo "The data on $part2 will be irreversibly changed."
+echo "The data in $mount2/$dir will be irreversibly changed."
 read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
 if [ $cont == "dry" ]
 then
-  sudo rsync -auPn $mount1/Public/ $mount2/Public
+  sudo rsync -auPn $mount1/$dir/ $mount2/$dir
   echo
   read -p "Do you want to commit the changes (y/n)? " comt
   if [ $comt == y ]
   then
-    sudo rsync -auP --delete-before $mount1/Public/ $mount2/Public
+    sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
   fi
 fi
 if [ $cont == "yes" ]
 then
-  sudo rsync -auP --delete-before $mount1/Public/ $mount2/Public
+  echo
+  read -p "Are you sure (y/n)? " comt
+  if [ $comt == y ]
+  then
+    sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
+  fi
 else
   echo "No changes made."
 fi
