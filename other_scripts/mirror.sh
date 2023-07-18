@@ -8,10 +8,10 @@ sudo umount -q /mnt/part1
 sudo umount -q /mnt/part2
 clear
 lsblk -o NAME,TYPE,SIZE,LABEL
+echo
+echo
 lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //' > list
 echo "network" >> list
-echo
-echo
 PS3="Select the partition to copy FROM: "
 select part1 in $(<list)
 do
@@ -34,12 +34,9 @@ do
     break
   fi
 done
+echo
+echo
 sed -i "/$part1/d" list
-echo
-echo
-lsblk -o NAME,TYPE,SIZE,LABEL
-echo
-echo
 PS3="Select the partition to copy TO: "
 select part2 in $(<list)
 do
@@ -75,7 +72,8 @@ do
     break
   fi
 done
-clear
+echo
+echo
 echo "**WARNING**"
 echo "The data in $mount2/$dir will be irreversibly changed."
 read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
