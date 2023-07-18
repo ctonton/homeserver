@@ -64,8 +64,11 @@ do
 done
 echo
 echo
+echo > list
+ls $mount1 >>list
+sed -i -e 's/^/Public\//' list
 PS3="Select directory to mirror: "
-select dir in $mount1/Public $(ls -d $mount1/Public/*)
+select dir in $(<list)
 do
   if [ ! -z $dir ]
   then
