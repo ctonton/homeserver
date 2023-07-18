@@ -35,7 +35,8 @@ do
   fi
 done
 sed -i "/$part1/d" list
-clear
+echo
+echo
 lsblk -o NAME,TYPE,SIZE,LABEL
 echo
 echo
@@ -61,6 +62,8 @@ do
     break
   fi
 done
+echo
+echo
 PS3="Select directory to mirror: "
 select dir in $mount1/Public $(ls -d $mount1/Public/*)
 do
