@@ -6,30 +6,30 @@ then
 fi
 sudo umount -q /mnt/part1
 sudo umount -q /mnt/part2
-sudo mkdir -p /mnt/part1
-sudo mkdir -p /mnt/part2
-lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //' > list
-echo "network" >> list
 clear
 lsblk -o NAME,TYPE,SIZE,LABEL
+lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //' > list
+echo "network" >> list
 echo
 echo
 PS3="Select the partition to copy FROM: "
 select part1 in $(<list)
 do
-if [ $part1 == "network" ]
-then
-  read -p "Enter the IP address of the NFS server: " nfs
-  sudo mount $nfs:/srv/NAS /mnt/part1
-  mount1=/mnt/part1
-else
-  if [ ! $(findmnt -m /dev/$part1) ]
+  if [ $part1 == "network" ]
   then
-    sudo mount /dev/$part1 /mnt/part1
+    read -p "Enter the IP address of the NFS server: " nfs
+    sudo mkdir -p /mnt/part1
+    sudo mount $nfs:/srv/NAS /mnt/part1
+    mount1=/mnt/part1
+  else
+    if [ ! $(findmnt -m /dev/$part1) ]
+    then
+      sudo mkdir -p /mnt/part1
+      sudo mount /dev/$part1 /mnt/part1
+    fi
+    mount1=$(lsblk -lno MOUNTPOINT /dev/$part1)
   fi
-  mount1=$(lsblk -lno MOUNTPOINT /dev/$part1)
-fi
-break
+  break
 done
 sed -i "/$part1/d" list
 clear
@@ -39,19 +39,21 @@ echo
 PS3="Select the partition to copy TO: "
 select part2 in $(<list)
 do
-if [ $part2 == "network" ]
-then
-  read -p "Enter the IP address of the NFS server: " nfs
-  sudo mount $nfs:/srv/NAS /mnt/part2
-  mount2=/mnt/part2
-else
-  if [ ! $(findmnt -m /dev/$part2) ]
+  if [ $part2 == "network" ]
   then
-    sudo mount /dev/$part2 /mnt/part2
+    read -p "Enter the IP address of the NFS server: " nfs
+    sudo mkdir -p /mnt/part2
+    sudo mount $nfs:/srv/NAS /mnt/part2
+    mount2=/mnt/part2
+  else
+    if [ ! $(findmnt -m /dev/$part2) ]
+    then
+      sudo mkdir -p /mnt/part2
+      sudo mount /dev/$part2 /mnt/part2
+    fi
+    mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
   fi
-  mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
-fi
-break
+  break
 done
 PS3="Select directory to mirror: "
 select dir in Public $(ls -d $mount1/Public/*)
