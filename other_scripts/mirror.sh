@@ -53,9 +53,8 @@ else
 fi
 break
 done
-select dir in Public $(ls -d $mount1/Public/*)
 PS3="Select directory to mirror: "
-select dir in $(<list)
+select dir in Public $(ls -d $mount1/Public/*)
 do
   if [ ! -z $dir ]
   then
