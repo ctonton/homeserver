@@ -1,4 +1,9 @@
 #!/bin/bash
+if ! dpkg -s rsync nfs-common >/dev/null 2>&1
+then
+  sudo apt update
+  sudo apt install -y rsync nfs-common
+fi
 sudo umount -q /mnt/part1
 sudo umount -q /mnt/part2
 sudo mkdir -p /mnt/part1
