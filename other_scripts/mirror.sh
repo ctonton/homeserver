@@ -21,8 +21,9 @@ do
     sudo mkdir -p /mnt/part1
     sudo mount $nfs:/srv/NAS /mnt/part1
     mount1=/mnt/part1
+    break
   fi
-  if [ -z $part1 ]
+  if [ ! -z $part1 ]
   then
     if [ $(findmnt -m /dev/$part1 >/dev/null) ]
     then
@@ -47,8 +48,9 @@ do
     sudo mkdir -p /mnt/part2
     sudo mount $nfs:/srv/NAS /mnt/part2
     mount2=/mnt/part2
+    break
   fi
-  if [ -z $part2 ]
+  if [ ! -z $part2 ]
   then
     if [ $(findmnt -m /dev/$part2 >/dev/null) ]
     then
