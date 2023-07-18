@@ -3,11 +3,7 @@ sudo umount -q /mnt/part1
 sudo umount -q /mnt/part2
 sudo mkdir -p /mnt/part1
 sudo mkdir -p /mnt/part2
-net=$(/sbin/ip route | awk '/src/ { print $1 }' | cut -d "." -f 1-3)
-lsblk -l -o TYPE,NAME > list
-sed -i '/disk/d' list
-sed -i '1d' list
-sed -i 's/[^ ]* //' list
+lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //' > list
 echo "network" >> list
 clear
 lsblk -o NAME,TYPE,SIZE,LABEL
@@ -18,8 +14,8 @@ select part1 in $(<list)
 do
 if [ $part1 == "network" ]
 then
-  read -p "Enter the IP address of the NFS server: $net." nfs
-  sudo mount $net.$nfs:/srv/NAS /mnt/part1
+  read -p "Enter the IP address of the NFS server: " nfs
+  sudo mount $nfs:/srv/NAS /mnt/part1
   mount1=/mnt/part1
 else
   if [ ! $(findmnt -m /dev/$part1) ]
@@ -40,8 +36,8 @@ select part2 in $(<list)
 do
 if [ $part2 == "network" ]
 then
-  read -p "Enter the IP address of the NFS server: $net." nfs
-  sudo mount $net.$nfs:/srv/NAS /mnt/part2
+  read -p "Enter the IP address of the NFS server: " nfs
+  sudo mount $nfs:/srv/NAS /mnt/part2
   mount2=/mnt/part2
 else
   if [ ! $(findmnt -m /dev/$part2) ]
@@ -59,6 +55,12 @@ read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
 if [ $cont == "dry" ]
 then
   sudo rsync -auPn $mount1/Public/ $mount2/Public
+  echo
+  read -p "Do you want to commit the changes (y/n)?" comt
+  if [ $comt == y ]
+  then
+    sudo rsync -auP --delete-before $mount1/Public/ $mount2/Public
+  fi
 fi
 if [ $cont == "yes" ]
 then
