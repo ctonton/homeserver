@@ -62,8 +62,9 @@ done
 echo
 echo
 echo > list
-ls $mount1 >>list
+ls $mount1/Public >> list
 sed -i -e 's/^/Public\//' list
+sed -i '1/.$//' list
 PS3="Select directory to mirror: "
 select dir in $(<list)
 do
