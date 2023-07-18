@@ -22,7 +22,7 @@ do
     sudo mount $nfs:/srv/NAS /mnt/part1
     mount1=/mnt/part1
   else
-    if [ ! $(findmnt -m /dev/$part1) ]
+    if [ $(findmnt -m /dev/$part1 >/dev/null) ]
     then
       sudo mkdir -p /mnt/part1
       sudo mount /dev/$part1 /mnt/part1
@@ -46,7 +46,7 @@ do
     sudo mount $nfs:/srv/NAS /mnt/part2
     mount2=/mnt/part2
   else
-    if [ ! $(findmnt -m /dev/$part2) ]
+    if [ $(findmnt -m /dev/$part2 >/dev/null) ]
     then
       sudo mkdir -p /mnt/part2
       sudo mount /dev/$part2 /mnt/part2
@@ -56,7 +56,7 @@ do
   break
 done
 PS3="Select directory to mirror: "
-select dir in Public $(ls -d $mount1/Public/*)
+select dir in $mount1/Public $(ls -d $mount1/Public/*)
 do
   if [ ! -z $dir ]
   then
