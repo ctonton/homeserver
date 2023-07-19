@@ -76,27 +76,30 @@ echo
 echo "**WARNING**"
 echo "The data in $mount2/$dir will be irreversibly changed."
 read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
-if [ $cont == "dry" ]
-then
-  sudo rsync -auPn $mount1/$dir/ $mount2/$dir
-  echo
-  read -p "Do you want to commit the changes (y/n)? " comt
-  if [ $comt == y ]
-  then
-    sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
-  fi
-fi
-if [ $cont == "yes" ]
-then
-  echo
-  read -p "Are you sure (y/n)? " comt
-  if [ $comt == y ]
-  then
-    sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
-  fi
-else
-  echo "No changes made."
-fi
+case $cont in
+  dry)
+    sudo rsync -auPn $mount1/$dir/ $mount2/$dir
+    read -p "Do you want to commit these changes (y/n)? " comt
+    if [ $comt == y ]
+    then
+      sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
+    else
+      echo "No changes made"
+    fi
+    ;;
+  yes)
+    read -p "Are you sure (y/n)? " comt
+    if [ $comt == y ]
+    then
+      sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
+    else
+      echo "No changes made"
+    fi
+    ;;
+  *)
+    echo "No changes made"
+    ;;
+esac
 sudo umount -q /mnt/part2
 sudo umount -q /mnt/part1
 sudo rmdir /mnt/part2
