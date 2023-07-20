@@ -78,11 +78,11 @@ echo "The data in $mount2/$dir will be irreversibly changed."
 read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
 case $cont in
   dry)
-    sudo rsync -auPn $mount1/$dir/ $mount2/$dir
+    sudo rsync -auPn --delete $mount1/$dir/ $mount2/$dir
     read -p "Do you want to commit these changes (y/n)? " comt
     if [ $comt == y ]
     then
-      sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
+      sudo rsync -auP --delete $mount1/$dir/ $mount2/$dir
     else
       echo "No changes made"
     fi
@@ -91,7 +91,7 @@ case $cont in
     read -p "Are you sure (y/n)? " comt
     if [ $comt == y ]
     then
-      sudo rsync -auP --delete-before $mount1/$dir/ $mount2/$dir
+      sudo rsync -auP --delete $mount1/$dir/ $mount2/$dir
     else
       echo "No changes made"
     fi
