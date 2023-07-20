@@ -55,7 +55,7 @@ do
       sudo mkdir -p /mnt/part2
       sudo mount /dev/$part2 /mnt/part2
     fi
-    mount1=$(lsblk -lno MOUNTPOINT /dev/$part2)
+    mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
     break
   fi
 done
