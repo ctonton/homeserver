@@ -22,8 +22,10 @@ do
     sudo mount $nfs:/srv/NAS /mnt/part1
     mount1=/mnt/part1
     break
-  else
-    if [ $(findmnt -m /dev/$part1 >/dev/null) ]
+  fi
+  if [ -b /dev/$part1 ]
+  then
+    if ! grep -q /dev/$part1 /proc/mounts
     then
       sudo mkdir -p /mnt/part1
       sudo mount /dev/$part1 /mnt/part1
@@ -31,16 +33,6 @@ do
     mount1=$(lsblk -lno MOUNTPOINT /dev/$part1)
     break
   fi
-#  if [ ! -z /dev/$part1 ]
-#  then
-#    if [ $(findmnt -m /dev/$part1 >/dev/null) ]
-#    then
-#      sudo mkdir -p /mnt/part1
-#      sudo mount /dev/$part1 /mnt/part1
-#    fi
-#    mount1=$(lsblk -lno MOUNTPOINT /dev/$part1)
-#    break
-#  fi
 done
 echo
 echo
@@ -55,25 +47,17 @@ do
     sudo mount $nfs:/srv/NAS /mnt/part2
     mount2=/mnt/part2
     break
-  else
-    if [ $(findmnt -m /dev/$part2 >/dev/null) ]
+  fi
+  if [ -b /dev/$part2 ]
+  then
+    if ! grep -q /dev/$part2 /proc/mounts
     then
       sudo mkdir -p /mnt/part2
       sudo mount /dev/$part2 /mnt/part2
     fi
-    mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
+    mount1=$(lsblk -lno MOUNTPOINT /dev/$part2)
     break
   fi
-#  if [ ! -z /dev/$part2 ]
-#  then
-#    if [ $(findmnt -m /dev/$part2 >/dev/null) ]
-#    then
-#      sudo mkdir -p /mnt/part2
-#      sudo mount /dev/$part2 /mnt/part2
-#    fi
-#    mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
-#    break
-#  fi
 done
 echo
 echo
