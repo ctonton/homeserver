@@ -8,8 +8,9 @@ if [ ! -f /etc/auto.master.bak ]
 then
   sudo cp /etc/auto.master /etc/auto.master.bak
 fi
-sudo tee -a /etc/auto.master > /dev/null <<EOT
-/-  /etc/auto.nfs
+sudo tee /etc/auto.master > /dev/null <<EOT
++auto.master
+/-  /etc/auto.nfs  browse
 EOT
 read -p "Enter the IP address of the NFS server: " nfsip
 sudo tee /etc/auto.nfs > /dev/null <<EOT
