@@ -1,7 +1,9 @@
 #!/bin/bash
-
-sudo apt update
-sudo apt install -y nfs-common autofs
+if ! dpkg -s autofs nfs-common >/dev/null 2>&1
+then
+  sudo apt update
+  sudo apt install -y autofs nfs-common
+fi
 if [ ! -f /etc/auto.master.bak ]
 then
   sudo cp /etc/auto.master /etc/auto.master.bak
@@ -14,6 +16,6 @@ sudo tee /etc/auto.nfs > /dev/null <<EOT
 /mnt/Public  -fstype=nfs,rw,sync,soft,intr  ${nfsip}:/srv/NAS/Public
 EOT
 sudo service autofs reload
-rmdir ~/Public
+rm -df ~/Public
 ln -s /mnt/Public ~/Public
 exit
