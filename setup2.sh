@@ -34,6 +34,57 @@ apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar u
 apt install -y --install-recommends openssh-server cups-browsed avahi-daemon avahi-autoipd
 systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
+wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
+chmod +x /usr/local/bin/wsdd
+tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
+[Unit]
+Description=Web Services Dynamic Discovery host daemon
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/wsdd -s -4
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl enable wsdd
+case $(uname -m) in
+  *aarch64*)
+    filemanager_arch="arm64";;
+  *64*)
+    filemanager_arch="amd64";;
+  *86*)
+    filemanager_arch="386";;
+  *armv5*)
+    filemanager_arch="armv5";;
+  *armv6*)
+    filemanager_arch="armv6";;
+  *armv7*)
+    filemanager_arch="armv7";;
+esac
+filemanager_file="linux-${filemanager_arch}-filebrowser.tar.gz"
+filemanager_tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
+filemanager_url="https://github.com/filebrowser/filebrowser/releases/download/$filemanager_tag/$filemanager_file"
+wget -q --show-progress "$filemanager_url"
+tar -xzf "$filemanager_file" -C /usr/local/bin filebrowser
+chmod +x /usr/local/bin/filebrowser
+rm "$filemanager_file"
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/filebrowser.zip
+mkdir -p /root/.config/filebrowser
+unzip -o filebrowser.zip -d /root/.config/filebrowser
+rm filebrowser.zip
+tee /etc/systemd/system/filebrowser.service > /dev/null <<EOT
+[Unit]
+Description=http file manager
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.json -d /root/.config/filebrowser/filebrowser.db
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl enable filebrowser
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 sed '2,/^sleep/d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
@@ -105,20 +156,6 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-wget https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
-chmod +x /usr/local/bin/wsdd
-tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
-[Unit]
-Description=Web Services Dynamic Discovery host daemon
-After=network-online.target
-Wants=network-online.target
-[Service]
-Type=exec
-ExecStart=/usr/local/bin/wsdd -s -4
-[Install]
-WantedBy=multi-user.target
-EOT
-systemctl enable wsdd
 
 #cups
 echo
@@ -140,13 +177,13 @@ echo
 echo "Installing ngrok."
 if [[ $(dpkg --print-architecture) = "armhf" ]]
 then
-  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
+  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
 elif [[ $(dpkg --print-architecture) = "arm64" ]]
 then
-  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
+  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
 elif [[ $(dpkg --print-architecture) = "amd64" ]]
 then
-  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
+  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
 fi
 tar xvf ngrok.tgz -C /usr/local/bin
 rm ngrok.tgz
@@ -179,7 +216,7 @@ echo "qBittorrent is a file sharing program. When you run a torrent, its data wi
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
-wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
@@ -230,7 +267,7 @@ EOT
 systemctl enable qbittorrent
 tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
 #!/bin/bash
-wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 systemctl restart qbittorrent
 exit
@@ -318,7 +355,7 @@ if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-wget https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
@@ -512,49 +549,10 @@ server {
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
 sed -i '/http {/a\\tclient_max_body_size 10M;\n\tupload_progress uploads 1m;' /etc/nginx/nginx.conf
-tee /root/webusers.sh > /dev/null <<'EOT'
-#!/bin/bash
-clear
-loo=0
-until [[ $loo -eq 4 ]]
-do
-  echo
-  echo "1 - List users"
-  echo "2 - Add user"
-  echo "3 - Remove user"
-  echo "4 - quit"
-  echo
-  read -p "Enter selection: :" loo
-  if [[ $loo -eq 1 ]]
-  then
-    echo
-    cat /etc/nginx/.htpasswd
-    loo=0
-  fi
-  if [[ $loo -eq 2 ]]
-  then
-    read -p "Enter a user name: " use
-    echo -n "${use}:" >> /etc/nginx/.htpasswd
-    openssl passwd -apr1 >> /etc/nginx/.htpasswd
-    loo=0
-  fi
-  if [[ $loo -eq 3 ]]
-  then
-    read -p "Enter a user name to remove: " use
-    sed -i "/$use/d" /etc/nginx/.htpasswd
-    loo=0
-  fi
-  if [[ $loo -ne 0 ]]
-  then
-    echo "Invalid selection."
-    echo
-  fi
-done
-exit
-EOT
-chmod +x /root/webusers.sh
+wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/other_scripts/http_users.sh -O /root/http_users.sh
+chmod +x /root/http_users.sh
 echo
-echo "A script called webusers.sh has been created in the root directory for modifying users of the web server."
+echo "A script called http_users.sh has been created in the root directory for modifying users of the web server."
 echo
 echo "Add a user for the web server now."
 loo="y"
@@ -576,7 +574,7 @@ localhost
 admin@localhost
 ANSWERS
 rm ipinfo
-wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #ufw
 echo
