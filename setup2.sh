@@ -496,8 +496,9 @@ server {
 	autoindex on;
 
 	location /files/ {
-		try_files $uri $uri/ =404;
-		auth_basic "Restricted Content";
+		proxy_pass http://127.0.0.1:8000/;
+		proxy_buffering off
+  		auth_basic "Restricted Content";
 		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
