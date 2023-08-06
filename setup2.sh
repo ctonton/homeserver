@@ -9,7 +9,7 @@ then
 fi
 if [[ $(lsb_release -is) != "Debian" ]]
 then
-  read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
+  read -n 1 -s -r -p "This script is written for Debian OS. Press any key to exit."
   exit
 fi
 if ! wget -q --spider www.google.com
@@ -21,19 +21,31 @@ fi
 #initialize
 read -p "Enter a hostname for this server. : " serv
 hostnamectl set-hostname $serv
-sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
+if ! dpkg -s openssh-server >/dev/null 2>&1
+then
+  sudo apt update
+  sudo apt install -y openssh-server
+fi
+sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
+sed '2,/^sleep/d' $0 > /root/resume.sh
+chmod +x /root/resume.sh
+echo "bash /root/resume.sh" > /root/.bash_profile
+chmod +x /root/.bash_profile
+echo
+read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
+rm $0
+systemctl reboot
+sleep 300
 
 #install
 echo
-echo "Installing software."
+echo "Installing server."
 apt update
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
-apt install -y --install-recommends openssh-server cups-browsed avahi-daemon avahi-autoipd
-systemctl enable --quiet ssh
-sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
+apt install -y --install-recommends cups-browsed avahi-daemon avahi-autoipd
 echo "Installing wsdd."
 wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
 chmod +x /usr/local/bin/wsdd
@@ -48,29 +60,20 @@ ExecStart=/usr/local/bin/wsdd -s -4
 [Install]
 WantedBy=multi-user.target
 EOT
-systemctl enable wsdd
+systemctl -q enable wsdd
 echo "Installing filebrowser."
-case $(uname -m) in
-  *aarch64*)
-    filemanager_arch="arm64";;
-  *64*)
-    filemanager_arch="amd64";;
-  *86*)
-    filemanager_arch="386";;
-  *armv5*)
-    filemanager_arch="armv5";;
-  *armv6*)
-    filemanager_arch="armv6";;
-  *armv7*)
-    filemanager_arch="armv7";;
+tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
+case $(dpkg --print-architecture) in
+  armhf)
+    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+  arm64)
+    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-arm64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+  amd64)
+    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-amd64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
 esac
-filemanager_file="linux-${filemanager_arch}-filebrowser.tar.gz"
-filemanager_tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
-filemanager_url="https://github.com/filebrowser/filebrowser/releases/download/$filemanager_tag/$filemanager_file"
-wget -q --show-progress "$filemanager_url"
-tar -xzf "$filemanager_file" -C /usr/local/bin filebrowser
+tar -xzf /root/filemanager.tar.gz -C /usr/local/bin filebrowser
 chmod +x /usr/local/bin/filebrowser
-rm "$filemanager_file"
+rm /root/filemanager.tar.gz
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
@@ -86,30 +89,19 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 [Install]
 WantedBy=multi-user.target
 EOT
-systemctl enable filebrowser
+systemctl -q enable filebrowser
 echo "Installing ngrok."
-if [[ $(dpkg --print-architecture) = "armhf" ]]
-then
-  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
-elif [[ $(dpkg --print-architecture) = "arm64" ]]
-then
-  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
-elif [[ $(dpkg --print-architecture) = "amd64" ]]
-then
-  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
-fi
+case $(dpkg --print-architecture) in
+  armhf)
+    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O /root/ngrok.tgz;;
+  arm64)
+    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O /root/ngrok.tgz;;
+  amd64)
+    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O /root/ngrok.tgz;;
+esac
 tar xvf ngrok.tgz -C /usr/local/bin
-rm ngrok.tgz
+rm /root/ngrok.tgz
 echo "0 4 * * 1 /sbin/reboot" | crontab -
-sed '2,/^sleep/d' $0 > /root/resume.sh
-chmod +x /root/resume.sh
-echo "bash /root/resume.sh" > /root/.bash_profile
-chmod +x /root/.bash_profile
-echo
-read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
-rm $0
-reboot
-sleep 10
 
 #storage
 echo
@@ -117,10 +109,7 @@ echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-lsblk -l -o TYPE,NAME > list
-sed -i '/disk/d' list
-sed -i '1d' list
-sed -i 's/[^ ]* //' list
+lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2 > list
 echo "other" >> list
 echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
@@ -146,7 +135,11 @@ rm list
 #nfs
 echo
 echo "Setting up NFS."
-echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" >> /etc/exports
+if [[ ! -f /etc/exports.bak ]]
+then
+  mv /etc/exports /etc/exports.bak
+fi
+echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
 
 #samba
 echo
@@ -176,15 +169,13 @@ EOT
 echo
 echo "Setting up CUPS."
 usermod -aG lpadmin root
-lpstat -e > list
 echo
 PS3="Enter the number for the default printer: "
-select defpr in $(<list)
+select defpr in $(lpstat -e)
 do
 lpadmin -d $defpr
 break
 done
-rm list
 cupsctl --no-share-printers
 
 #ngrok
@@ -219,7 +210,7 @@ echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
@@ -595,4 +586,4 @@ apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
 rm /root/resume.sh
-reboot
+systemctl reboot
