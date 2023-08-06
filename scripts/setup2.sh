@@ -85,13 +85,16 @@ then
   mount -a
   mkdir -p /srv/NAS/Public
 else
-  echo "#UUID=?  /srv/NAS  ?  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
+  sed -i '/^#UUID/d' /etc/fstab
+  echo "#UUID=???  /srv/NAS  ???  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
   echo "Device is not available. Manually edit fstab later."
   read -n 1 -s -r -p "Press any key to continue without mounting storage."
 fi
 break
 done
 rm list
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/fixpermi.sh -O /root/fixpermi.sh
+chmod +x /root/fixpermi.sh
 
 #nfs
 echo
