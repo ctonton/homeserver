@@ -71,10 +71,10 @@ wget -q --show-progress "$filemanager_url"
 tar -xzf "$filemanager_file" -C /usr/local/bin filebrowser
 chmod +x /usr/local/bin/filebrowser
 rm "$filemanager_file"
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/filebrowser.zip
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
 mkdir -p /root/.config
-unzip -o filebrowser.zip -d /root/.config/
-rm filebrowser.zip
+unzip -o /root/filebrowser.zip -d /root/.config/
+rm /root/filebrowser.zip
 tee /etc/systemd/system/filebrowser.service > /dev/null <<EOT
 [Unit]
 Description=http file manager
@@ -357,9 +357,9 @@ if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
-unzip -o icons.zip -d /var/www/html
-rm icons.zip
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
+unzip -o /root/icons.zip -d /var/www/html
+rm /root/icons.zip
 ln -s /root/Downloads /var/www/html/egg
 if [[ ! -f /etc/nginx/sites-available/default.bak ]]
 then
