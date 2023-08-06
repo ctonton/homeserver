@@ -2,7 +2,7 @@
 
 ## Usage
 
-Run the "start.sh" script to install a NAS file server.
+Run the "start.sh" script on Debian to install a NAS file server.
 
 Select option "1 - install lite version server" for devices with less than 1gb of RAM.
 
