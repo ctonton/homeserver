@@ -497,7 +497,7 @@ server {
 
 	location /files/ {
 		proxy_pass http://127.0.0.1:8000/;
-		proxy_buffering off
+		proxy_buffering off;
   		auth_basic "Restricted Content";
 		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
