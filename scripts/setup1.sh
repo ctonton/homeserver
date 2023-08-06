@@ -2,19 +2,36 @@
 
 #install
 echo
-echo "Installing software."
+echo "Installing server."
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends curl ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl
+echo "Installing wsdd."
+wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
+chmod +x /usr/local/bin/wsdd
+tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
+[Unit]
+Description=Web Services Dynamic Discovery host daemon
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/wsdd -s -4
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl -q enable wsdd
+echo "Installing ngrok."
+case $(dpkg --print-architecture) in
+  armhf)
+    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O /root/ngrok.tgz;;
+  arm64)
+    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O /root/ngrok.tgz;;
+  amd64)
+    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O /root/ngrok.tgz;;
+esac
+tar xvf ngrok.tgz -C /usr/local/bin
+rm /root/ngrok.tgz
 echo "0 4 * * 1 /sbin/reboot" | crontab -
-sed '2,/^sleep/d' $0 > /root/resume.sh
-chmod +x /root/resume.sh
-echo "bash /root/resume.sh" > /root/.bash_profile
-chmod +x /root/.bash_profile
-echo
-read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
-rm $0
-reboot
-sleep 10
 
 #storage
 echo
@@ -22,10 +39,7 @@ echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-lsblk -l -o TYPE,NAME > list
-sed -i '/disk/d' list
-sed -i '1d' list
-sed -i 's/[^ ]* //' list
+lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2 > list
 echo "other" >> list
 echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
@@ -40,18 +54,25 @@ then
   mount -a
   mkdir -p /srv/NAS/Public
 else
-  echo "#UUID=?  /srv/NAS  ?  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
+  sed -i '/^#UUID/d' /etc/fstab
+  echo "#UUID=???  /srv/NAS  ???  defaults,x-systemd.before=nfs-kernel-server.service,nofail  0  0" >> /etc/fstab
   echo "Device is not available. Manually edit fstab later."
   read -n 1 -s -r -p "Press any key to continue without mounting storage."
 fi
 break
 done
 rm list
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/fixpermi.sh -O /root/fixpermi.sh
+chmod +x /root/fixpermi.sh
 
 #nfs
 echo
 echo "Setting up NFS."
-echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" >> /etc/exports
+if [[ ! -f /etc/exports.bak ]]
+then
+  mv /etc/exports /etc/exports.bak
+fi
+echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
 
 #samba
 echo
@@ -76,42 +97,14 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-wget https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
-chmod +x /usr/local/bin/wsdd
-tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
-[Unit]
-Description=Web Services Dynamic Discovery host daemon
-After=network-online.target
-Wants=network-online.target
-[Service]
-Type=exec
-ExecStart=/usr/local/bin/wsdd -s -4
-[Install]
-WantedBy=multi-user.target
-EOT
-systemctl enable wsdd
 
 #ngrok
 echo
-echo "Installing ngrok."
-if [[ $(dpkg --print-architecture) = "armhf" ]]
-then
-  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
-elif [[ $(dpkg --print-architecture) = "arm64" ]]
-then
-  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
-elif [[ $(dpkg --print-architecture) = "amd64" ]]
-then
-  wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
-fi
-tar xvf ngrok.tgz -C /usr/local/bin
-rm ngrok.tgz
 read -p "Do you want to set up access to this server through ngrok? y/n: " cont
 if [[ $cont == "y" ]]
 then
   read -p "Enter your ngrok Authtoken: " auth
   ngrok config add-authtoken $auth
-  ngrok service install --config /root/.config/ngrok/ngrok.yml
   tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
 tunnels:
   nginx:
@@ -124,6 +117,10 @@ tunnels:
     addr: 22
     proto: tcp
 EOT
+  ngrok service install --config /root/.config/ngrok/ngrok.yml
+else
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/ngrok.sh -O /root/ngrok.sh
+  chmod +x /root/ngrok.sh
 fi
 
 #qbittorrent
@@ -135,8 +132,8 @@ echo "qBittorrent is a file sharing program. When you run a torrent, its data wi
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
-wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -d /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
 [AutoRun]
 enabled=true
@@ -186,7 +183,7 @@ EOT
 systemctl enable qbittorrent
 tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
 #!/bin/bash
-wget https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 systemctl restart qbittorrent
 exit
@@ -201,10 +198,9 @@ if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O icons.zip
-unzip -o icons.zip -d /var/www/html
-rm icons.zip
-ln -s /srv/NAS/Public /var/www/html/files
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
+unzip -o /root/icons.zip -d /var/www/html
+rm /root/icons.zip
 if [[ ! -f /etc/nginx/sites-available/default.bak ]]
 then
   mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
@@ -227,7 +223,9 @@ tee /var/www/html/index.html > /dev/null <<'EOT'
   </body>
 </html>
 EOT
+chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
+ln -s /srv/NAS/Public /var/www/html/files
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
 ##
 map $http_upgrade $connection_upgrade {
@@ -265,11 +263,13 @@ server {
 	root /var/www/html;
 	index index.html;
 	autoindex on;
+
 	location /files/ {
 		try_files $uri $uri/ =404;
 		auth_basic "Restricted Content";
 		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
+
 	location /torrents/ {
 		proxy_pass http://127.0.0.1:8080/;
 		proxy_buffering off;
@@ -279,7 +279,7 @@ server {
 }
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
-wget https://raw.githubusercontent.com/ctonton/homeserver/main/other_scripts/http_users.sh -O /root/http_users.sh
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
 chmod +x /root/http_users.sh
 echo
 echo "A script called http_users.sh has been created in the root directory for modifying users of the web server."
@@ -304,11 +304,12 @@ localhost
 admin@localhost
 ANSWERS
 rm ipinfo
-wget https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
 #cleanup
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
-rm /root/resume.sh
-reboot
+rm $0
+systemctl reboot
+exit
