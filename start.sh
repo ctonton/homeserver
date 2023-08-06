@@ -72,10 +72,10 @@ do
   read -p "Make your selection: " cont
   if [[ $cont == 1 ]]
   then
-    wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
+    wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
   elif [[ $cont == 2 ]]
   then
-    wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
+    wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
   else
     echo "Invalid selection"
   fi
