@@ -3,7 +3,6 @@
 #install
 echo
 echo "Installing server."
-apt update
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 apt install -y --install-recommends cups-browsed avahi-daemon avahi-autoipd
