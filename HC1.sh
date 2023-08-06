@@ -35,7 +35,8 @@ apt update
 systemctl --quiet disable NetworkManager
 apt autopurge -y network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
-apt install -y --install-recommends ifupdown
+apt install -y --install-recommends ifupdown openssh-server
+sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
 eth=$(ip route | awk '/kernel/ { print $3 }')
@@ -50,6 +51,7 @@ auto lo
 iface lo inet loopback
 
 auto $eth
+allow-hotplug $eth
 iface $eth inet6 auto
 EOT
 echo
@@ -76,19 +78,19 @@ do
   read -p "Make your selection: " cont
   if [[ $cont == 1 ]]
   then
-    wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
+    wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
   elif [[ $cont == 2 ]]
   then
-    wget https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
+    wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
   else
     echo "Invalid selection"
   fi
 done
 chmod +x /root/setup.sh
-sed -i '2,/#install/d' /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
-reboot
+systemctl reboot
+exit
