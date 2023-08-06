@@ -2,11 +2,7 @@
 
 ## Usage
 
-Run the "start.sh" script on a fresh Debian installation to setup a N.A.S. file server where storage is located on a separate drive or partition, in a directory named "Public", on the root of that partition.
-
-Select option "1 - install lite version server" for devices with less than 1gb of RAM.
-
-Select option "2 - install full version server" for devices with at least 1gb of RAM.
+Run the "start.sh" script on a fresh Debian installation to setup a N.A.S. where storage is located in a directory named "Public" that is on the root of a separate drive or partition. A lite version of the server will be automatically installed on devices having less than 1GB of R.A.M.
 
 ```shell
 wget https://raw.githubusercontent.com/ctonton/homeserver/main/start.sh -O start.sh && chmod +x start.sh && bash start.sh
