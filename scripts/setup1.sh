@@ -1,34 +1,10 @@
 #!/bin/bash
 
-#checks
-clear
-if [[ $EUID -ne 0 ]]
-then
-  read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
-  exit
-fi
-if ! wget -q --spider www.google.com
-then
-  read -n 1 -s -r -p "The network is not online. Press any key to exit."
-  exit
-fi
-
-#initialize
-read -p "Enter a hostname for this server. : " serv
-hostnamectl set-hostname $serv
-sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
-dpkg-reconfigure locales
-dpkg-reconfigure tzdata
-
 #install
 echo
 echo "Installing software."
-apt update
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends curl ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl
-apt install -y --install-recommends openssh-server
-systemctl enable --quiet ssh
-sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 sed '2,/^sleep/d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
