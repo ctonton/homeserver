@@ -317,7 +317,6 @@ fi
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o /root/icons.zip -d /var/www/html
 rm /root/icons.zip
-ln -s /root/Downloads /var/www/html/egg
 if [[ ! -f /etc/nginx/sites-available/default.bak ]]
 then
   mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
@@ -411,6 +410,7 @@ post_max_size = 10M
 EOT
 chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
+ln -s /root/Downloads /var/www/html/egg
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
 ##
 map $http_upgrade $connection_upgrade {
@@ -464,8 +464,6 @@ server {
 
 	location /egg/ {
 		try_files $uri $uri/ =404;
-		auth_basic "Restricted Content";
-		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /torrents/ {
@@ -553,3 +551,4 @@ read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
 rm $0
 systemctl reboot
+exit
