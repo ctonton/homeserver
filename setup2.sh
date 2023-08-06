@@ -34,6 +34,7 @@ apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar u
 apt install -y --install-recommends openssh-server cups-browsed avahi-daemon avahi-autoipd
 systemctl enable --quiet ssh
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
+echo "Installing wsdd."
 wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
 chmod +x /usr/local/bin/wsdd
 tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
@@ -48,6 +49,7 @@ ExecStart=/usr/local/bin/wsdd -s -4
 WantedBy=multi-user.target
 EOT
 systemctl enable wsdd
+echo "Installing filebrowser."
 case $(uname -m) in
   *aarch64*)
     filemanager_arch="arm64";;
@@ -85,6 +87,19 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl enable filebrowser
+echo "Installing ngrok."
+if [[ $(dpkg --print-architecture) = "armhf" ]]
+then
+  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
+elif [[ $(dpkg --print-architecture) = "arm64" ]]
+then
+  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
+elif [[ $(dpkg --print-architecture) = "amd64" ]]
+then
+  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
+fi
+tar xvf ngrok.tgz -C /usr/local/bin
+rm ngrok.tgz
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 sed '2,/^sleep/d' $0 > /root/resume.sh
 chmod +x /root/resume.sh
@@ -174,19 +189,6 @@ cupsctl --no-share-printers
 
 #ngrok
 echo
-echo "Installing ngrok."
-if [[ $(dpkg --print-architecture) = "armhf" ]]
-then
-  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O ngrok.tgz
-elif [[ $(dpkg --print-architecture) = "arm64" ]]
-then
-  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O ngrok.tgz
-elif [[ $(dpkg --print-architecture) = "amd64" ]]
-then
-  wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
-fi
-tar xvf ngrok.tgz -C /usr/local/bin
-rm ngrok.tgz
 read -p "Do you want to set up access to this server through ngrok? y/n: " cont
 if [[ $cont == "y" ]]
 then
