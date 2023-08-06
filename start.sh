@@ -65,21 +65,12 @@ echo "iface $eth inet dhcp" >> /etc/network/interfaces
 fi
 echo
 cont=0
-until [[ $cont == 1 ]] || [[ $cont == 2 ]]
-do
-  echo "1 - install lite version server"
-  echo "2 - install full version server"
-  read -p "Make your selection: " cont
-  if [[ $cont == 1 ]]
-  then
-    wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
-  elif [[ $cont == 2 ]]
-  then
-    wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
-  else
-    echo "Invalid selection"
-  fi
-done
+if [[ $(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}') -lt 1 ]]
+then
+  wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
+else
+  wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
+fi
 chmod +x /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
