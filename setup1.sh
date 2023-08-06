@@ -225,7 +225,7 @@ if [[ ! -f /var/www/html/index.bak ]]
 then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
-wget https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
 ln -s /srv/NAS/Public /var/www/html/files
