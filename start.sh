@@ -29,7 +29,8 @@ apt update
 systemctl --quiet disable NetworkManager
 apt autopurge -y network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
-apt install -y --install-recommends ifupdown
+apt install -y --install-recommends ifupdown openssh-server
+sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
 eth=$(ip route | awk '/kernel/ { print $3 }')
@@ -80,10 +81,10 @@ do
   fi
 done
 chmod +x /root/setup.sh
-sed -i '2,/#install/d' /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
 rm $0
-reboot
+systemctl reboot
+exit
