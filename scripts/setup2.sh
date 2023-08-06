@@ -1,44 +1,5 @@
 #!/bin/bash
 
-#checks
-clear
-if [[ $EUID -ne 0 ]]
-then
-  read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
-  exit
-fi
-if [[ $(lsb_release -is) != "Debian" ]]
-then
-  read -n 1 -s -r -p "This script is written for Debian OS. Press any key to exit."
-  exit
-fi
-if ! wget -q --spider www.google.com
-then
-  read -n 1 -s -r -p "The network is not online. Press any key to exit."
-  exit
-fi
-
-#initialize
-read -p "Enter a hostname for this server. : " serv
-hostnamectl set-hostname $serv
-dpkg-reconfigure locales
-dpkg-reconfigure tzdata
-if ! dpkg -s openssh-server >/dev/null 2>&1
-then
-  sudo apt update
-  sudo apt install -y openssh-server
-fi
-sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-sed '2,/^sleep/d' $0 > /root/resume.sh
-chmod +x /root/resume.sh
-echo "bash /root/resume.sh" > /root/.bash_profile
-chmod +x /root/.bash_profile
-echo
-read -n 1 -s -r -p "System needs to reboot. Press any key to do so and then log in as "root" to continue."
-rm $0
-systemctl reboot
-sleep 300
-
 #install
 echo
 echo "Installing server."
@@ -185,7 +146,6 @@ if [[ $cont == "y" ]]
 then
   read -p "Enter your ngrok Authtoken: " auth
   ngrok config add-authtoken $auth
-  ngrok service install --config /root/.config/ngrok/ngrok.yml
   tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
 tunnels:
   nginx:
@@ -198,6 +158,10 @@ tunnels:
     addr: 22
     proto: tcp
 EOT
+  ngrok service install --config /root/.config/ngrok/ngrok.yml
+else
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/ngrok.sh -O /root/ngrok.sh
+  chmod +x /root/ngrok.sh
 fi
 
 #qbittorrent
@@ -544,7 +508,7 @@ server {
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
 sed -i '/http {/a\\tclient_max_body_size 10M;\n\tupload_progress uploads 1m;' /etc/nginx/nginx.conf
-wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/other_scripts/http_users.sh -O /root/http_users.sh
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
 chmod +x /root/http_users.sh
 echo
 echo "A script called http_users.sh has been created in the root directory for modifying users of the web server."
@@ -585,5 +549,5 @@ ufw --force enable
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
-rm /root/resume.sh
+rm $0
 systemctl reboot
