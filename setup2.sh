@@ -72,8 +72,8 @@ tar -xzf "$filemanager_file" -C /usr/local/bin filebrowser
 chmod +x /usr/local/bin/filebrowser
 rm "$filemanager_file"
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/filebrowser.zip
-mkdir -p /root/.config/filebrowser
-unzip -o filebrowser.zip -d /root/.config/filebrowser
+mkdir -p /root/.config
+unzip -o filebrowser.zip -d /root/.config/
 rm filebrowser.zip
 tee /etc/systemd/system/filebrowser.service > /dev/null <<EOT
 [Unit]
@@ -360,7 +360,6 @@ fi
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/icons.zip -O icons.zip
 unzip -o icons.zip -d /var/www/html
 rm icons.zip
-ln -s /srv/NAS/Public /var/www/html/files
 ln -s /root/Downloads /var/www/html/egg
 if [[ ! -f /etc/nginx/sites-available/default.bak ]]
 then
@@ -387,7 +386,7 @@ tee /var/www/html/index.html > /dev/null <<'EOT'
     <div class="row" style="text-align:center">
       <div class="column">
         <h1>File Server</h1>
-        <a href="/files/"><img src="fs.png" alt="HTTP Server"></a>
+        <a href="/filebrowser"><img src="fs.png" alt="HTTP Server"></a>
         <br>
         <br>
         <h1>Print Server</h1>
@@ -464,6 +463,9 @@ map $http_upgrade $connection_upgrade {
 upstream novnc-firefox {
 	server 127.0.0.1:5800;
 }
+upstream filebrowser {
+	server 127.0.0.1:8000;
+}
 ##
 server {
 listen 80 default_server;
@@ -497,9 +499,8 @@ server {
 	index index.html;
 	autoindex on;
 
-	location /files/ {
-		proxy_pass http://127.0.0.1:8000/;
-		proxy_buffering off;
+	location /filebrowser {
+		proxy_pass http://filebrowser;
   		auth_basic "Restricted Content";
 		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
