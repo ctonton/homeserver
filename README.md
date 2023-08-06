@@ -9,6 +9,5 @@ Select option "1 - install lite version server" for devices with less than 1gb o
 Select option "2 - install full version server" for devices with at least 1gb of RAM.
 
 ```shell
-wget https://raw.githubusercontent.com/ctonton/homeserver/main/start.sh -O setup.sh && chmod +x setup.sh
-bash setup.sh
+wget https://raw.githubusercontent.com/ctonton/homeserver/main/start.sh -O start.sh && chmod +x start.sh && bash start.sh
 ```
