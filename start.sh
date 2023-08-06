@@ -29,7 +29,7 @@ apt update
 systemctl --quiet disable NetworkManager
 apt autopurge -y network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
-apt install -y --install-recommends ifupdown openssh-server
+apt install -y --install-recommends ifupdown dhcp-client openssh-server
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
@@ -63,13 +63,12 @@ EOT
 else
 echo "iface $eth inet dhcp" >> /etc/network/interfaces
 fi
-echo
-cont=0
-if [[ $(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}') -lt 1 ]]
+mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
+if [[ ${mem%.*} -lt 1 ]]
 then
-  wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup1.sh -O /root/setup.sh
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup1.sh -O /root/setup.sh
 else
-  wget -q --show-progress https://raw.githubusercontent.com/ctonton/homeserver/main/setup2.sh -O /root/setup.sh
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup2.sh -O /root/setup.sh
 fi
 chmod +x /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
