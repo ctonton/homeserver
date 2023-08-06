@@ -2,7 +2,7 @@
 
 ## Usage
 
-Run the "start.sh" script on a fresh Debian installation to setup a N.A.S. file server where storage is on a separate drive or partition, in a directory named "Public", on the root of that partition.
+Run the "start.sh" script on a fresh Debian installation to setup a N.A.S. file server where storage is located on a separate drive or partition, in a directory named "Public", on the root of that partition.
 
 Select option "1 - install lite version server" for devices with less than 1gb of RAM.
 
