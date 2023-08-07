@@ -29,7 +29,7 @@ apt update
 systemctl --quiet disable NetworkManager
 apt autopurge -y network-manager netplan.io
 rm -rf /etc/NetworkManager /etc/netplan
-apt install -y --install-recommends ifupdown dhcp-client openssh-server
+apt install -y ifupdown isc-dhcp-client openssh-server
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
