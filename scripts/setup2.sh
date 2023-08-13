@@ -194,8 +194,8 @@ Cookies=@Invalid()
 [Preferences]
 Bittorrent\MaxRatioAction=1
 Connection\GlobalUPLimit=10
-Downloads\SavePath=/srv/NAS/Public/Unsorted/
-Downloads\TempPath=/srv/NAS/Public/Unsorted/
+Downloads\SavePath=/srv/NAS/Public/Downloads/
+Downloads\TempPath=/srv/NAS/Public/Downloads/
 IPFilter\Enabled=true
 IPFilter\File=/root/.config/qBittorrent/blocklist.p2p
 IPFilter\FilterTracker=true
