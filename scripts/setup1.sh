@@ -205,19 +205,20 @@ if [[ ! -f /etc/nginx/sites-available/default.bak ]]
 then
   mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 fi
-tee /var/www/html/index.html > /dev/null <<'EOT'
+tee /var/www/html/index.html > /dev/null <<EOT
 <html>
   <head>
-    <title>Server</title>
-	  <style></style>
+    <title>$HOSTNAME</title>
   </head>
-  <body style="background-color:#000000;color:yellow;font-size:125%;text-align:center">
-    <h1>File Server</h1>
+  <body style="background-color:#F3F3F3;font-family:arial;text-align:center">
+    <br>
+    <br>
     <a href="/files/"><img src="fs.png" alt="HTTP Server"></a>
+    <h1>File Server</h1>   
     <br>
     <br>
-    <h1>Torrent Server</h1>
     <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
+    <h1>Torrent Server</h1>
     <br>
     <br>
   </body>
