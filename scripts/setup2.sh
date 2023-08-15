@@ -329,12 +329,12 @@ tee /var/www/html/index.html > /dev/null <<EOT
       .column {
         float: left;
         width: 50%;
-        height: 2160px
+        height: 2160px;
       }
       .row:after {
         content: "";
         display: table;
-        clear: both
+        clear: both;
       }
     </style>
   </head>
