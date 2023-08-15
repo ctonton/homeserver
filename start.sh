@@ -33,7 +33,7 @@ apt install -y ifupdown isc-dhcp-client isc-dhcp-common openssh-server
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
-eth=$(ip route | awk '/kernel/ { print $3 }')
+eth=$(ls /sys/class/net | grep e)
 mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
 tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf > /dev/null <<EOT
 [Service]
