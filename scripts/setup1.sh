@@ -206,22 +206,24 @@ then
   mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 fi
 tee /var/www/html/index.html > /dev/null <<EOT
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>$HOSTNAME</title>
-  </head>
-  <body style="background-color:#F3F3F3;font-family:arial;text-align:center">
-    <br>
-    <br>
-    <a href="/files/"><img src="fs.png" alt="HTTP Server"></a>
-    <h1>File Server</h1>   
-    <br>
-    <br>
-    <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
-    <h1>Torrent Server</h1>
-    <br>
-    <br>
-  </body>
+<head>
+  <title>$HOSTNAME</title>
+  <meta charset="UTF-8">
+</head>
+<body style="background-color:#F3F3F3;font-family:arial;text-align:center">
+  <br>
+  <br>
+  <a href="/files/"><img src="fs.png" alt="HTTP Server"></a>
+  <h1>File Server</h1>   
+  <br>
+  <br>
+  <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
+  <h1>Torrent Server</h1>
+  <br>
+  <br>
+</body>
 </html>
 EOT
 chmod -R 774 /var/www/html
