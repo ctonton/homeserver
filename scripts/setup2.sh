@@ -325,18 +325,18 @@ tee /var/www/html/index.html > /dev/null <<EOT
 <html>
   <head>
     <title>$HOSTNAME</title>
-      <style>
+    <style>
       .column {
-      float: left;
-      width: 50%;
-      height: 2160px
+        float: left;
+        width: 50%;
+        height: 2160px
       }
       .row:after {
-      content: "";
-      display: table;
-      clear: both
+        content: "";
+        display: table;
+        clear: both
       }
-      </style>
+    </style>
   </head>
   <body style="background-color:#F3F3F3;font-family:arial;text-align:center">
     <div class="row">
