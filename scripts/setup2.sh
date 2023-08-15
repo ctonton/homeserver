@@ -322,53 +322,63 @@ then
   mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 fi
 tee /var/www/html/index.html > /dev/null <<EOT
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>$HOSTNAME</title>
-    <style>
-      .column {
-        float: left;
-        width: 50%;
-        height: 2160px;
-      }
-      .row:after {
-        content: "";
-        display: table;
-        clear: both;
-      }
-    </style>
-  </head>
-  <body style="background-color:#F3F3F3;font-family:arial;text-align:center">
-    <div class="row">
-      <div class="column">
-        <br>
-        <br>
-        <a href="/filebrowser"><img src="fs.png" alt="HTTP Server"></a>
-        <h1>File Server</h1>
-        <br>
-        <br>
-        <a href="/print/"><img src="ps.png" alt="Print Server"></a>
-        <h1>Print Server</h1>
-        <br>
-        <br>
-      </div>
-      <div class="column" style="text-align:center">
-        <br>
-        <br>
-        <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
-        <h1>Torrent Server</h1>
-        <br>
-        <br>
-        <a href="/novnc/vnc.html?path=novnc/websockify"><img src="ff.png" alt="Firefox"></a>
-        <h1>Web Browser</h1>
-        <br>
-        <br>
-      </div>
+<head>
+  <title>$HOSTNAME</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      background-color: #F3F3F3;
+    }
+    .column {
+      float: left;
+      width: 50%;
+      text-align: center;
+      font-family: arial;
+      height: 2160px;
+    }
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    .footer {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <div class="column">
+      <br>
+      <br>
+      <a href="/filebrowser"><img src="fs.png" alt="File Browser"></a>
+      <h1>File Browser</h1>
+      <br>
+      <br>
+      <a href="/print/"><img src="ps.png" alt="Print Server"></a>
+      <h1>Print Server</h1>
+      <br>
+      <br>
     </div>
-  </body>
-  <footer>
-    <a href="/egg/"><img align="right" src="ee.png"></right></a>
-  </footer>
+    <div class="column">
+      <br>
+      <br>
+      <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
+      <h1>Torrent Server</h1>
+      <br>
+      <br>
+      <a href="/novnc/vnc.html?path=novnc/websockify"><img src="ff.png" alt="Firefox"></a>
+      <h1>Web Browser</h1>
+      <br>
+      <br>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="/egg/"><img src="ee.png" alt="ee"></a>
+  </div>
+</body>
 </html>
 EOT
 mkdir /var/www/html/print
