@@ -321,45 +321,49 @@ if [[ ! -f /etc/nginx/sites-available/default.bak ]]
 then
   mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 fi
-tee /var/www/html/index.html > /dev/null <<'EOT'
+tee /var/www/html/index.html > /dev/null <<EOT
 <html>
   <head>
-    <title>Server</title>
-	<style>
-    .column {
-    float: left;
-    width: 50%;
-    height: 2160px;
-    }
-	.row:after {
-    content: "";
-    display: table;
-    clear: both;
-    }
-    </style>
+    <title>$HOSTNAME</title>
+      <style>
+      .column {
+      float: left;
+      width: 50%;
+      height: 2160px
+      }
+      .row:after {
+      content: "";
+      display: table;
+      clear: both
+      }
+      </style>
   </head>
-  <body style="background-color:#000000;color:yellow;font-size:125%">
-    <div class="row" style="text-align:center">
+  <body style="background-color:#F3F3F3;font-family:arial;text-align:center">
+    <div class="row">
       <div class="column">
-        <h1>File Server</h1>
+        <br>
+        <br>
         <a href="/filebrowser"><img src="fs.png" alt="HTTP Server"></a>
+        <h1>File Server</h1>
         <br>
         <br>
-        <h1>Print Server</h1>
         <a href="/print/"><img src="ps.png" alt="Print Server"></a>
+        <h1>Print Server</h1>
         <br>
         <br>
       </div>
       <div class="column" style="text-align:center">
-        <h1>Torrent Server</h1>
+        <br>
+        <br>
         <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
+        <h1>Torrent Server</h1>
         <br>
         <br>
-        <h1>Web Browser</h1>
         <a href="/novnc/vnc.html?path=novnc/websockify"><img src="ff.png" alt="Firefox"></a>
+        <h1>Web Browser</h1>
         <br>
         <br>
-	  </div>
+      </div>
     </div>
   </body>
   <footer>
