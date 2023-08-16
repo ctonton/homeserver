@@ -61,7 +61,24 @@ iface $eth inet static
         gateway $(ip route | awk '/default/ { print $3 }')
 EOT
 else
-echo "iface $eth inet dhcp" >> /etc/network/interfaces
+  tee -a /etc/network/interfaces > /dev/null <<EOT
+iface $eth inet dhcp
+        up /root/.config/fixufw.sh
+EOT
+  tee /root/.config/fixufw.sh > /dev/null <<'EOT'
+#!/bin/bash
+eth=$(ls /sys/class/net | grep e)
+old=0.0.0.0/24
+new=$(ip route | grep "$eth proto kernel" | cut -d " " -f 1)
+if [ $old != $new ]; then
+  ufw delete allow from $old
+  ufw allow from $new
+  ufw reload
+  sed -i "s~$old~$new~g" "$0"
+fi
+exit
+EOT
+  chmod +x /root/.config/fixufw.sh
 fi
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
 if [[ ${mem%.*} -lt 1 ]]
