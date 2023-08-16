@@ -61,10 +61,7 @@ iface $eth inet static
         gateway $(ip route | awk '/default/ { print $3 }')
 EOT
 else
-  tee -a /etc/network/interfaces > /dev/null <<EOT
-iface $eth inet dhcp
-        up /root/.config/fixufw.sh
-EOT
+  echo "iface $eth inet dhcp" >> /etc/network/interfaces
   tee /etc/dhcp/dhclient-exit-hooks.d/fixufw > /dev/null <<'EOT'
 #!/bin/bash
 eth=adapter
@@ -82,10 +79,10 @@ then
   ufw reload
   sed -i "s~$old~$new~g" /etc/dhcp/dhclient-exit-hooks.d/fixufw
 fi
-exit
+exit 0
 EOT
   sed -i "s/adapter/$eth/g" /etc/dhcp/dhclient-exit-hooks.d/fixufw
-  chmod +x /root/.config/fixufw.sh
+  chmod +x /etc/dhcp/dhclient-exit-hooks.d/fixufw
 fi
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
 if [[ ${mem%.*} -lt 1 ]]
