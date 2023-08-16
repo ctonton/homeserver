@@ -4,7 +4,7 @@
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip ufw nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
 apt install -y --install-recommends cups-browsed avahi-daemon avahi-autoipd
 echo "Installing wsdd."
 wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
