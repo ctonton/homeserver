@@ -4,7 +4,7 @@
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends curl ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl
+apt install -y --no-install-recommends curl ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl ufw
 echo "Installing wsdd."
 wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
 chmod +x /usr/local/bin/wsdd
@@ -308,6 +308,16 @@ admin@localhost
 ANSWERS
 rm ipinfo
 wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+
+#ufw
+echo
+echo "Setting up firewall."
+ufw allow ssh
+ufw allow http
+ufw allow https
+ufw allow from $(/sbin/ip route | awk '/kernel/ { print $1 }')
+ufw logging off
+ufw --force enable
 
 #cleanup
 apt -y autopurge
