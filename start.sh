@@ -65,19 +65,26 @@ else
 iface $eth inet dhcp
         up /root/.config/fixufw.sh
 EOT
-  tee /root/.config/fixufw.sh > /dev/null <<'EOT'
+  tee /etc/dhcp/dhclient-exit-hooks.d/fixufw > /dev/null <<'EOT'
 #!/bin/bash
-eth=$(ls /sys/class/net | grep e)
+eth=adapter
 old=0.0.0.0/24
-new=$(ip route | grep "$eth proto kernel" | cut -d " " -f 1)
-if [ $old != $new ]; then
+if ([ $reason == "BOUND" ] || [ $reason == "RENEW" ])
+then
+  new=$(ip route | grep "$eth proto kernel" | cut -d " " -f 1)
+else
+  exit 0
+fi
+if [ $old != $new ]
+then
   ufw delete allow from $old
   ufw allow from $new
   ufw reload
-  sed -i "s~$old~$new~g" "$0"
+  sed -i "s~$old~$new~g" /etc/dhcp/dhclient-exit-hooks.d/fixufw
 fi
 exit
 EOT
+  sed -i "s/adapter/$eth/g" /etc/dhcp/dhclient-exit-hooks.d/fixufw
   chmod +x /root/.config/fixufw.sh
 fi
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
