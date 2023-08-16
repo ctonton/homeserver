@@ -70,7 +70,7 @@ if ([ $reason == "BOUND" ] || [ $reason == "RENEW" ])
 then
   new=$(ip route | grep "$eth proto kernel" | cut -d " " -f 1)
 else
-  exit 0
+  exit
 fi
 if [ $old != $new ]
 then
@@ -79,7 +79,7 @@ then
   ufw reload
   sed -i "s~$old~$new~g" /etc/dhcp/dhclient-exit-hooks.d/fixufw
 fi
-exit 0
+exit
 EOT
   sed -i "s/adapter/$eth/g" /etc/dhcp/dhclient-exit-hooks.d/fixufw
   chmod +x /etc/dhcp/dhclient-exit-hooks.d/fixufw
