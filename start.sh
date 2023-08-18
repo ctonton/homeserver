@@ -66,12 +66,7 @@ else
 #!/bin/bash
 eth=adapter
 old=0.0.0.0/24
-if ([ $reason = "BOUND" ] || [ $reason = "RENEW" ])
-then
-  new=$(ip route | grep "$eth proto kernel" | cut -d " " -f 1)
-else
-  exit
-fi
+new=$(ip route | grep "$eth proto kernel" | cut -d " " -f 1)
 if [ $old != $new ]
 then
   ufw delete allow from $old
