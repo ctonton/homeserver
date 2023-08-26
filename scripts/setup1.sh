@@ -73,6 +73,18 @@ then
   mv /etc/exports /etc/exports.bak
 fi
 echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
+tee /etc/avahi/services/nfs.service > /dev/null <<EOT
+<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">NFS server at $HOSTNAME</name>  
+  <service>
+    <type>_nfs._tcp</type>
+    <port>2049</port>
+    <txt-record>path=/srv/NAS/Public</txt-record>
+  </service>
+</service-group>
+EOT
 
 #samba
 echo
