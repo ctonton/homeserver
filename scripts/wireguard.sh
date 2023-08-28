@@ -2,7 +2,7 @@
 clear
 echo "Setup WireGuard"
 loo=0
-until [ $loo -eq 5 ]
+until [ $loo -eq 6 ]
 do
   echo
   echo "1 - Install WireGuard"
