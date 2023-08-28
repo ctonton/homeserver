@@ -16,7 +16,7 @@ then
     apt autopurge -y cloud-init snapd unattended-upgrades needrestart
     rm -rf /etc/cloud
   else
-    read -n 1 -s -r -p "This script is will only work on Debian or Ubuntu. Press any key to exit."
+    read -n 1 -s -r -p "This script is will only work with Debian or Ubuntu. Press any key to exit."
     exit
   fi
 fi
