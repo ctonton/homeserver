@@ -5,7 +5,6 @@ echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends curl ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl
-echo "Installing wsdd."
 wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
 chmod +x /usr/local/bin/wsdd
 tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
@@ -19,19 +18,84 @@ ExecStart=/usr/local/bin/wsdd -s -4
 [Install]
 WantedBy=multi-user.target
 EOT
-systemctl -q enable wsdd
-echo "Installing ngrok."
-case $(dpkg --print-architecture) in
-  armhf)
-    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O /root/ngrok.tgz;;
-  arm64)
-    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O /root/ngrok.tgz;;
-  amd64)
-    wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O /root/ngrok.tgz;;
-esac
-tar xvf ngrok.tgz -C /usr/local/bin
-rm /root/ngrok.tgz
-echo "0 4 * * 1 /sbin/reboot" | crontab -
+tee /root/fixpermi.sh > /dev/null <<'EOT'
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOT
+chmod +x /root/fixpermi.sh
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
+chmod +x /root/http_users.sh
+
+#ngrok
+echo
+read -p "Do you want to set up access to this server through ngrok? y/n: " cont
+if [[ $cont == "y" ]]
+then
+  echo "Installing ngrok."
+  case $(dpkg --print-architecture) in
+    armhf)
+      wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O /root/ngrok.tgz;;
+    arm64)
+      wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O /root/ngrok.tgz;;
+    amd64)
+      wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O /root/ngrok.tgz;;
+  esac
+  tar xvf ngrok.tgz -C /usr/local/bin
+  rm /root/ngrok.tgz
+  read -p "Enter your ngrok Authtoken: " auth
+  ngrok config add-authtoken $auth
+  tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
+tunnels:
+  nginx:
+    addr: 443
+    proto: http
+    schemes:
+      - https
+    inspect: false
+  ssh:
+    addr: 22
+    proto: tcp
+EOT
+  ngrok service install --config /root/.config/ngrok/ngrok.yml
+fi
+
+#ddns
+echo
+read -p "Do you want to set up ddns access to this server with Duck DNS? y/n: " cont
+if [[ $cont == "y" ]]
+then
+  echo "Installing DuckDNS."
+  mkdir /root/.ddns
+  tee /root/.ddns/duck.sh > /dev/null <<'EOT'
+#!/bin/bash
+domain=enter_domain
+token=enter_token
+ipv6addr=$(curl -s https://api6.ipify.org)
+ipv4addr=$(curl -s https://api.ipify.org)
+curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
+EOT
+  chmod +x /root/.ddns/duck.sh
+  tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
+[Unit]
+Description=DynDNS Updater services
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+ExecStart=/root/.ddns/duck.sh
+[Install]
+WantedBy=multi-user.target
+EOT
+  echo
+  read -p "Enter the token from duckdns.org: " token
+  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
+  read -p "Enter the domain from duckdns.org: " domain
+  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
+  systemctl enable ddns
+  cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
+fi
 
 #storage
 echo
@@ -62,8 +126,6 @@ fi
 break
 done
 rm list
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/fixpermi.sh -O /root/fixpermi.sh
-chmod +x /root/fixpermi.sh
 
 #nfs
 echo
@@ -109,31 +171,7 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-
-#ngrok
-echo
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [[ $cont == "y" ]]
-then
-  read -p "Enter your ngrok Authtoken: " auth
-  ngrok config add-authtoken $auth
-  tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
-tunnels:
-  nginx:
-    addr: 443
-    proto: http
-    schemes:
-      - https
-    inspect: false
-  ssh:
-    addr: 22
-    proto: tcp
-EOT
-  ngrok service install --config /root/.config/ngrok/ngrok.yml
-else
-  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/ngrok.sh -O /root/ngrok.sh
-  chmod +x /root/ngrok.sh
-fi
+systemctl -q enable wsdd
 
 #qbittorrent
 echo
@@ -294,8 +332,6 @@ server {
 }
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
-chmod +x /root/http_users.sh
 echo
 echo "A script called http_users.sh has been created in the root directory for modifying users of the web server."
 echo
