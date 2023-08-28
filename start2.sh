@@ -33,16 +33,15 @@ apt install -y networkd-dispatcher policykit-1 openssh-server ufw
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
-eth=$(ip route | awk '/default/ { print $5 }')
 mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
 tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf > /dev/null <<EOT
 [Service]
 ExecStart=
-ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=$eth --timeout=30
+ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=$(ip route | awk '/default/ { print $5 }') --timeout=30
 EOT
 tee /etc/systemd/network/20-wired.network > /dev/null <<EOT
 [Match]
-Name=$eth
+Name=$(ip route | awk '/default/ { print $5 }')
 
 [Network]
 EOT
@@ -50,11 +49,10 @@ echo
 read -p "Do you want to setup a static IP address on this server? y/n: " cont
 if [[ $cont == "y" ]]
 then
-  net=$(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3)
   echo
-  read -p "Enter a static IP address for the server: $net." add
+  read -p "Enter a static IP address for the server: $(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3)." add
   tee -a /etc/systemd/network/20-wired.network > /dev/null <<EOT
-Address=$net.$add/24
+Address=$(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3).$add/24
 Gateway=$(ip route | awk '/default/ { print $3 }'
 DNS=$(ip route | awk '/default/ { print $3 }'
 EOT
@@ -73,8 +71,7 @@ then
 fi
 exit
 EOT
-  sed -i "s/adapter/$eth/g" /etc/dhcp/dhclient-exit-hooks.d/fixufw
-  chmod +x /etc/dhcp/dhclient-exit-hooks.d/fixufw
+  chmod +x /etc/networkd-dispatcher/routable.d/20fixufw
 fi
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
 if [[ ${mem%.*} -lt 1 ]]
