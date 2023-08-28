@@ -564,9 +564,9 @@ wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/ngi
 #ufw
 echo
 echo "Setting up firewall."
+ufw allow from $(/sbin/ip route | awk '/kernel/ { print $1 }')
 ufw allow http
 ufw allow https
-ufw allow from $(/sbin/ip route | awk '/kernel/ { print $1 }')
 ufw logging off
 ufw --force enable
 
