@@ -9,8 +9,13 @@ then
 fi
 if [[ $(lsb_release -is) != "Debian" ]]
 then
-  read -n 1 -s -r -p "This script is written for the Debian OS. Press any key to exit."
-  exit
+  if [[ $(lsb_release -is) == "Ubuntu" ]]
+  then
+    add-apt-repository -y ppa:mozillateam/ppa
+  else
+    read -n 1 -s -r -p "This script is will only work on Debian or Ubuntu. Press any key to exit."
+    exit
+  fi
 fi
 if ! wget -q --spider www.google.com
 then
@@ -26,7 +31,6 @@ read -p "Enter a hostname for this server. : " serv
 hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 apt update
-systemctl --quiet disable NetworkManager
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp
 apt install -y networkd-dispatcher policykit-1 openssh-server ufw
@@ -58,7 +62,7 @@ DNS=$(ip route | awk '/default/ { print $3 }'
 EOT
 else
   echo "DHCP=yes" >> /etc/systemd/network/20-wired.network
-  tee /etc/networkd-dispatcher/routable.d/20fixufw > /dev/null <<'EOT'
+  tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
 #!/bin/bash
 old=0
 new=$(ip route | grep "$IFACE proto kernel" | cut -d " " -f 1)
@@ -71,7 +75,7 @@ then
 fi
 exit
 EOT
-  chmod +x /etc/networkd-dispatcher/routable.d/20fixufw
+  chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
 fi
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
 if [[ ${mem%.*} -lt 1 ]]
