@@ -31,7 +31,7 @@ read -p "Enter a hostname for this server. : " serv
 hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 apt update
-apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client cloud-init snapd
+apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client cloud-init
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /etc/cloud
 apt install -y networkd-dispatcher policykit-1 openssh-server ufw
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
