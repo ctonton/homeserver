@@ -10,6 +10,7 @@ case $(dpkg --print-architecture) in
 esac
 tar xvf ngrok.tgz -C /usr/local/bin
 rm /root/ngrok.tgz
+rm /root/.config/ngrok/ngrok.yml
 read -p "Enter your ngrok Authtoken: " auth
 ngrok config add-authtoken $auth
 tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
@@ -26,4 +27,4 @@ tunnels:
 EOT
 ngrok service install --config /root/.config/ngrok/ngrok.yml
 rm $0
-return
+exit
