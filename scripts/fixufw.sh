@@ -1,6 +1,6 @@
 #!/bin/bash
 eth=$(ls /sys/class/net | grep e)
-old=0.0.0.0/24
+old=0
 new=$(ip route | grep "$eth proto kernel" | cut -d " " -f 1)
 if [ $old != $new ]; then
   ufw delete allow from $old
