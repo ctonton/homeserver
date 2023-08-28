@@ -13,7 +13,7 @@ then
   then
     add-apt-repository -y ppa:mozillateam/ppa
     add-apt-repository -y ppa:qbittorrent-team/qbittorrent-stable
-    apt autopurge -y cloud-init snapd unattended-upgrades needrestart
+    apt autopurge -y cloud-init unattended-upgrades needrestart firefox
     rm -rf /etc/cloud
   else
     read -n 1 -s -r -p "This script is will only work with Debian or Ubuntu. Press any key to exit."
