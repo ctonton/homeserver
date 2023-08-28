@@ -12,6 +12,7 @@ then
   if [[ $(lsb_release -is) == "Ubuntu" ]]
   then
     add-apt-repository -y ppa:mozillateam/ppa
+    add-apt-repository -y ppa:qbittorrent-team/qbittorrent-stable
     apt autopurge -y cloud-init snapd unattended-upgrades needrestart
     rm -rf /etc/cloud
   else
