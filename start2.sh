@@ -12,6 +12,8 @@ then
   if [[ $(lsb_release -is) == "Ubuntu" ]]
   then
     add-apt-repository -y ppa:mozillateam/ppa
+    apt autopurge -y cloud-init snapd unattended-upgrades
+    rm -rf /etc/cloud
   else
     read -n 1 -s -r -p "This script is will only work on Debian or Ubuntu. Press any key to exit."
     exit
@@ -31,8 +33,8 @@ read -p "Enter a hostname for this server. : " serv
 hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 apt update
-apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client cloud-init
-rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /etc/cloud
+apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client
+rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp
 apt install -y networkd-dispatcher policykit-1 openssh-server ufw
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
