@@ -27,6 +27,7 @@ then
 fi
 
 #initialize
+echo "0 4 * * 1 /sbin/reboot" | crontab -
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 clear
