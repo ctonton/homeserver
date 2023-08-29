@@ -49,13 +49,6 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl -q enable filebrowser
-tee /root/fixpermi.sh > /dev/null <<'EOT'
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
-exit
-EOT
-chmod +x /root/fixpermi.sh
 
 #ngrok
 echo
@@ -132,6 +125,13 @@ echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
+tee /root/fixpermi.sh > /dev/null <<'EOT'
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOT
+chmod +x /root/fixpermi.sh
 echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
