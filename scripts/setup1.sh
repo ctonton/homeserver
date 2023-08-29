@@ -18,6 +18,7 @@ ExecStart=/usr/local/bin/wsdd -s -4
 [Install]
 WantedBy=multi-user.target
 EOT
+systemctl -q enable wsdd
 tee /root/fixpermi.sh > /dev/null <<'EOT'
 #!/bin/bash
 chmod -R 777 /srv/NAS/Public
@@ -103,14 +104,12 @@ echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2 > list
-echo "other" >> list
 echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
 echo
 PS3="Select the partition to use as storage: "
-select part in $(<list)
+select part in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2) other
 do
 if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
 then
@@ -125,7 +124,6 @@ else
 fi
 break
 done
-rm list
 
 #nfs
 echo
@@ -171,7 +169,6 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-systemctl -q enable wsdd
 
 #qbittorrent
 echo
