@@ -19,13 +19,6 @@ ExecStart=/usr/local/bin/wsdd -s -4
 WantedBy=multi-user.target
 EOT
 systemctl -q enable wsdd
-tee /root/fixpermi.sh > /dev/null <<'EOT'
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
-exit
-EOT
-chmod +x /root/fixpermi.sh
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
 chmod +x /root/http_users.sh
 
@@ -104,6 +97,13 @@ echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
+tee /root/fixpermi.sh > /dev/null <<'EOT'
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOT
+chmod +x /root/fixpermi.sh
 echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
