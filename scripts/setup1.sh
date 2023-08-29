@@ -19,8 +19,6 @@ ExecStart=/usr/local/bin/wsdd -s -4
 WantedBy=multi-user.target
 EOT
 systemctl -q enable wsdd
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
-chmod +x /root/http_users.sh
 
 #ngrok
 echo
@@ -329,6 +327,8 @@ server {
 }
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
+chmod +x /root/http_users.sh
 echo
 echo "A script called http_users.sh has been created in the root directory for modifying users of the web server."
 echo
