@@ -116,7 +116,10 @@ EOT
   read -p "Enter the domain from duckdns.org: " domain
   sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
   systemctl enable ddns
-  cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
+  if ! (crontab -l | grep -q duck.sh)
+  then
+    cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
+  fi
 fi
 
 #storage
@@ -277,7 +280,10 @@ systemctl restart qbittorrent
 exit
 EOT
 chmod +x /root/.config/qBittorrent/updatelist.sh
-cat <(crontab -l) <(echo "30 4 * * 1 /root/.config/qBittorrent/updatelist.sh") | crontab -
+if ! (crontab -l | grep -q updatelist.sh)
+then
+  cat <(crontab -l) <(echo "30 4 * * 1 /root/.config/qBittorrent/updatelist.sh") | crontab -
+fi
 
 #firefox
 echo
@@ -571,16 +577,19 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/h
 chmod +x /root/http_users.sh
 echo
 echo "A script called http_users.sh has been created in the root directory for modifying users of the web server."
-echo
-echo "Add a user for the web server now."
-loo="y"
-until [[ $loo != "y" ]]
-do
-  read -p "Enter a user name: " use
-  echo -n "${use}:" >> /etc/nginx/.htpasswd
-  openssl passwd -apr1 >> /etc/nginx/.htpasswd
-  read -p "Add another user? (y/n): " loo
-done
+if [[ ! -f /etc/nginx/.htpasswd ]]
+then
+  echo
+  echo "Add a user for the web server now."
+  loo="y"
+  until [[ $loo != "y" ]]
+  do
+    read -p "Enter a user name: " use
+    echo -n "${use}:" >> /etc/nginx/.htpasswd
+    openssl passwd -apr1 >> /etc/nginx/.htpasswd
+    read -p "Add another user? (y/n): " loo
+  done
+fi
 curl -s ipinfo.io | tr -d ' ' | tr -d '"' | tr -d ',' > ipinfo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt << ANSWERS
 $(cat ipinfo | grep "country" | cut -d ':' -f 2)
