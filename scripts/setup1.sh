@@ -98,13 +98,6 @@ echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-tee /root/fixpermi.sh > /dev/null <<'EOT'
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
-exit
-EOT
-chmod +x /root/fixpermi.sh
 echo
 lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
@@ -125,6 +118,13 @@ else
 fi
 break
 done
+tee /root/fixpermi.sh > /dev/null <<'EOT'
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOT
+chmod +x /root/fixpermi.sh
 
 #nfs
 echo
