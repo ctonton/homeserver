@@ -7,6 +7,11 @@ then
   read -n 1 -s -r -p "Run as "root" user. Press any key to exit."
   exit
 fi
+if ! wget -q --spider www.google.com
+then
+  read -n 1 -s -r -p "The network is not online. Press any key to exit."
+  exit
+fi
 if [[ $(lsb_release -is) != "Debian" ]]
 then
   if [[ $(lsb_release -is) == "Ubuntu" ]]
@@ -19,11 +24,6 @@ then
     read -n 1 -s -r -p "This script is will only work with Debian or Ubuntu. Press any key to exit."
     exit
   fi
-fi
-if ! wget -q --spider www.google.com
-then
-  read -n 1 -s -r -p "The network is not online. Press any key to exit."
-  exit
 fi
 
 #initialize
