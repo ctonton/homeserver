@@ -95,7 +95,7 @@ EOT
     qrencode -t PNG -o /root/clients/"$new.png" -r /root/clients/"$new.conf"
     qrencode -t UTF8 < /root/clients/"$new.conf"
     echo "This is a QR code containing ${new}'s client configuration."
-    echo "${new}'s configuration files is available in /root/clients"
+    echo "${new}'s configuration file is available in /root/clients"
     read -n 1 -s -r -p "Press any key to continue."
     systemctl reload wg-quick@wg0
     clear
