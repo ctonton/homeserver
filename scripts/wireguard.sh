@@ -1,8 +1,8 @@
 #!/bin/bash
 clear
 echo "Setup WireGuard"
-loo=0
-until [ $loo -eq 6 ]
+loop=0
+until [ $loop -eq 6 ]
 do
   echo
   echo "1 - Install WireGuard"
@@ -12,8 +12,8 @@ do
   echo "5 - Uninstall Wireguard"
   echo "6 - Quit"
   echo
-  read -p "Enter selection: " loo
-  if [ $loo -eq 1 ]
+  read -p "Enter selection: " loop
+  if [ $loop -eq 1 ]
   then
     apt update
     apt install -y wireguard qrencode ufw
@@ -52,10 +52,10 @@ EOT
     clear
     echo "WireGuard server is running."
   fi
-  if [ $loo -eq 2 ]
+  if [ $loop -eq 2 ]
   then
     mkdir -p /root/clients
-    read -p "Input a name for the new client: " new
+    read -p "Input a name for the new client: " client
     key=$(wg genkey)
     psk=$(wg genpsk)
     ip6=$(cat /etc/wireguard/wg0.conf | grep Address | awk '{print $4}' | cut -c-16)
@@ -70,14 +70,14 @@ EOT
       exit
     fi
     tee -a /etc/wireguard/wg0.conf > /dev/null << EOT
-#BEGIN_$new
+#BEGIN_$client
 [Peer]
 PublicKey = $(wg pubkey <<< $key)
 PresharedKey = $psk
 AllowedIPs = 10.10.100.${octet}/32, ${ip6}${octet}/128
-#END_$new
+#END_$client
 EOT
-    tee /root/clients/${new}.conf > /dev/null << EOT
+    tee /root/clients/${client}.conf > /dev/null << EOT
 [Interface]
 Address = 10.10.100.${octet}/24, ${ip6}${octet}/64
 DNS = 8.8.8.8, 8.8.4.4
@@ -92,41 +92,41 @@ PersistentKeepalive = 25
 EOT
     clear
     echo
-    qrencode -t PNG -o /root/clients/"$new.png" -r /root/clients/"$new.conf"
-    qrencode -t UTF8 < /root/clients/"$new.conf"
-    echo "This is a QR code containing ${new}'s client configuration."
-    echo "${new}'s configuration file is available in /root/clients"
+    qrencode -t PNG -o /root/clients/"$client.png" -r /root/clients/"$client.conf"
+    qrencode -t UTF8 < /root/clients/"$client.conf"
+    echo "This is a QR code containing ${client}'s client configuration."
+    echo "${client}'s configuration file is available in /root/clients"
     read -n 1 -s -r -p "Press any key to continue."
     systemctl reload wg-quick@wg0
     clear
-    echo "$new added"
+    echo "$client added"
   fi
-    if [ $loo -eq 3 ]
+  if [ $loop -eq 3 ]
   then
     PS3="Select the name of the client to display: "
-    select use in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
+    select client in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
     do
-      qrencode -t UTF8 < /root/clients/"$use.conf"
-      echo "This is a QR code containing ${use}'s client configuration."
+      qrencode -t UTF8 < /root/clients/"$client.conf"
+      echo "This is a QR code containing ${client}'s client configuration."
       break
     done
     clear
     echo "Setup WireGuard"
   fi
-  if [ $loo -eq 4 ]
+  if [ $loop -eq 4 ]
   then
     PS3="Select the name of the client to remove: "
-    select old in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
+    select client in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
     do
-      sed -i "/#BEGIN_$old/,/#END_$old/d" /etc/wireguard/wg0.conf
-      rm /root/clients/$old.*
+      sed -i "/#BEGIN_$client/,/#END_$client/d" /etc/wireguard/wg0.conf
+      rm /root/clients/$client.*
       systemctl reload wg-quick@wg0
       break
     done
     clear
-    echo "$old removed"
+    echo "$client removed"
   fi
-  if [ $loo -eq 5 ]
+  if [ $loop -eq 5 ]
   then
     systemctl stop wg-quick@wg0.service
     systemctl disable wg-quick@wg0.service
