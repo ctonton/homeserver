@@ -12,9 +12,9 @@ sudo tee /etc/auto.master > /dev/null <<EOT
 +auto.master
 /-  /etc/auto.nfs  browse
 EOT
-read -p "Enter the IP address of the NFS server: " nfsip
+read -p "Enter the address of the NFS server: " nfsip
 sudo tee /etc/auto.nfs > /dev/null <<EOT
-/mnt/Public  -fstype=nfs,rw,sync,soft,intr  ${nfsip}:/srv/NAS/Public
+/mnt/Public  -fstype=nfs,rw,sync,soft,intr,retrans=1,retry=0  ${nfsip}:/srv/NAS/Public
 EOT
 sudo service autofs reload
 rm -df ~/Public
