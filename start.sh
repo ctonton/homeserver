@@ -17,11 +17,6 @@ then
   read -n 1 -s -r -p "This script does not work with $(lsb_release -is). Press any key to exit."
   exit
 fi
-if [[ $(lsb_release -is) == "Ubuntu" ]]
-then
-  add-apt-repository -y ppa:mozillateam/ppa
-  add-apt-repository -y ppa:qbittorrent-team/qbittorrent-stable
-fi
 
 #initialize
 adapt=$(ls /sys/class/net | grep ^e)
@@ -34,6 +29,11 @@ clear
 read -p "Enter a hostname for this server. : " serv
 hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
+if [[ $(lsb_release -is) == "Ubuntu" ]]
+then
+  add-apt-repository -y ppa:mozillateam/ppa
+  add-apt-repository -y ppa:qbittorrent-team/qbittorrent-stable
+fi
 apt update
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client openvpn unattended-upgrades cloud-init firefox needrestart
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /var/log/unattended-upgrades /etc/cloud
