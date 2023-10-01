@@ -69,16 +69,17 @@ else
   tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
 #!/bin/bash
 old=0
-new=$(ip route | grep "$IFACE proto kernel" | cut -d " " -f 1)
+new=$(ip route | grep "adapter proto kernel" | cut -d " " -f 1)
 if [ $old != $new ]
 then
   ufw delete allow from $old
   ufw allow from $new
   ufw reload
-  sed -i "s~$old~$new~g" $0
+  sed -i "s~$old~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
 fi
 exit
 EOT
+  sed -i "s/adapter/$(ip route | awk '/default/ { print $5 }')/g" /etc/networkd-dispatcher/routable.d/30-fixufw
   chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
 fi
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
