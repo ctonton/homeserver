@@ -24,6 +24,9 @@ then
 fi
 
 #initialize
+adapt=$(ls /sys/class/net | grep ^e)
+gate=$(ip route | awk '/default/ { print $3 }')
+add=$(echo $gate | cut -d "." -f 1-3)
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
@@ -42,11 +45,11 @@ mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
 tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf > /dev/null <<EOT
 [Service]
 ExecStart=
-ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=$(ip route | awk '/default/ { print $5 }') --timeout=30
+ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=$adapt --timeout=30
 EOT
 tee /etc/systemd/network/20-wired.network > /dev/null <<EOT
 [Match]
-Name=$(ip route | awk '/default/ { print $5 }')
+Name=$adapt
 
 [Network]
 EOT
@@ -55,18 +58,18 @@ read -p "Do you want to setup a static IP address on this server? y/n: " cont
 if [[ $cont == "y" ]]
 then
   echo
-  read -p "Enter a static IP address for the server: $(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3)." add
+  read -p "Enter a static IP address for the server: $add." res
   tee -a /etc/systemd/network/20-wired.network > /dev/null <<EOT
-Address=$(ip route | awk '/default/ { print $3 }' | cut -d "." -f 1-3).$add/24
-Gateway=$(ip route | awk '/default/ { print $3 }'
-DNS=$(ip route | awk '/default/ { print $3 }'
+Address=$add.$res/24
+Gateway=$gate
+DNS=$gate
 EOT
 else
   echo "DHCP=yes" >> /etc/systemd/network/20-wired.network
   tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
 #!/bin/bash
 old=0
-new=$(ip route | grep "adapter proto kernel" | cut -d " " -f 1)
+new=$(ip route | grep "ADAPT proto kernel" | cut -d " " -f 1)
 if [ $old != $new ]
 then
   ufw delete allow from $old
@@ -76,7 +79,7 @@ then
 fi
 exit
 EOT
-  sed -i "s/adapter/$(ip route | awk '/default/ { print $5 }')/g" /etc/networkd-dispatcher/routable.d/30-fixufw
+  sed -i "s/ADAPT/$adapt/g" /etc/networkd-dispatcher/routable.d/30-fixufw
   chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
 fi
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
