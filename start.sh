@@ -58,9 +58,9 @@ read -p "Do you want to setup a static IP address on this server? y/n: " cont
 if [[ $cont == "y" ]]
 then
   echo
-  read -p "Enter a static IP address for the server: $add." res
+  read -p "Enter a static IP address for the server: $add." ress
   tee -a /etc/systemd/network/20-wired.network > /dev/null <<EOT
-Address=$add.$res/24
+Address=$add.$ress/24
 Gateway=$gate
 DNS=$gate
 EOT
