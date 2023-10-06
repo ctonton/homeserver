@@ -19,6 +19,34 @@ ExecStart=/usr/local/bin/wsdd -s -4
 WantedBy=multi-user.target
 EOT
 systemctl -q enable wsdd
+tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
+case $(dpkg --print-architecture) in
+  armhf)
+    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+  arm64)
+    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-arm64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+  amd64)
+    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-amd64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+esac
+tar -xzf /root/filemanager.tar.gz -C /usr/local/bin filebrowser
+chmod +x /usr/local/bin/filebrowser
+rm /root/filemanager.tar.gz
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
+mkdir -p /root/.config
+unzip -o /root/filebrowser.zip -d /root/.config/
+rm /root/filebrowser.zip
+tee /etc/systemd/system/filebrowser.service > /dev/null <<EOT
+[Unit]
+Description=http file manager
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.json -d /root/.config/filebrowser/filebrowser.db
+[Install]
+WantedBy=multi-user.target
+EOT
+systemctl -q enable filebrowser
 
 #ngrok
 echo
@@ -266,8 +294,8 @@ tee /var/www/html/index.html > /dev/null <<EOT
 <body style="background-color:#F3F3F3;font-family:arial;text-align:center">
   <br>
   <br>
-  <a href="/files/"><img src="fs.png" alt="HTTP Server"></a>
-  <h1>File Server</h1>   
+  <a href="/filebrowser"><img src="fs.png" alt="File Browser"></a>
+  <h1>File Browser</h1>
   <br>
   <br>
   <a href="/torrents/"><img src="qb.png" alt="Qbittorrent"></a>
@@ -279,12 +307,14 @@ tee /var/www/html/index.html > /dev/null <<EOT
 EOT
 chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
-ln -s /srv/NAS/Public /var/www/html/files
 tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
 ##
 map $http_upgrade $connection_upgrade {
 	default upgrade;
 	''      close;
+}
+upstream filebrowser {
+	server 127.0.0.1:8000;
 }
 ##
 server {
@@ -318,9 +348,9 @@ server {
 	index index.html;
 	autoindex on;
 
-	location /files/ {
-		try_files $uri $uri/ =404;
-		auth_basic "Restricted Content";
+	location /filebrowser {
+		proxy_pass http://filebrowser;
+  		auth_basic "Restricted Content";
 		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
