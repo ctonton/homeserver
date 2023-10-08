@@ -4,23 +4,8 @@
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm
+apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm wsdd
 apt install -y --install-recommends cups-browsed avahi-daemon avahi-autoipd
-echo "Installing wsdd."
-wget -q --show-progress https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py -O /usr/local/bin/wsdd
-chmod +x /usr/local/bin/wsdd
-tee /etc/systemd/system/wsdd.service > /dev/null <<EOT
-[Unit]
-Description=Web Services Dynamic Discovery host daemon
-After=network-online.target
-Wants=network-online.target
-[Service]
-Type=exec
-ExecStart=/usr/local/bin/wsdd -s -4
-[Install]
-WantedBy=multi-user.target
-EOT
-systemctl -q enable wsdd
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
 case $(dpkg --print-architecture) in
   armhf)
@@ -49,6 +34,40 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl -q enable filebrowser
+
+#storage
+echo
+echo "Mounting storage."
+mkdir /srv/NAS
+chmod 777 /srv/NAS
+chown nobody:nogroup /srv/NAS
+echo
+lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
+echo
+echo
+PS3="Select the partition to use as storage: "
+select part in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2) other
+do
+if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
+then
+  echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
+  mount -a
+  mkdir -p /srv/NAS/Public
+else
+  sed -i '/^#UUID/d' /etc/fstab
+  echo "#UUID=???  /srv/NAS  ???  defaults,nofail  0  0" >> /etc/fstab
+  echo "Device is not available. Manually edit fstab later."
+  read -n 1 -s -r -p "Press any key to continue without mounting storage."
+fi
+break
+done
+tee /root/fixpermi.sh > /dev/null <<'EOT'
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOT
+chmod +x /root/fixpermi.sh
 
 #ngrok
 echo
@@ -121,40 +140,6 @@ EOT
     cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
   fi
 fi
-
-#storage
-echo
-echo "Mounting storage."
-mkdir /srv/NAS
-chmod 777 /srv/NAS
-chown nobody:nogroup /srv/NAS
-echo
-lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
-echo
-echo
-PS3="Select the partition to use as storage: "
-select part in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2) other
-do
-if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
-then
-  echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
-  mount -a
-  mkdir -p /srv/NAS/Public
-else
-  sed -i '/^#UUID/d' /etc/fstab
-  echo "#UUID=???  /srv/NAS  ???  defaults,nofail  0  0" >> /etc/fstab
-  echo "Device is not available. Manually edit fstab later."
-  read -n 1 -s -r -p "Press any key to continue without mounting storage."
-fi
-break
-done
-tee /root/fixpermi.sh > /dev/null <<'EOT'
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
-exit
-EOT
-chmod +x /root/fixpermi.sh
 
 #nfs
 echo
