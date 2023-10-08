@@ -34,6 +34,8 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl -q enable filebrowser
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/wireguard.sh -O /root/wireguard.sh
+chmod +x /root/wireguard.sh
 
 #storage
 echo
