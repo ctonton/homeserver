@@ -353,7 +353,7 @@ then
   mv /var/www/html/index* /var/www/html/index.bak
 fi
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
-unzip -o /root/icons.zip -d /var/www/html
+unzip -o -q /root/icons.zip -d /var/www/html
 rm /root/icons.zip
 if [[ ! -f /etc/nginx/sites-available/default.bak ]]
 then
