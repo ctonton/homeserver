@@ -28,8 +28,9 @@ done
 #install
 echo
 echo "Installing server."
+echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends curl ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl wsdd
+apt install -y --no-install-recommends curl ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba avahi-daemon avahi-autoipd qbittorrent-nox nginx openssl wsdd ufw
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
 case $(dpkg --print-architecture) in
   armhf)
@@ -259,10 +260,7 @@ fi
 #nginx
 echo
 echo "Setting up NGINX."
-if [[ ! -f /var/www/html/index.bak ]]
-then
-  mv /var/www/html/index* /var/www/html/index.bak
-fi
+rm /var/www/html/*
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o -q /root/icons.zip -d /var/www/html
 rm /root/icons.zip
