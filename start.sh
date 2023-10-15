@@ -22,7 +22,6 @@ fi
 adapt=$(ls /sys/class/net | grep ^e)
 gate=$(ip route | awk '/default/ { print $3 }')
 add=$(echo $gate | cut -d "." -f 1-3)
-echo "0 4 * * 1 /sbin/reboot" | crontab -
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 clear
