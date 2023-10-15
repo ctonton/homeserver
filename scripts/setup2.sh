@@ -28,6 +28,7 @@ done
 #install
 echo
 echo "Installing server."
+echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm wsdd
 apt install -y --install-recommends cups-browsed avahi-daemon avahi-autoipd
@@ -346,10 +347,7 @@ systemctl enable tigervnc
 #nginx
 echo
 echo "Setting up NGINX."
-if [[ ! -f /var/www/html/index.bak ]]
-then
-  mv /var/www/html/index* /var/www/html/index.bak
-fi
+rm /var/www/html/*
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o -q /root/icons.zip -d /var/www/html
 rm /root/icons.zip
