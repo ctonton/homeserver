@@ -138,7 +138,7 @@ EOT
     ufw reload
     sed -i '/forward=1/ s/./#&/' /etc/sysctl.conf
     sed -i '/forwarding=1/ s/./#&/' /etc/sysctl.conf
-    sysctl -p
+    sysctl --system
     exit
   fi
 done
