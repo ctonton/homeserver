@@ -30,8 +30,8 @@ echo
 echo "Installing server."
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends curl firefox-esr ntfs-3g exfat-fuse tar unzip gzip nfs-kernel-server samba cups printer-driver-hpcups qbittorrent-nox nginx-extras php-fpm openssl tigervnc-standalone-server novnc jwm wsdd
-apt install -y --install-recommends cups-browsed avahi-daemon avahi-autoipd
+apt install -y --no-install-recommends cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox samba tar tigervnc-standalone-server unzip wsdd
+apt install -y --install-recommends avahi-autoipd avahi-daemon cups-browsed
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
 case $(dpkg --print-architecture) in
   armhf)
@@ -186,6 +186,24 @@ tee /etc/samba/smb.conf > /dev/null <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
+
+#minidlna
+echo
+echo "Setting up minidlna"
+if [[ ! -f /etc/minidlna.bak ]]
+then
+  mv /etc/minidlna.conf /etc/minidlna.bak
+fi
+tee /etc/minidlna.conf > /dev/null <<EOT
+media_dir=V,/srv/NAS/Public/Movies
+media_dir=V,/srv/NAS/Public/Television
+db_dir=/var/cache/minidlna
+log_dir=/var/log/minidlna
+log_level=off
+port=8200
+inotify=yes
+EOT
+systemctl enable minidlna
 
 #cups
 echo
