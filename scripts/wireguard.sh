@@ -15,19 +15,24 @@ do
   read -p "Enter selection: " loop
   if [ $loop -eq 1 ]
   then
+    if ! dpkg -l | grep -q 'linux-headers'
+    then
+      echo "Wireguard can not be installed. Install linux-headers for your system and try again."
+    fi
     apt update
     apt install -y wireguard qrencode ufw
+    PS3="Select the network adapter to use: "
+    clear
+    select eth in $(ls /sys/class/net); do break; done
+    echo
+    read -p "Enter the public ip address or name of this server: " ddns
     ufw allow ssh
     ufw --force enable
     mkdir -p /etc/wireguard
-    PS3="Select adapter to listen on: "
-    select eth in $(ls /sys/class/net); do break; done
     wg genkey | tee /etc/wireguard/private.key
     chmod go= /etc/wireguard/private.key
     cat /etc/wireguard/private.key | wg pubkey | tee /etc/wireguard/public.key
     ip6=$(echo $(date +%s%N)$(cat /var/lib/dbus/machine-id) | sha1sum | cut -c 31- | sed '1 s/./fd&/' | sed 's/..../&:/g' | sed 's/  -/:/')
-    clear
-    read -p "Enter the public ip address or name of this server: " ddns
     tee /etc/wireguard/wg0.conf > /dev/null << EOT
 [Interface]
 PrivateKey = $(cat /etc/wireguard/private.key)
