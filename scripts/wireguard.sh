@@ -46,7 +46,7 @@ EOT
     ufw reload
     sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
     sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
-    sysctl -p
+    sysctl --system
     systemctl enable wg-quick@wg0.service
     systemctl start wg-quick@wg0.service
     clear
