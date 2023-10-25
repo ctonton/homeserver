@@ -17,7 +17,7 @@ do
   then
     if ! dpkg -l | grep -q 'linux-headers'
     then
-      echo "Wireguard can not be installed. Install linux-headers for your system and try again."
+      echo "Wireguard can not run. Install linux-headers for your system and then try again."
       read -n 1 -s -r -p "Press any key to exit."
       exit
     fi
