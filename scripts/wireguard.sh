@@ -20,12 +20,12 @@ do
     ufw allow ssh
     ufw --force enable
     mkdir -p /etc/wireguard
+    PS3="Select adapter to listen on: "
+    select eth in $(ls /sys/class/net); do break; done
     wg genkey | tee /etc/wireguard/private.key
     chmod go= /etc/wireguard/private.key
     cat /etc/wireguard/private.key | wg pubkey | tee /etc/wireguard/public.key
     ip6=$(echo $(date +%s%N)$(cat /var/lib/dbus/machine-id) | sha1sum | cut -c 31- | sed '1 s/./fd&/' | sed 's/..../&:/g' | sed 's/  -/:/')
-    PS3="Select adapter to listen on: "
-    select eth in $(ls /sys/class/net); do break; done
     clear
     read -p "Enter the public ip address or name of this server: " ddns
     tee /etc/wireguard/wg0.conf > /dev/null << EOT
