@@ -18,6 +18,8 @@ do
     if ! dpkg -l | grep -q 'linux-headers'
     then
       echo "Wireguard can not be installed. Install linux-headers for your system and try again."
+      read -n 1 -s -r -p "Press any key to exit."
+      exit
     fi
     apt update
     apt install -y wireguard qrencode ufw
