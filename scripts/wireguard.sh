@@ -45,8 +45,8 @@ EOT
     ufw allow from 10.10.100.0/24
     ufw allow 51820/udp
     ufw reload
-    sed -i '/forward=1/s/^# *//' /etc/sysctl.conf
-    sed -i '/forwarding=1/s/^# *//' /etc/sysctl.conf
+    sed -i 's/.*forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+    sed -i 's/.*forwarding=1/net.ipv6.conf.all.forwarding=1/' /etc/sysctl.conf
     sysctl --system
     systemctl enable wg-quick@wg0.service
     systemctl start wg-quick@wg0.service
@@ -138,8 +138,8 @@ EOT
     ufw delete allow from 10.10.100.0/24
     ufw delete allow 51820/udp
     ufw reload
-    sed -i '/forward=1/ s/./#&/' /etc/sysctl.conf
-    sed -i '/forwarding=1/ s/./#&/' /etc/sysctl.conf
+    sed -i 's/.*forward=1/#net.ipv4.ip_forward=1/' /etc/sysctl.conf
+    sed -i 's/.*forwarding=1/#net.ipv6.conf.all.forwarding=1/' /etc/sysctl.conf
     sysctl --system
     exit
   fi
