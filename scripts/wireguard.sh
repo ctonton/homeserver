@@ -108,6 +108,7 @@ EOT
     do
       qrencode -t UTF8 < /root/clients/"$client.conf"
       echo "This is a QR code containing ${client}'s client configuration."
+      read -n 1 -s -r -p "Press any key to continue."
       break
     done
     clear
