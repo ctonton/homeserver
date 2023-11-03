@@ -27,7 +27,8 @@ do
     clear
     select eth in $(ls /sys/class/net); do break; done
     echo
-    read -p "Enter the public ip address or name of this server: " ddns
+    read -p "Enter the public ip address or name of this server: "
+    echo $REPLY > /etc/wireguard/endpoint
     ufw allow ssh
     ufw --force enable
     mkdir -p /etc/wireguard
@@ -66,7 +67,7 @@ EOT
     read -p "Input a name for the new client: " client
     key=$(wg genkey)
     psk=$(wg genpsk)
-    ip6=$(cat /etc/wireguard/wg0.conf | grep Address | awk '{print $4}' | cut -c-16)
+    ip6=$(cat /etc/wireguard/wg0.conf | grep -m 1 Address | awk '{print $4}' | cut -c-16)
     octet=2
     while grep 'AllowedIPs' /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"
     do
@@ -78,12 +79,11 @@ EOT
       exit
     fi
     tee -a /etc/wireguard/wg0.conf > /dev/null << EOT
-#BEGIN_$client
 [Peer]
 PublicKey = $(wg pubkey <<< $key)
 PresharedKey = $psk
 AllowedIPs = 10.10.100.${octet}/32, ${ip6}${octet}/128
-#END_$client
+Endpoint =
 EOT
     tee /root/clients/${client}.conf > /dev/null << EOT
 [Interface]
@@ -95,7 +95,7 @@ PrivateKey = $key
 PublicKey = $(awk '/PrivateKey/ {print $3}' /etc/wireguard/wg0.conf | wg pubkey)
 PresharedKey = $psk
 AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = $(awk '/#ENDPOINT/ {print $2}' /etc/wireguard/wg0.conf):51820
+Endpoint = $(head -1 /etc/wireguard/endpoint):51820
 PersistentKeepalive = 25
 EOT
     clear
@@ -127,7 +127,9 @@ EOT
     PS3="Select the name of the client to remove: "
     select client in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
     do
-      sed -i "/#BEGIN_$client/,/#END_$client/d" /etc/wireguard/wg0.conf
+      psk=$(cat /root/clients/"$client.conf" | awk '/PresharedKey/ {print $3}')
+      line=$(cat wg0.conf | sed -n "/$psk/{=;q;}")
+      sed -i "$(expr $line - 3),$(expr $line + 2)d" /etc/wireguard/wg0.conf
       rm /root/clients/$client.*
       systemctl reload wg-quick@wg0
       break
