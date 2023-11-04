@@ -36,7 +36,7 @@ fi
 apt update
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client openvpn unattended-upgrades cloud-init firefox needrestart
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /var/log/unattended-upgrades /etc/cloud
-apt install -y networkd-dispatcher policykit-1 openssh-server ufw
+apt install -y systemd-resolved networkd-dispatcher policykit-1 openssh-server ufw
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
