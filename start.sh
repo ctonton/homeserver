@@ -67,7 +67,7 @@ else
   echo "DHCP=yes" >> /etc/systemd/network/20-wired.network
   tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
 #!/bin/bash
-old=0
+old=0.0.0.0/24
 new=$(ip route | grep "ADAPT proto kernel" | cut -d " " -f 1)
 if [ $old != $new ]
 then
