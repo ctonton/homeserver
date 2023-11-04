@@ -64,7 +64,11 @@ Gateway=$gate
 DNS=$gate
 EOT
 else
-  echo "DHCP=yes" >> /etc/systemd/network/20-wired.network
+  tee -a /etc/systemd/network/20-wired.network > /dev/null <<EOT
+DHCP=yes
+LinkLocalAddressing=ipv4
+IPv4LLStartAddress=10.10.10.10/24
+EOT
   tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
 #!/bin/bash
 old=0.0.0.0/24
