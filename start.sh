@@ -51,25 +51,11 @@ tee /etc/systemd/network/20-wired.network > /dev/null <<EOT
 Name=$adapt
 
 [Network]
-EOT
-echo
-read -p "Do you want to setup a static IP address on this server? y/n: " cont
-if [[ $cont == "y" ]]
-then
-  echo
-  read -p "Enter a static IP address for the server: $add." ress
-  tee -a /etc/systemd/network/20-wired.network > /dev/null <<EOT
-Address=$add.$ress/24
-Gateway=$gate
-DNS=$gate
-EOT
-else
-  tee -a /etc/systemd/network/20-wired.network > /dev/null <<EOT
 DHCP=yes
 EOT
-  tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
+tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
 #!/bin/bash
-old=0.0.0.0/24
+old=VIEJO
 new=$(ip route | grep "ADAPT proto kernel" | cut -d " " -f 1)
 if [ $old != $new ]
 then
@@ -80,9 +66,11 @@ then
 fi
 exit
 EOT
-  sed -i "s/ADAPT/$adapt/g" /etc/networkd-dispatcher/routable.d/30-fixufw
-  chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
-fi
+new=$(ip route | grep "$adapt proto kernel" | cut -d " " -f 1)
+sed -i "s~VIEJO~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
+sed -i "s/ADAPT/$adapt/g" /etc/networkd-dispatcher/routable.d/30-fixufw
+chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
+ufw allow from $new
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
 if [[ ${mem%.*} -lt 1 ]]
 then
