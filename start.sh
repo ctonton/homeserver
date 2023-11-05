@@ -67,7 +67,7 @@ else
   tee -a /etc/systemd/network/20-wired.network > /dev/null <<EOT
 DHCP=yes
 LinkLocalAddressing=ipv4
-IPv4LLStartAddress=10.10.10.10/24
+IPv4LLStartAddress=10.10.10.10/32
 EOT
   tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
 #!/bin/bash
