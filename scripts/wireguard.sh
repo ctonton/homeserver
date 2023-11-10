@@ -28,27 +28,27 @@ do
     select eth in $(ls /sys/class/net); do break; done
     echo
     read -p "Enter the public ip address or name of this server: "
-    echo $REPLY > /etc/wireguard/endpoint
+    echo "Endpoint = $REPLY:5120" > /etc/wireguard/variables
+    ip6=$(echo $(date +%s%N)$(cat /var/lib/dbus/machine-id) | sha1sum | cut -c 31- | sed '1 s/./fd&/' | sed 's/..../&:/g' | sed 's/  -/:/')
+    echo "$ip6" >> /etc/wireguard/variables
     ufw allow ssh
     ufw --force enable
     mkdir -p /etc/wireguard
     wg genkey | tee /etc/wireguard/private.key
     chmod go= /etc/wireguard/private.key
     cat /etc/wireguard/private.key | wg pubkey | tee /etc/wireguard/public.key
-    ip6=$(echo $(date +%s%N)$(cat /var/lib/dbus/machine-id) | sha1sum | cut -c 31- | sed '1 s/./fd&/' | sed 's/..../&:/g' | sed 's/  -/:/')
     tee /etc/wireguard/wg0.conf > /dev/null << EOT
 [Interface]
-PrivateKey = $(cat /etc/wireguard/private.key)
 Address = 10.10.100.1/24, ${ip6}1/64
-ListenPort = 51820
-SaveConfig = true
+SaveConfig = false
 PostUp = ufw route allow in on wg0 out on $eth
 PostUp = iptables -t nat -I POSTROUTING -o $eth -j MASQUERADE
 PostUp = ip6tables -t nat -I POSTROUTING -o $eth -j MASQUERADE
 PreDown = ufw route delete allow in on wg0 out on $eth
 PreDown = iptables -t nat -D POSTROUTING -o $eth -j MASQUERADE
 PreDown = ip6tables -t nat -D POSTROUTING -o $eth -j MASQUERADE
-#ENDPOINT $ddns
+ListenPort = 51820
+PrivateKey = $(cat /etc/wireguard/private.key)
 EOT
     ufw allow from 10.10.100.0/24
     ufw allow 51820/udp
@@ -67,7 +67,6 @@ EOT
     read -p "Input a name for the new client: " client
     key=$(wg genkey)
     psk=$(wg genpsk)
-    ip6=$(cat /etc/wireguard/wg0.conf | grep -m 1 Address | awk '{print $4}' | cut -c-16)
     octet=2
     while grep 'AllowedIPs' /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"
     do
@@ -79,15 +78,15 @@ EOT
       exit
     fi
     tee -a /etc/wireguard/wg0.conf > /dev/null << EOT
+
 [Peer]
 PublicKey = $(wg pubkey <<< $key)
 PresharedKey = $psk
-AllowedIPs = 10.10.100.${octet}/32, ${ip6}${octet}/128
-Endpoint =
+AllowedIPs = 10.10.100.${octet}/32, $(head -2 /etc/wireguard/variables)${octet}/128
 EOT
     tee /root/clients/${client}.conf > /dev/null << EOT
 [Interface]
-Address = 10.10.100.${octet}/24, ${ip6}${octet}/64
+Address = 10.10.100.${octet}/24, $(head -2 /etc/wireguard/variables)${octet}/64
 DNS = 8.8.8.8, 8.8.4.4
 PrivateKey = $key
 
@@ -95,7 +94,7 @@ PrivateKey = $key
 PublicKey = $(awk '/PrivateKey/ {print $3}' /etc/wireguard/wg0.conf | wg pubkey)
 PresharedKey = $psk
 AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = $(head -1 /etc/wireguard/endpoint):51820
+$(head -1 /etc/wireguard/variables)
 PersistentKeepalive = 25
 EOT
     clear
@@ -129,7 +128,7 @@ EOT
     do
       psk=$(cat /root/clients/"$client.conf" | awk '/PresharedKey/ {print $3}')
       line=$(cat wg0.conf | sed -n "/$psk/{=;q;}")
-      sed -i "$(expr $line - 3),$(expr $line + 2)d" /etc/wireguard/wg0.conf
+      sed -i "$(expr $line - 3),$(expr $line + 1)d" /etc/wireguard/wg0.conf
       rm /root/clients/$client.*
       systemctl reload wg-quick@wg0
       break
