@@ -36,7 +36,8 @@ fi
 apt update
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client openvpn unattended-upgrades cloud-init firefox needrestart
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /var/log/unattended-upgrades /etc/cloud
-apt install -y systemd-resolved networkd-dispatcher policykit-1 openssh-server ufw
+apt install -y systemd-resolved networkd-dispatcher policykit-1 openssh-server
+#apt install -y ufw
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
@@ -53,24 +54,24 @@ Name=$adapt
 [Network]
 DHCP=yes
 EOT
-tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
-#!/bin/bash
-old=VIEJO
-new=$(ip route | grep "ADAPT proto kernel" | cut -d " " -f 1)
-if [ $old != $new ]
-then
-  ufw delete allow from $old
-  ufw allow from $new
-  ufw reload
-  sed -i "s~$old~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
-fi
-exit
-EOT
-new=$(ip route | grep "$adapt proto kernel" | cut -d " " -f 1)
-sed -i "s~VIEJO~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
-sed -i "s/ADAPT/$adapt/g" /etc/networkd-dispatcher/routable.d/30-fixufw
-chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
-ufw allow from $new
+#tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
+##!/bin/bash
+#old=VIEJO
+#new=$(ip route | grep "ADAPT proto kernel" | cut -d " " -f 1)
+#if [ $old != $new ]
+#then
+#  ufw delete allow from $old
+#  ufw allow from $new
+#  ufw reload
+#  sed -i "s~$old~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
+#fi
+#exit
+#EOT
+#new=$(ip route | grep "$adapt proto kernel" | cut -d " " -f 1)
+#sed -i "s~VIEJO~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
+#sed -i "s/ADAPT/$adapt/g" /etc/networkd-dispatcher/routable.d/30-fixufw
+#chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
+#ufw allow from $new
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
 if [[ ${mem%.*} -lt 1 ]]
 then
