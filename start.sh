@@ -38,6 +38,14 @@ apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client openvpn una
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /var/log/unattended-upgrades /etc/cloud
 apt install -y systemd-resolved networkd-dispatcher policykit-1 openssh-server
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
+mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
+if [[ ${mem%.*} -lt 1 ]]
+then
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup1.sh -O /root/setup.sh
+else
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup2.sh -O /root/setup.sh
+fi
+chmod +x /root/setup.sh
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
 mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
@@ -71,14 +79,6 @@ EOT
 #sed -i "s/ADAPT/$adapt/g" /etc/networkd-dispatcher/routable.d/30-fixufw
 #chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
 #ufw allow from $new
-mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
-if [[ ${mem%.*} -lt 1 ]]
-then
-  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup1.sh -O /root/setup.sh
-else
-  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup2.sh -O /root/setup.sh
-fi
-chmod +x /root/setup.sh
 echo "bash /root/setup.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
