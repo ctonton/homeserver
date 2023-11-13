@@ -1,4 +1,13 @@
 #!/bin/bash
+if [[ ! -f /etc/nginx/.htpasswd ]]
+then
+  clear
+  echo
+  echo "No users have been created yet.
+  read -p "Enter a user name: " use
+  echo -n "${use}:" >> /etc/nginx/.htpasswd
+  openssl passwd -apr1 >> /etc/nginx/.htpasswd
+fi
 opt=0
 clear
 echo "Manage HTTP users"
