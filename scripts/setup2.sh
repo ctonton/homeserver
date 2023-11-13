@@ -30,7 +30,7 @@ echo
 echo "Installing server."
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox samba tar tigervnc-standalone-server unzip wsdd
+apt install -y --no-install-recommends cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox samba tar tigervnc-standalone-server unzip wireguard-tools wsdd
 apt install -y --install-recommends avahi-autoipd avahi-daemon cups-browsed
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
 case $(dpkg --print-architecture) in
@@ -60,8 +60,6 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl -q enable filebrowser
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/wireguard.sh -O /root/wireguard.sh
-chmod +x /root/wireguard.sh
 tee /root/fixpermi.sh > /dev/null <<'EOT'
 #!/bin/bash
 chmod -R 777 /srv/NAS/Public
