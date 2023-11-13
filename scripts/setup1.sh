@@ -30,7 +30,7 @@ echo
 echo "Installing server."
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar ufw unzip wsdd
+apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar ufw unzip wireguard-tools wsdd
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
 case $(dpkg --print-architecture) in
   armhf)
@@ -59,8 +59,6 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl -q enable filebrowser
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/wireguard.sh -O /root/wireguard.sh
-chmod +x /root/wireguard.sh
 tee /root/fixpermi.sh > /dev/null <<'EOT'
 #!/bin/bash
 chmod -R 777 /srv/NAS/Public
