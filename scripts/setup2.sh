@@ -218,8 +218,8 @@ fi
 #firefox
 echo
 echo "Setting up Firefox."
-mkdir /root/Downloads
-mkdir /root/.vnc
+mkdir -p /root/Downloads
+mkdir -p /root/.vnc
 tee /root/.vnc/xstartup > /dev/null <<EOT
 #!/bin/bash
 /usr/bin/jwm
