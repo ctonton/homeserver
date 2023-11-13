@@ -30,7 +30,7 @@ echo
 echo "Installing server."
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar ufw unzip wireguard-tools wsdd
+apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar unzip wireguard-tools wsdd
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
 case $(dpkg --print-architecture) in
   armhf)
@@ -66,78 +66,6 @@ chown -R nobody:nogroup /srv/NAS/Public
 exit
 EOT
 chmod +x /root/fixpermi.sh
-
-#ngrok
-echo
-read -p "Do you want to set up access to this server through ngrok? y/n: " cont
-if [[ $cont == "y" ]]
-then
-  echo "Installing ngrok."
-  case $(dpkg --print-architecture) in
-    armhf)
-      wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.tgz -O /root/ngrok.tgz;;
-    arm64)
-      wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz -O /root/ngrok.tgz;;
-    amd64)
-      wget -q --show-progress https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O /root/ngrok.tgz;;
-  esac
-  tar xvf ngrok.tgz -C /usr/local/bin
-  rm /root/ngrok.tgz
-  read -p "Enter your ngrok Authtoken: " auth
-  ngrok config add-authtoken $auth
-  tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
-tunnels:
-  nginx:
-    addr: 443
-    proto: http
-    schemes:
-      - https
-    inspect: false
-  ssh:
-    addr: 22
-    proto: tcp
-EOT
-  ngrok service install --config /root/.config/ngrok/ngrok.yml
-fi
-
-#ddns
-echo
-read -p "Do you want to set up ddns access to this server with Duck DNS? y/n: " cont
-if [[ $cont == "y" ]]
-then
-  echo "Installing DuckDNS."
-  mkdir /root/.ddns
-  tee /root/.ddns/duck.sh > /dev/null <<'EOT'
-#!/bin/bash
-domain=enter_domain
-token=enter_token
-ipv6addr=$(curl -s https://api6.ipify.org)
-ipv4addr=$(curl -s https://api.ipify.org)
-curl -s "https://www.duckdns.org/update?domains=$domain&token=$token&ip=$ipv4addr&ipv6=$ipv6addr"
-EOT
-  chmod +x /root/.ddns/duck.sh
-  tee /etc/systemd/system/ddns.service > /dev/null <<'EOT'
-[Unit]
-Description=DynDNS Updater services
-After=network-online.target
-Wants=network-online.target
-[Service]
-Type=simple
-ExecStart=/root/.ddns/duck.sh
-[Install]
-WantedBy=multi-user.target
-EOT
-  echo
-  read -p "Enter the token from duckdns.org: " token
-  sed -i "s/enter_token/$token/g" /root/.ddns/duck.sh
-  read -p "Enter the domain from duckdns.org: " domain
-  sed -i "s/enter_domain/$domain/g" /root/.ddns/duck.sh
-  systemctl enable ddns
-  if ! (crontab -l | grep -q duck.sh)
-  then
-    cat <(crontab -l) <(echo "0 */2 * * * /root/.ddns/duck.sh") | crontab -
-  fi
-fi
 
 #nfs
 echo
@@ -350,36 +278,19 @@ server {
 
 	location /filebrowser {
 		proxy_pass http://filebrowser;
-  		auth_basic "Restricted Content";
-		auth_basic_user_file /etc/nginx/.htpasswd;
+  		#auth_basic "Restricted Content";
+		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /torrents/ {
 		proxy_pass http://127.0.0.1:8080/;
 		proxy_buffering off;
-		auth_basic "Restricted Content";
-		auth_basic_user_file /etc/nginx/.htpasswd;
+		#auth_basic "Restricted Content";
+		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 }
 EOT
 sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
-chmod +x /root/http_users.sh
-echo
-echo "A script called http_users.sh has been created in the root directory for modifying users of the web server."
-if [[ ! -f /etc/nginx/.htpasswd ]]
-then
-  echo
-  echo "Add a user for the web server now."
-  loo="y"
-  until [[ $loo != "y" ]]
-  do
-    read -p "Enter a user name: " use
-    echo -n "${use}:" >> /etc/nginx/.htpasswd
-    openssl passwd -apr1 >> /etc/nginx/.htpasswd
-    read -p "Add another user? (y/n): " loo
-  done
-fi
 curl -s ipinfo.io | tr -d ' ' | tr -d '"' | tr -d ',' > ipinfo
 openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt << ANSWERS
 $(cat ipinfo | grep "country" | cut -d ':' -f 2)
@@ -392,14 +303,6 @@ admin@localhost
 ANSWERS
 rm ipinfo
 wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
-
-#ufw
-echo
-echo "Setting up firewall."
-ufw allow http
-ufw allow https
-ufw logging off
-ufw --force enable
 
 #cleanup
 apt -y autopurge
