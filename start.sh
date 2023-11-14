@@ -52,33 +52,15 @@ mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
 tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf > /dev/null <<EOT
 [Service]
 ExecStart=
-ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=$adapt --timeout=30
+ExecStart=/lib/systemd/systemd-networkd-wait-online --any --timeout=30
 EOT
 tee /etc/systemd/network/20-wired.network > /dev/null <<EOT
 [Match]
-Name=$adapt
+Name=e*
 
 [Network]
 DHCP=yes
 EOT
-#tee /etc/networkd-dispatcher/routable.d/30-fixufw > /dev/null <<'EOT'
-##!/bin/bash
-#old=VIEJO
-#new=$(ip route | grep "ADAPT proto kernel" | cut -d " " -f 1)
-#if [ $old != $new ]
-#then
-#  ufw delete allow from $old
-#  ufw allow from $new
-#  ufw reload
-#  sed -i "s~$old~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
-#fi
-#exit
-#EOT
-#new=$(ip route | grep "$adapt proto kernel" | cut -d " " -f 1)
-#sed -i "s~VIEJO~$new~g" /etc/networkd-dispatcher/routable.d/30-fixufw
-#sed -i "s/ADAPT/$adapt/g" /etc/networkd-dispatcher/routable.d/30-fixufw
-#chmod +x /etc/networkd-dispatcher/routable.d/30-fixufw
-#ufw allow from $new
 echo "bash /root/setup.sh" > /root/.bash_profile
 chmod +x /root/.bash_profile
 echo
