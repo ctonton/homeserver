@@ -36,7 +36,7 @@ fi
 apt update
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client openvpn unattended-upgrades cloud-init firefox needrestart ufw
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /var/log/unattended-upgrades /etc/cloud
-apt install -y systemd-resolved networkd-dispatcher policykit-1 openssh-server
+apt install -y networkd-dispatcher policykit-1 openssh-server
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
 if [[ ${mem%.*} -lt 1 ]]
