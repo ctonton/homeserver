@@ -26,5 +26,9 @@ tunnels:
     proto: tcp
 EOT
 ngrok service install --config /root/.config/ngrok/ngrok.yml
+sed -i 's/\#auth/auth/g' /etc/nginx/sites-available/default
+nginx -s reload
+wget https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
 rm $0
+bash /root/http_users.sh
 exit
