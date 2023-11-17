@@ -29,8 +29,6 @@ else
     break
   done
 fi
-gate=$(ip route | awk '/default/ { print $3 }')
-add=$(echo $gate | cut -d "." -f 1-3)
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 clear
