@@ -19,7 +19,16 @@ then
 fi
 
 #initialize
-adapt=$(ls /sys/class/net | grep ^e)
+if [[ $(ls /sys/class/net | grep ^e | wc -w) == 1 ]]
+then
+  adapt=$(ls /sys/class/net | grep ^e)
+else
+  PS3="Select the network adapter that this server uses to connect: "
+  select adapt in $(ls /sys/class/net | grep ^e)
+  do
+    break
+  done
+fi
 gate=$(ip route | awk '/default/ { print $3 }')
 add=$(echo $gate | cut -d "." -f 1-3)
 dpkg-reconfigure locales
@@ -52,11 +61,11 @@ mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
 tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf > /dev/null <<EOT
 [Service]
 ExecStart=
-ExecStart=/lib/systemd/systemd-networkd-wait-online --any --timeout=30
+ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=$adapt --timeout=30
 EOT
 tee /etc/systemd/network/20-wired.network > /dev/null <<EOT
 [Match]
-Name=e*
+Name=$adapt
 
 [Network]
 DHCP=yes
