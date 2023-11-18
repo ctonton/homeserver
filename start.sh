@@ -32,7 +32,7 @@ then
   adapt=$(ls /sys/class/net | grep ^e)
 else
   ip route
-  PS3="Select the network adapter that this server uses to connect: "
+  PS3="Select the network adapter that this server will use to connect: "
   select adapt in $(ls /sys/class/net | grep ^e)
   do
     break
