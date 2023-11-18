@@ -46,7 +46,7 @@ apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client openvpn una
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /var/log/unattended-upgrades /etc/cloud
 apt install -y networkd-dispatcher policykit-1 openssh-server
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-mem=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1000000}')
+mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo)
 if [[ ${mem%.*} -lt 1 ]]
 then
   wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup1.sh -O /root/setup.sh
