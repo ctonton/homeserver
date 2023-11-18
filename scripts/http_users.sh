@@ -2,8 +2,8 @@
 if [[ ! -f /etc/nginx/.htpasswd ]]
 then
   clear
-  echo
   echo "No users have been created yet."
+  echo
   read -p "Enter a user name: " use
   echo -n "${use}:" > /etc/nginx/.htpasswd
   openssl passwd -apr1 >> /etc/nginx/.htpasswd
