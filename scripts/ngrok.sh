@@ -10,7 +10,7 @@ case $(dpkg --print-architecture) in
 esac
 tar xvf ngrok.tgz -C /usr/local/bin
 rm /root/ngrok.tgz
-rm /root/.config/ngrok/ngrok.yml
+rm -rf /root/.config/ngrok
 read -p "Enter your ngrok Authtoken: " auth
 ngrok config add-authtoken $auth
 tee -a /root/.config/ngrok/ngrok.yml > /dev/null <<EOT
@@ -26,6 +26,7 @@ tunnels:
     proto: tcp
 EOT
 ngrok service install --config /root/.config/ngrok/ngrok.yml
+systemctl start ngrok
 sed -i 's/\#auth/auth/g' /etc/nginx/sites-available/default
 nginx -s reload
 wget https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
