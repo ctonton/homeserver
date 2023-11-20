@@ -22,7 +22,7 @@ do
       read -p "Enter a user name: " use
       read -p "Enter a password: " pass
       line=$(echo -e "      - \"$use:$pass\"")
-      sed -i "/basic/a\$line"
+      sed -i "/basic/a\\$line" /root/.config/ngrok/ngrok.yml
       clear
       echo "$use added"
       ;;
