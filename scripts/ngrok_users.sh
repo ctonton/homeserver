@@ -1,7 +1,6 @@
 #!/bin/bash
 if [[ ! -f /root/.config/ngrok/ngrok.yml ]]
 then
-  clear
   echo "NGROK not installed."
   exit
 fi
