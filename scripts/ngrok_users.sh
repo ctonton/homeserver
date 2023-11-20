@@ -5,6 +5,11 @@ then
   echo "NGROK not installed."
   exit
 fi
+if ! grep -q 'basic' /root/.config/ngrok/ngrok.yml
+then
+  line=$(echo -e "    basic_auth:")
+  sed -i "/inspect/a\\$line" /root/.config/ngrok/ngrok.yml
+fi
 opt=0
 clear
 echo "Manage HTTP users"
