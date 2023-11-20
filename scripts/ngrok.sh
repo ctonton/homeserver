@@ -29,8 +29,8 @@ ngrok service install --config /root/.config/ngrok/ngrok.yml
 systemctl start ngrok
 sed -i 's/\#auth/auth/g' /etc/nginx/sites-available/default
 nginx -s reload
-wget https://github.com/ctonton/homeserver/raw/main/scripts/http_users.sh -O /root/http_users.sh
-chmod +x /root/http_users.sh
+wget https://github.com/ctonton/homeserver/raw/main/scripts/ngrok_users.sh -O /root/ngrok_users.sh
+chmod +x /root/ngrok_users.sh
 rm $0
-bash /root/http_users.sh
+bash /root/ngrok_users.sh
 exit
