@@ -7,7 +7,7 @@ then
 fi
 opt=0
 clear
-echo "Manage HTTP users"
+echo "Manage NGROK users"
 until [ $opt -eq 4 ]
 do
   echo
