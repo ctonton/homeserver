@@ -60,13 +60,10 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl -q enable filebrowser
-tee /root/fixpermi.sh > /dev/null <<'EOT'
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
-exit
-EOT
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/fixpermi.sh -O /root/fixpermi.sh
 chmod +x /root/fixpermi.sh
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/ngrok.sh -O /root/ngrok.sh
+chmod +x /root/ngrok.sh
 
 #nfs
 echo
