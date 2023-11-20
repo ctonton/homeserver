@@ -5,11 +5,6 @@ then
   echo "NGROK not installed."
   exit
 fi
-if ! grep -q 'basic' /root/.config/ngrok/ngrok.yml
-then
-  line=$(echo -e "    basic_auth:")
-  sed -i "/inspect/a\\$line" /root/.config/ngrok/ngrok.yml
-fi
 opt=0
 clear
 echo "Manage HTTP users"
@@ -24,6 +19,11 @@ do
   read -p "Enter selection: " opt
   case $opt in
     1)
+      if ! grep -q 'basic' /root/.config/ngrok/ngrok.yml
+      then
+        base=$(echo -e "    basic_auth:")
+        sed -i "/inspect/a\\$base" /root/.config/ngrok/ngrok.yml
+      fi
       read -p "Enter a user name: " use
       read -p "Enter a password: " pass
       line=$(echo -e "      - \"$use:$pass\"")
