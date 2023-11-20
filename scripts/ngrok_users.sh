@@ -27,6 +27,7 @@ do
       read -p "Enter a password: " pass
       line=$(echo -e "      - \"$use:$pass\"")
       sed -i "/basic/a\\$line" /root/.config/ngrok/ngrok.yml
+      systemctl restart ngrok
       clear
       echo "$use added"
       ;;
@@ -37,6 +38,7 @@ do
         sed -i "/$use/d" /root/.config/ngrok/ngrok.yml
         break
       done
+      systemctl restart ngrok
       clear
       echo "$use removed"
       ;;
