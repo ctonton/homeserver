@@ -21,7 +21,6 @@ tunnels:
     schemes:
       - https
     inspect: false
-    basic_auth:
   ssh:
     addr: 22
     proto: tcp
