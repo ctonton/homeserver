@@ -21,14 +21,13 @@ tunnels:
     schemes:
       - https
     inspect: false
+    basic_auth:
   ssh:
     addr: 22
     proto: tcp
 EOT
 ngrok service install --config /root/.config/ngrok/ngrok.yml
 systemctl start ngrok
-sed -i 's/\#auth/auth/g' /etc/nginx/sites-available/default
-nginx -s reload
 wget https://github.com/ctonton/homeserver/raw/main/scripts/ngrok_users.sh -O /root/ngrok_users.sh
 chmod +x /root/ngrok_users.sh
 rm $0
