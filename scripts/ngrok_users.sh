@@ -21,7 +21,7 @@ do
     1)
       read -p "Enter a user name: " use
       read -p "Enter a password: " pass
-      line=$(echo "      - "$use:$pass""
+      line=$(echo -e "      - "$use:$pass"")
       sed -i "/basic/a\$line"
       clear
       echo "$use added"
