@@ -7,7 +7,7 @@ fi
 sudo umount -q /mnt/part1
 sudo umount -q /mnt/part2
 clear
-lsblk -o NAME,TYPE,SIZE,LABEL
+lsblk -o NAME,FSTYPE,SIZE,LABEL
 echo
 echo
 PS3="Select the partition to copy FROM: "
@@ -77,44 +77,30 @@ do
 done
 echo
 echo
-if [ -d $mount2/$dir ]
-then
-  echo "**WARNING**"
-  echo "The data in $mount2/$dir will be irreversibly changed."
-  read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
-  case $cont in
-    dry)
-      sudo rsync -ahn --delete --stats $mount1/$dir/ $mount2/$dir
-      read -p "Do you want to commit these changes (y/n)? " comt
-      if [ $comt == y ]
-      then
-        sudo rsync -ahW --delete-before --info=progress2 $mount1/$dir/ $mount2/$dir
-      else
-        echo "No changes made."
-      fi;;
-    yes)
-      read -p "Are you sure (y/n)? " comt
-      if [ $comt == y ]
-      then
-        sudo rsync -ahW --delete-before --info=progress2 $mount1/$dir/ $mount2/$dir
-      else
-        echo "No changes made."
-      fi;;
-    *)
-      echo "No changes made.";;
-  esac
-else
-  echo "$dir does not exist on destination."
-  read -p "Are you sure that you want to continue (y/n)? " comt
-  if [ $comt == y ]
-  then
-    mkdir -p $mount2/$dir
-    cd $mount1/$dir
-    tar cf - . | pv -br | (cd $mount2/$dir && tar xvf -)
-  else
-    echo "No changes made."
-  fi
-fi
+echo "**WARNING**"
+echo "The data in $mount2/$dir will be irreversibly changed."
+read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
+case $cont in
+  dry)
+    sudo rsync -ahvn --delete --stats $mount1/$dir/ $mount2/$dir
+    read -p "Do you want to commit these changes (y/n)? " comt
+    if [ $comt == y ]
+    then
+      sudo rsync -ahvW --delete-before --info=progress2 $mount1/$dir/ $mount2/$dir
+    else
+      echo "No changes made."
+    fi;;
+  yes)
+    read -p "Are you sure (y/n)? " comt
+    if [ $comt == y ]
+    then
+      sudo rsync -ahvW --delete-before --info=progress2 $mount1/$dir/ $mount2/$dir
+    else
+      echo "No changes made."
+    fi;;
+  *)
+    echo "No changes made.";;
+esac
 sudo umount -q /mnt/part2
 sudo umount -q /mnt/part1
 sudo rmdir /mnt/part2 2>&-
