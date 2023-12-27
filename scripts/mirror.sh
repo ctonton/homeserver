@@ -10,10 +10,8 @@ clear
 lsblk -o NAME,TYPE,SIZE,LABEL
 echo
 echo
-lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //' > list
-echo "network" >> list
 PS3="Select the partition to copy FROM: "
-select part1 in $(<list)
+select part1 in network $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //')
 do
   if [ $part1 == "network" ]
   then
@@ -36,10 +34,18 @@ do
 done
 echo
 echo
-sed -i "/$part1/d" list
 PS3="Select the partition to copy TO: "
-select part2 in $(<list)
+select part2 in network $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //')
 do
+  if [ $part2 == $part1 ]
+  then
+    echo "Can not mirror $part1 to $part2"
+    sudo umount -q /mnt/part2
+    sudo umount -q /mnt/part1
+    sudo rmdir /mnt/part2 2>&-
+    sudo rmdir /mnt/part1 2>&-
+    exit
+  fi
   if [ $part2 == "network" ]
   then
     read -p "Enter the IP address of the NFS server: " nfs
@@ -61,48 +67,56 @@ do
 done
 echo
 echo
-ls $mount1/Public > list
-sed -i -e 's/^/Public\//' list
 PS3="Select directory to mirror: "
-select dir in Public $(<list)
+select dir in Public $(ls $mount1/Public | sed -e 's/^/Public\//')
 do
-  if [ ! -z $dir ]
+  if [ -n $dir ]
   then
     break
   fi
 done
 echo
 echo
-echo "**WARNING**"
-echo "The data in $mount2/$dir will be irreversibly changed."
-read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
-case $cont in
-  dry)
-    sudo rsync -auPn --delete $mount1/$dir/ $mount2/$dir
-    read -p "Do you want to commit these changes (y/n)? " comt
-    if [ $comt == y ]
-    then
-      sudo rsync -auP --delete-before --inplace $mount1/$dir/ $mount2/$dir
-    else
-      echo "No changes made"
-    fi
-    ;;
-  yes)
-    read -p "Are you sure (y/n)? " comt
-    if [ $comt == y ]
-    then
-      sudo rsync -auP --delete-before --inplace $mount1/$dir/ $mount2/$dir
-    else
-      echo "No changes made"
-    fi
-    ;;
-  *)
-    echo "No changes made"
-    ;;
-esac
+if [ -d $mount2/$dir ]
+then
+  echo "**WARNING**"
+  echo "The data in $mount2/$dir will be irreversibly changed."
+  read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
+  case $cont in
+    dry)
+      sudo rsync -ahn --delete --stats $mount1/$dir/ $mount2/$dir
+      read -p "Do you want to commit these changes (y/n)? " comt
+      if [ $comt == y ]
+      then
+        sudo rsync -ahW --delete-before --info=progress2 $mount1/$dir/ $mount2/$dir
+      else
+        echo "No changes made."
+      fi;;
+    yes)
+      read -p "Are you sure (y/n)? " comt
+      if [ $comt == y ]
+      then
+        sudo rsync -ahW --delete-before --info=progress2 $mount1/$dir/ $mount2/$dir
+      else
+        echo "No changes made."
+      fi;;
+    *)
+      echo "No changes made.";;
+  esac
+else
+  echo "$dir does not exist on destination."
+  read -p "Are you sure that you want to continue (y/n)? " comt
+  if [ $comt == y ]
+  then
+    mkdir -p $mount2/$dir
+    cd $mount1/$dir
+    tar cf - . | pv -br | (cd $mount2/$dir && tar xvf -)
+  else
+    echo "No changes made."
+  fi
+fi
 sudo umount -q /mnt/part2
 sudo umount -q /mnt/part1
-sudo rmdir /mnt/part2
-sudo rmdir /mnt/part1
-rm list
+sudo rmdir /mnt/part2 2>&-
+sudo rmdir /mnt/part1 2>&-
 exit
