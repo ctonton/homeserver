@@ -30,7 +30,7 @@ echo
 echo "Installing server."
 echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar unzip wireguard-tools wsdd
+apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar unzip wireguard-tools wsdd xfsprogs
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
 case $(dpkg --print-architecture) in
   armhf)
