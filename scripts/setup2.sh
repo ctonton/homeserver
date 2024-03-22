@@ -15,7 +15,7 @@ select part in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -
 do
 if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
 then
-  echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,x-systemd.mount-timeout=30  0  0" >> /etc/fstab
+  echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
   mount -a
   mkdir -p /srv/NAS/Public
 else
