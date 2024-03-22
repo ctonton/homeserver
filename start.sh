@@ -34,8 +34,6 @@ read -p "Enter a hostname for this server. : " serv
 hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
 apt update
-apt autopurge -y unattended-upgrades cloud-init firefox needrestart ufw
-rm -rf /var/log/unattended-upgrades /etc/cloud
 apt install -y cron openssh-server
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 echo "bash /root/setup.sh" > /root/.bash_profile
