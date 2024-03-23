@@ -19,9 +19,11 @@ then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
   mount -a
   mkdir -p /srv/NAS/Public
+  rm $0
 else
   echo "Device is not available. Manually edit fstab later."
   read -n 1 -s -r -p "Press any key to continue without mounting storage."
 fi
 break
 done
+exit
