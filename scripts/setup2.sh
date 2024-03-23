@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #storage
 echo
 echo "Mounting storage."
@@ -19,7 +20,9 @@ then
   mount -a
   mkdir -p /srv/NAS/Public
 else
-  echo "Device is not available. Manually edit fstab later."
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/storage.sh -O /root/storage.sh
+  chmod +x /root/storage.sh
+  echo "Device is unavailable. Manually edit fstab or run /root/storage.sh later."
   read -n 1 -s -r -p "Press any key to continue without mounting storage."
 fi
 break
