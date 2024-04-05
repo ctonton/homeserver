@@ -11,7 +11,7 @@ lsblk -o NAME,FSTYPE,SIZE,LABEL
 echo
 echo
 PS3="Select the partition to copy FROM: "
-select part1 in network $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //')
+select part1 in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //') network
 do
   if [ $part1 == "network" ]
   then
@@ -35,7 +35,7 @@ done
 echo
 echo
 PS3="Select the partition to copy TO: "
-select part2 in network $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //')
+select part2 in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //') network
 do
   if [ $part2 == $part1 ]
   then
