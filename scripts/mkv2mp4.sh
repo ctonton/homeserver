@@ -1,4 +1,9 @@
 #!/bin/bash
+if ! dpkg -s ffmpeg >/dev/null 2>&1
+then
+  sudo apt update
+  sudo apt install -y ffmpeg
+fi
 shopt -s extglob
 cd Public/Downloads/Working
 for dir in *
