@@ -1,4 +1,5 @@
 #!/bin/bash
+cd working
 for dir in "A "*
 do
   if [[ "$dir" == *" - "* ]]
@@ -26,4 +27,5 @@ do
     mv "$dir" "$(echo $dir | sed 's/^The //' | sed 's/ (/, The (/')"
   fi
 done
+cd ..
 exit
