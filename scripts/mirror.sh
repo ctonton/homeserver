@@ -7,7 +7,7 @@ fi
 sudo umount -q /mnt/part1
 sudo umount -q /mnt/part2
 clear
-lsblk -o NAME,FSTYPE,SIZE,LABEL
+lsblk -o NAME,FSTYPE,SIZE,LABEL,MOUNTPOINT
 echo
 echo
 PS3="Select the partition to copy FROM: "
@@ -70,16 +70,13 @@ echo
 PS3="Select directory to mirror: "
 select dir in Public $(ls $mount1/Public | sed -e 's/^/Public\//')
 do
-  if [ -n $dir ]
-  then
-    break
-  fi
+  break
 done
 echo
 echo
 echo "**WARNING**"
 echo "The data in $mount2/$dir will be irreversibly changed."
-read -p "Type \"dry\" to test, or \"yes\" to continue: " cont
+read -p "Type \"dry\" to test, \"yes\" to commit, or \"new\" to creat a new copy: " cont
 case $cont in
   dry)
     sudo rsync -avhn --del --force --stats $mount1/$dir/ $mount2/$dir
@@ -95,6 +92,15 @@ case $cont in
     if [ $comt == y ]
     then
       sudo rsync -avhW --del --force --info=progress2 $mount1/$dir/ $mount2/$dir
+    else
+      echo "No changes made."
+    fi;;
+  new)
+    read -p "Are you sure (y/n)? " comt
+    if [ $comt == y ]
+    then
+      cd $mount1
+      sudo tar cf - $dir | (cd $mount2 && tar xvf -)
     else
       echo "No changes made."
     fi;;
