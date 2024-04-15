@@ -8,6 +8,11 @@ shopt -s extglob
 PS3="Select directory to process: "
 select dir in movie show
 do
+  if [[ ! -d $dir ]]
+  then
+    echo "Can not locate the media files."
+    exit
+  fi
   if [[ $dir == "movie" ]]
   then
     vid="movie/*/"
