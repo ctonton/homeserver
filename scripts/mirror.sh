@@ -34,37 +34,32 @@ do
 done
 echo
 echo
-PS3="Select the partition to copy TO: "
-select part2 in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //') network
-do
-  if [ $part2 == $part1 ]
+read -p "Select the partition to copy TO: " part2
+if [ $part2 == $part1 ]
+then
+  echo "Can not mirror $part1 to $part2"
+  sudo umount -q /mnt/part2
+  sudo umount -q /mnt/part1
+  sudo rmdir /mnt/part2 2>&-
+  sudo rmdir /mnt/part1 2>&-
+  exit
+fi
+if [ $part2 == "network" ]
+then
+  read -p "Enter the IP address of the NFS server: " nfs
+  sudo mkdir -p /mnt/part2
+  sudo mount $nfs:/srv/NAS /mnt/part2
+  mount2=/mnt/part2
+fi
+if [ -b /dev/$part2 ]
+then
+  if ! grep -q /dev/$part2 /proc/mounts
   then
-    echo "Can not mirror $part1 to $part2"
-    sudo umount -q /mnt/part2
-    sudo umount -q /mnt/part1
-    sudo rmdir /mnt/part2 2>&-
-    sudo rmdir /mnt/part1 2>&-
-    exit
-  fi
-  if [ $part2 == "network" ]
-  then
-    read -p "Enter the IP address of the NFS server: " nfs
     sudo mkdir -p /mnt/part2
-    sudo mount $nfs:/srv/NAS /mnt/part2
-    mount2=/mnt/part2
-    break
+    sudo mount /dev/$part2 /mnt/part2
   fi
-  if [ -b /dev/$part2 ]
-  then
-    if ! grep -q /dev/$part2 /proc/mounts
-    then
-      sudo mkdir -p /mnt/part2
-      sudo mount /dev/$part2 /mnt/part2
-    fi
-    mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
-    break
-  fi
-done
+  mount2=$(lsblk -lno MOUNTPOINT /dev/$part2)
+fi
 echo
 echo
 PS3="Select directory to mirror: "
