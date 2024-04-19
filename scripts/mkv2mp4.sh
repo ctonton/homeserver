@@ -5,26 +5,9 @@ then
   sudo apt install -y ffmpeg
 fi
 shopt -s extglob
-PS3="Select directory to process: "
-select dir in movie show
-do
-  if [[ ! -d $dir ]]
-  then
-    echo "Can not locate the media files."
-    exit
-  fi
-  if [[ $dir == "movie" ]]
-  then
-    vid="movie/*/"
-    break
-  fi
-  if [[ $dir == "show" ]]
-  then
-    vid="show/*/*/"
-    break
-  fi
-done
-for mp4 in "$vid"*.mp4
+
+function convert {
+for mp4 in *.mp4
 do
   if ffprobe -i "$mp4" -hide_banner 2>&1 | grep -q 'Subtitle:'
   then
@@ -34,7 +17,7 @@ do
   ffmpeg -i old.mp4 -hide_banner -c:a copy -c:v copy -sn -map_metadata -1 -map_chapters -1 -movflags faststart "$mp4"
   rm -f old.mp4
 done
-for mkv in "$vid"*.mkv
+for mkv in *.mkv
 do
   if ffprobe -i "$mkv" -hide_banner 2>&1 | grep -q 'Subtitle:'
   then
@@ -42,5 +25,40 @@ do
   fi
   ffmpeg -i "$mkv" -hide_banner -c:a copy -c:v copy -sn -map_metadata -1 -map_chapters -1 -movflags faststart "${mkv%.*}".mp4
 done
-rm -rf "$vid"!(*.mp4|*.srt)
+rm -rf !(*.mp4|*.srt)
+}
+
+PS3="Select directory to process: "
+select media in movie show
+do
+  case $media in
+    movie)
+      cd movie
+      for title in */
+      do
+        cd "$title"
+        convert
+        cd ..
+      done
+      cd ..
+      break;;
+    show)
+      cd show
+      for title in */
+      do
+        cd "$title"
+        for season in */
+        do
+          cd "$season"
+          convert
+          cd ..
+        done
+        cd ..
+      done
+      cd ..
+      break;;
+    *)
+      echo "Invalid Selection.";;
+  esac
+done
 exit
