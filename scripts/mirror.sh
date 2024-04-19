@@ -33,7 +33,6 @@ do
   fi
 done
 echo
-echo
 read -p "Select the partition to copy TO: " part2
 if [ $part2 == $part1 ]
 then
