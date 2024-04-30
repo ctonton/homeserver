@@ -52,6 +52,7 @@ do
     sudo mkdir -p /mnt/part2
     sudo mount $nfs:/srv/NAS /mnt/part2
     mount2=/mnt/part2
+    break
   fi
   if [ -b /dev/$part2 ]
   then
