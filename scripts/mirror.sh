@@ -76,14 +76,14 @@ echo
 echo
 echo "**WARNING**"
 echo "The data in $mount2/$dir will be irreversibly changed."
-read -p "Type \"dry\" to test, \"yes\" to commit, or \"new\" to creat a new copy: " cont
+read -p "Type \"dry\" to test, \"yes\" to commit, or \"new\" to create a new copy: " cont
 case $cont in
   dry)
     sudo rsync -avhn --del --force --stats $mount1/$dir/ $mount2/$dir
     read -p "Do you want to commit these changes (y/n)? " comt
     if [ $comt == y ]
     then
-      sudo rsync -avhW --del --force --info=progress2 $mount1/$dir/ $mount2/$dir
+      sudo rsync -avhW --delete-before --force --info=progress2 $mount1/$dir/ $mount2/$dir
     else
       echo "No changes made."
     fi;;
@@ -91,7 +91,7 @@ case $cont in
     read -p "Are you sure (y/n)? " comt
     if [ $comt == y ]
     then
-      sudo rsync -avhW --del --force --info=progress2 $mount1/$dir/ $mount2/$dir
+      sudo rsync -avhW --delete-before --force --info=progress2 $mount1/$dir/ $mount2/$dir
     else
       echo "No changes made."
     fi;;
