@@ -83,7 +83,7 @@ case $cont in
     read -p "Do you want to commit these changes (y/n)? " comt
     if [ $comt == y ]
     then
-      sudo rsync -avhW --delete-before --force --info=progress2 $mount1/$dir/ $mount2/$dir
+      sudo rsync -avhW --del --force --info=progress2 $mount1/$dir/ $mount2/$dir
     else
       echo "No changes made."
     fi;;
@@ -91,7 +91,7 @@ case $cont in
     read -p "Are you sure (y/n)? " comt
     if [ $comt == y ]
     then
-      sudo rsync -avhW --delete-before --force --info=progress2 $mount1/$dir/ $mount2/$dir
+      sudo rsync -avhW --del --force --info=progress2 $mount1/$dir/ $mount2/$dir
     else
       echo "No changes made."
     fi;;
