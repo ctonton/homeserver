@@ -31,7 +31,7 @@ if [[ -n $1 ]]; then
   exit 0
 fi
 echo
-echo "Transfer to a DEV (device), over LAN (unsecure), or over WAN (secure)?"
+echo "Sync to a DEV (device), over LAN (unsecure), or over WAN (secure)?"
 PS3="Select option: "
 select mode in DEV LAN WAN; do
   case $mode in
