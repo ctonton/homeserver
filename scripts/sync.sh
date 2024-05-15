@@ -26,8 +26,11 @@ if [[ -n $1 ]]; then
     rsetup
   fi
   rsync -ahW --inplace --del --force --exclude 'Downloads' /srv/NAS/Public/ root@"$remote":/srv/NAS/Public
-  old=$(grep -ao -m 1 '//.*/srv' /srv/NAS/Public/Downloads/working/MyVideos131.db | cut -d "/" -f 3)
-  sed "s/$old/$remote/g" /srv/NAS/Public/Downloads/working/MyVideos131.db | ssh root@"$remote" 'cat - >/srv/NAS/Public/Downloads/working/MyVideos131.db'
+  old=$(grep -ao -m 1 '//.*/srv' /srv/NAS/Downloads/working/sources.xml | cut -d "/" -f 3)
+  sed "s/$old/$remote/g" /srv/NAS/Downloads/working/sources.xml | ssh root@"$remote" 'cat - > /srv/NAS/Public/Downloads/working/sources.xml'
+  old=$(grep -ao -m 1 '//.*/srv' /srv/NAS/Downloads/working/MyVideos131.db | cut -d "/" -f 3)
+  sed "s/$old/$remote/g" /srv/NAS/Downloads/working/MyVideos131.db | ssh root@"$remote" 'cat - > /srv/NAS/Public/Downloads/working/MyVideos131.db'
+  ssh root@"$remote" "chmod -R 777 /srv/NAS/Public; chown -R nobody:nogroup /srv/NAS/Public"
   exit 0
 fi
 echo
