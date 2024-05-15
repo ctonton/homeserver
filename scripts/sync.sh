@@ -107,6 +107,7 @@ case $mode in
       sed "s/$old/$remote/g" "$srce"/Downloads/working/sources.xml > "$dest"/Downloads/working/sources.xml
       old=$(grep -ao -m 1 '//.*/srv' "$srce"/Downloads/working/MyVideos131.db | cut -d "/" -f 3)
       sed "s/$old/$remote/g" "$srce"/Downloads/working/MyVideos131.db > "$dest"/Downloads/working/MyVideos131.db
+      chmod -R 777 "$dest"; chown -R nobody:nogroup "$dest"
     fi
     umount /mnt/"$part2" >/dev/null 2>&1
     rmdir /mnt/part2 >/dev/null 2>&1;;
@@ -116,6 +117,7 @@ case $mode in
       sed "s/$old/$remote/g" "$srce"/Downloads/working/sources.xml | ssh root@"$remote" 'cat - > /srv/NAS/Public/Downloads/working/sources.xml'
       old=$(grep -ao -m 1 '//.*/srv' "$srce"/Downloads/working/MyVideos131.db | cut -d "/" -f 3)
       sed "s/$old/$remote/g" "$srce"/Downloads/working/MyVideos131.db | ssh root@"$remote" 'cat - > /srv/NAS/Public/Downloads/working/MyVideos131.db'
+      ssh root@"$remote" "chmod -R 777 /srv/NAS/Public; chown -R nobody:nogroup /srv/NAS/Public"
     fi
     ssh root@"$remote" 'killall rsync';;
   WAN)
@@ -124,6 +126,7 @@ case $mode in
       sed "s/$old/$remote/g" "$srce"/Downloads/working/sources.xml | ssh root@"$remote" 'cat - > /srv/NAS/Public/Downloads/working/sources.xml'
       old=$(grep -ao -m 1 '//.*/srv' "$srce"/Downloads/working/MyVideos131.db | cut -d "/" -f 3)
       sed "s/$old/$remote/g" "$srce"/Downloads/working/MyVideos131.db | ssh root@"$remote" 'cat - > /srv/NAS/Public/Downloads/working/MyVideos131.db'
+      ssh root@"$remote" "chmod -R 777 /srv/NAS/Public; chown -R nobody:nogroup /srv/NAS/Public"
     fi;;
 esac
 exit 0
