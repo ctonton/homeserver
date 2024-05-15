@@ -55,7 +55,7 @@ select mode in DEV LAN WAN; do
       echo "**CAUTION** **IMPORTANT**"
       echo "Do you want to sync FROM or TO /dev/$part2?"
       until [[ $dire == "FROM" || $dire == "TO" ]]; do
-        read -pr "Type FROM or TO here: " dire
+        read -p "Type FROM or TO here: " dire
         case $dire in
           FROM)
             srce="$(lsblk -lno MOUNTPOINT /dev/"$part2")/Public"
@@ -69,7 +69,7 @@ select mode in DEV LAN WAN; do
       done
       break;;
     LAN)
-      read -pr "Enter a valid ip address for the remote server: " remote
+      read -p "Enter a valid ip address for the remote server: " remote
       if ! ping -c 1 "$remote" >/dev/null 2>&1; then
         echo "Remote server unavailable."
         exit 64
@@ -82,7 +82,7 @@ select mode in DEV LAN WAN; do
       dest="$remote::Public"
       break;;
     WAN)
-      read -pr "Enter a valid ip address for the remote server: " remote
+      read -p "Enter a valid ip address for the remote server: " remote
       if ! ping -c 1 "$remote" >/dev/null 2>&1; then
         echo "Remote server unavailable."
         exit 64
@@ -96,7 +96,7 @@ select mode in DEV LAN WAN; do
   esac
 done
 rsync -avhn --del --stats --exclude 'Downloads' "$srce"/ "$dest"
-read -pr "Do you want to commit these changes (y/n)? " comt
+read -p "Do you want to commit these changes (y/n)? " comt
 if [ "$comt" == "y" ]; then
   rsync -avhW --inplace --del --force --progress --exclude 'Downloads' "$srce"/ "$dest"
 else
