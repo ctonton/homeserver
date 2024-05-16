@@ -1,6 +1,5 @@
 #!/bin/bash
-
-clear
+echo
 echo "Installing DuckDNS."
 mkdir /root/.ddns
 tee /root/.ddns/duck.sh > /dev/null <<'EOT'
