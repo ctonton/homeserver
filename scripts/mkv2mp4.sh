@@ -24,6 +24,7 @@ do
     ffmpeg -i "$mkv" -hide_banner -map 0:s:0 "${mkv%.*}".srt
   fi
   ffmpeg -i "$mkv" -hide_banner -c:a copy -c:v copy -sn -map_metadata -1 -map_chapters -1 -movflags faststart "${mkv%.*}".mp4
+  rm -f "$mkv"
 done
 rm -rf !(*.mp4|*.srt)
 }
