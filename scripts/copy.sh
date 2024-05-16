@@ -13,9 +13,9 @@ if [[ -n $1 ]]; then
   exit 0
 fi
 echo
-echo "Copy to a DEV (local), or over LAN (remote)?"
+echo "Copy to a DEV (device), over LAN (unsecure), or over WAN (secure)?"
 PS3="Select option: "
-select mode in DEV LAN; do
+select mode in DEV LAN WAN; do
   case $mode in
     DEV)
       echo
@@ -46,7 +46,7 @@ select mode in DEV LAN; do
             echo "Incorect input.";;
         esac
       done
-	  tar -b8 -C "$srce" -cf - . | mbuffer -s 4096 -m 128M | tar -b8 -C "$dest" -xf -
+      tar -b8 -C "$srce" -cf - . | mbuffer -s 4096 -m 128M | tar -b8 -C "$dest" -xf -
       break;;
     LAN)
       read -p "Enter a valid ip address for the remote server: " remote
@@ -58,6 +58,14 @@ select mode in DEV LAN; do
       ssh root@"$remote" "mbuffer -s 4096 -m 128M -I 7770 | tar -b8 -C /srv/NAS/Public -xf - &"
       tar -b8 -C /srv/NAS/Public -cf - . | mbuffer -s 4096 -m 128M -O "$1":7770
       ssh root@"$remote" 'killall mbuffer tar'
+      break;;
+    WAN)
+      read -p "Enter a valid ip address for the remote server: " remote
+      if ! ping -c 1 "$remote" >/dev/null 2>&1; then
+        echo "Remote server unavailable."
+        exit 64
+      fi
+      tar -b8 -C /srv/NAS/Public -cf - . | mbuffer -s 4096 -m 32M | ssh root@"remote" 'tar -b8 -C /srv/NAS/Public -xf -'
       break;;
   esac
 done
