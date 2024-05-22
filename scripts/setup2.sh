@@ -161,26 +161,24 @@ enabled=true
 program=chown -R nobody:nogroup \"%R\"
 
 [BitTorrent]
+Session\AnonymousModeEnabled=true
+Session\DefaultSavePath=/srv/NAS/Public/Downloads/
 Session\GlobalMaxSeedingMinutes=1
+Session\GlobalUPSpeedLimit=10
+Session\IPFilter=/root/.config/qBittorrent/blocklist.p2p
+Session\IPFilteringEnabled=true
+Session\MaxActiveDownloads=2
+Session\MaxActiveTorrents=3
+Session\MaxActiveUploads=1
+Session\MaxRatioAction=1
+Session\QueueingSystemEnabled=true
+Session\TempPath=/srv/NAS/Public/Downloads/
+Session\TrackerFilteringEnabled=true
 
 [LegalNotice]
 Accepted=true
 
-[Network]
-Cookies=@Invalid()
-
 [Preferences]
-Bittorrent\MaxRatioAction=1
-Connection\GlobalUPLimit=10
-Downloads\SavePath=/srv/NAS/Public/Downloads/
-Downloads\TempPath=/srv/NAS/Public/Downloads/
-IPFilter\Enabled=true
-IPFilter\File=/root/.config/qBittorrent/blocklist.p2p
-IPFilter\FilterTracker=true
-Queueing\MaxActiveDownloads=2
-Queueing\MaxActiveTorrents=3
-Queueing\MaxActiveUploads=1
-Queueing\QueueingEnabled=true
 WebUI\AuthSubnetWhitelist=0.0.0.0/0
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
