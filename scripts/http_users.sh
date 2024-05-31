@@ -16,10 +16,13 @@ do
       read -p "Enter a user name: " use
       if [[ -f /etc/nginx/.htpasswd ]]; then
         echo -n "${use}:" >> /etc/nginx/.htpasswd
+        openssl passwd -apr1 >> /etc/nginx/.htpasswd
       else
         echo -n "${use}:" > /etc/nginx/.htpasswd
+        openssl passwd -apr1 >> /etc/nginx/.htpasswd
+        sed -i 's/#auth_basic/auth_basic/g' /etc/nginx/sites-available/default
+        nginx -s reload /dev/null
       fi
-      openssl passwd -apr1 >> /etc/nginx/.htpasswd
       clear
       echo "$use added"
       ;;
@@ -32,6 +35,8 @@ do
         done
         if [ -z "$(cat ${file_name})" ]; then
           rm /etc/nginx/.htpasswd
+          sed -i 's/auth_basic/#auth_basic/g' /etc/nginx/sites-available/default
+          nginx -s reload /dev/null
         fi
         clear
         echo "$use removed"
@@ -41,8 +46,13 @@ do
       fi
       ;;
     3)
-      clear
-      cat /etc/nginx/.htpasswd | cut -d ':' -f 1
+      if [[ -f /etc/nginx/.htpasswd ]]; then
+        clear
+        cat /etc/nginx/.htpasswd | cut -d ':' -f 1
+      else
+        clear
+        echo "No users exist."
+      fi
       ;;
     *)
       clear
