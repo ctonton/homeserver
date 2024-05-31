@@ -21,7 +21,7 @@ do
         echo -n "${use}:" > /etc/nginx/.htpasswd
         openssl passwd -apr1 >> /etc/nginx/.htpasswd
         sed -i 's/#auth_basic/auth_basic/g' /etc/nginx/sites-available/default
-        nginx -s reload /dev/null
+        systemctl restart nginx
       fi
       clear
       echo "$use added"
@@ -36,7 +36,7 @@ do
         if [ -z "$(cat ${file_name})" ]; then
           rm /etc/nginx/.htpasswd
           sed -i 's/auth_basic/#auth_basic/g' /etc/nginx/sites-available/default
-          nginx -s reload /dev/null
+          systemctl restart nginx
         fi
         clear
         echo "$use removed"
