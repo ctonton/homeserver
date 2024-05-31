@@ -1,13 +1,4 @@
 #!/bin/bash
-if [[ ! -f /etc/nginx/.htpasswd ]]
-then
-  clear
-  echo "No users have been created yet."
-  echo
-  read -p "Enter a user name: " use
-  echo -n "${use}:" > /etc/nginx/.htpasswd
-  openssl passwd -apr1 >> /etc/nginx/.htpasswd
-fi
 opt=0
 clear
 echo "Manage HTTP users"
@@ -23,20 +14,31 @@ do
   case $opt in
     1)
       read -p "Enter a user name: " use
-      echo -n "${use}:" >> /etc/nginx/.htpasswd
+      if [[ -f /etc/nginx/.htpasswd ]]; then
+        echo -n "${use}:" >> /etc/nginx/.htpasswd
+      else
+        echo -n "${use}:" > /etc/nginx/.htpasswd
+      fi
       openssl passwd -apr1 >> /etc/nginx/.htpasswd
       clear
       echo "$use added"
       ;;
     2)
-      PS3="Enter a number: "
-      select use in $(cat /etc/nginx/.htpasswd | cut -d ':' -f 1)
-      do
-        sed -i "/$use/d" /etc/nginx/.htpasswd
-        break
-      done
-      clear
-      echo "$use removed"
+      if [[ -f /etc/nginx/.htpasswd ]]; then
+        PS3="Enter a number: "
+        select use in $(cat /etc/nginx/.htpasswd | cut -d ':' -f 1); do
+          sed -i "/$use/d" /etc/nginx/.htpasswd
+          break
+        done
+        if [ -z "$(cat ${file_name})" ]; then
+          rm /etc/nginx/.htpasswd
+        fi
+        clear
+        echo "$use removed"
+      else
+        clear
+        echo "No users exist."
+      fi
       ;;
     3)
       clear
