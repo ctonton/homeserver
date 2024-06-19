@@ -46,7 +46,7 @@ select mode in DEV LAN WAN; do
             echo "Incorect input.";;
         esac
       done
-      tar -b8 -C "$srce" -cf - . | mbuffer -s 4096 -m 128M | tar -b8 -C "$dest" -xf -
+      tar -b8 -C "$srce" -cf - . | tar -b8 -C "$dest" -xf -
       break;;
     LAN)
       read -p "Enter a valid ip address for the remote server: " remote
