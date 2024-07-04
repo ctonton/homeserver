@@ -46,7 +46,7 @@ select mode in DEV LAN WAN; do
             echo "Incorect input.";;
         esac
       done
-      tar -b8 -C "$srce" -cf - . | tar -b8 -C "$dest" -xf -
+      tar -b8 --directory="$srce" --exclude=Downloads -cf - . | mbuffer -s 4K -m 128M | tar -b8 --directory="$dest" -xf -
       break;;
     LAN)
       read -p "Enter a valid ip address for the remote server: " remote
@@ -55,9 +55,10 @@ select mode in DEV LAN WAN; do
         exit 64
       fi
       ssh root@"$remote" "if ! mbuffer --version >/dev/null 2>&1; then apt update && apt install mbuffer; fi"
-      ssh root@"$remote" "mbuffer -s 4096 -m 128M -I 7770 | tar -b8 -C /srv/NAS/Public -xf - &"
-      tar -b8 -C /srv/NAS/Public -cf - . | mbuffer -s 4096 -m 128M -O "$1":7770
-      ssh root@"$remote" 'killall mbuffer tar'
+      ssh root@"$remote" "mkdir -p /srv/NAS/Public/Downloads"
+      ssh root@"$remote" "mbuffer -s 4K -m 128M -I 777 | tar --directory=/srv/NAS/Public -b8 -xf - &"
+      tar --directory=/srv/NAS/Public --exclude=Downloads -b8 -cf - . | mbuffer -s 4k -m 128M -O "$remote":777
+      ssh root@"$remote" "chmod -R 777 /srv/NAS/Public; chown -R nobody:nogroup /srv/NAS/Public"
       break;;
     WAN)
       read -p "Enter a valid ip address for the remote server: " remote
@@ -65,7 +66,8 @@ select mode in DEV LAN WAN; do
         echo "Remote server unavailable."
         exit 64
       fi
-      tar -b8 -C /srv/NAS/Public -cf - . | mbuffer -s 4096 -m 32M | ssh root@"remote" 'tar -b8 -C /srv/NAS/Public -xf -'
+      tar -b8 --directory=/srv/NAS/Public --exclude=Downloads -cf - . | mbuffer -s 4K -m 32M | ssh root@"$remote" "tar -b8 --directory=/srv/NAS/Public -xf -"
+      ssh root@"$remote" "chmod -R 777 /srv/NAS/Public; chown -R nobody:nogroup /srv/NAS/Public"
       break;;
   esac
 done
