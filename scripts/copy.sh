@@ -2,16 +2,6 @@
 if ! mbuffer --version >/dev/null 2>&1; then
   apt update && apt install -y mbuffer
 fi
-if [[ -n $1 ]]; then
-  if ! ping -c 1 "$1" >/dev/null 2>&1; then
-    exit 64
-  fi
-  ssh root@"$1" "if ! mbuffer --version >/dev/null 2>&1; then apt update && apt install mbuffer; fi"
-  ssh root@"$1" "mbuffer -s 4096 -m 128M -I 7770 | tar -b8 -C /srv/NAS/Public -xf - &"
-  tar -b8 -C /srv/NAS/Public -cf - . | mbuffer -s 4096 -m 128M -O "$1":7770
-  ssh root@"$1" 'killall mbuffer tar'
-  exit 0
-fi
 echo
 echo "Copy to a DEV (device), over LAN (unsecure), or over WAN (secure)?"
 PS3="Select option: "
