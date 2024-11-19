@@ -2,8 +2,7 @@
 clear
 echo "Setup WireGuard"
 loop=0
-until [ $loop -eq 6 ]
-do
+until [ $loop -eq 6 ]; do
   echo
   echo "1 - Install WireGuard"
   echo "2 - Add client"
@@ -13,10 +12,8 @@ do
   echo "6 - Quit"
   echo
   read -p "Enter selection: " loop
-  if [ $loop -eq 1 ]
-  then
-    if ! dpkg -l | grep -q 'linux-headers'
-    then
+  if [[ $loop -eq 1 ]]; then
+    if ! dpkg -l | grep -q 'linux-headers'; then
       echo "Wireguard can not run. Install linux-headers for your system and then try again."
       read -n 1 -s -r -p "Press any key to exit."
       exit
@@ -61,23 +58,17 @@ EOT
     clear
     echo "WireGuard server is running."
   fi
-  if [ $loop -eq 2 ]
-  then
+  if [[ $loop -eq 2 ]]; then
     mkdir -p /root/clients
     read -p "Input a name for the new client: " client
     key=$(wg genkey)
     psk=$(wg genpsk)
     octet=2
-    while grep 'AllowedIPs' /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"
-    do
-      (( octet++ ))
-    done
-    if [[ "$octet" -eq 255 ]]
-    then
+    while grep 'AllowedIPs' /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"; do (( octet++ )); done
+    if [[ "$octet" -eq 255 ]]; then
       echo "253 clients are already configured. The WireGuard internal subnet is full!"
-      exit
-    fi
-    tee -a /etc/wireguard/wg0.conf > /dev/null << EOT
+    else
+      tee -a /etc/wireguard/wg0.conf > /dev/null << EOT
 
 [Peer]
 PublicKey = $(wg pubkey <<< $key)
@@ -97,47 +88,39 @@ AllowedIPs = 0.0.0.0/0, ::/0
 $(head -1 /etc/wireguard/variables)
 PersistentKeepalive = 25
 EOT
-    clear
-    echo
-    qrencode -t PNG -o /root/clients/"$client.png" -r /root/clients/"$client.conf"
-    qrencode -t UTF8 < /root/clients/"$client.conf"
-    echo "This is a QR code containing ${client}'s client configuration."
-    echo "${client}'s configuration file is available in /root/clients"
-    read -n 1 -s -r -p "Press any key to continue."
-    systemctl reload wg-quick@wg0
-    clear
-    echo "$client added"
-  fi
-  if [ $loop -eq 3 ]
-  then
-    PS3="Select the name of the client to display: "
-    select client in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
-    do
+      clear
+      echo
+      qrencode -t PNG -o /root/clients/"$client.png" -r /root/clients/"$client.conf"
       qrencode -t UTF8 < /root/clients/"$client.conf"
       echo "This is a QR code containing ${client}'s client configuration."
+      echo "${client}'s configuration file is available in /root/clients"
       read -n 1 -s -r -p "Press any key to continue."
-      break
-    done
+      systemctl reload wg-quick@wg0
+      clear
+      echo "$client added"
+    fi
+  fi
+  if [[ $loop -eq 3 ]]; then
+    PS3="Select the name of the client to display: "
+    select client in $(ls /root/clients | grep '.conf' | cut -d '.' -f1); do break; done
+    qrencode -t UTF8 < /root/clients/"$client.conf"
+    echo "This is a QR code containing ${client}'s client configuration."
+    read -n 1 -s -r -p "Press any key to continue."
     clear
     echo "Setup WireGuard"
   fi
-  if [ $loop -eq 4 ]
-  then
+  if [[ $loop -eq 4 ]]; then
     PS3="Select the name of the client to remove: "
-    select client in $(ls /root/clients | grep '.conf' | cut -d '.' -f1)
-    do
-      psk=$(cat /root/clients/"$client.conf" | awk '/PresharedKey/ {print $3}')
-      line=$(cat wg0.conf | sed -n "/$psk/{=;q;}")
-      sed -i "$(expr $line - 3),$(expr $line + 1)d" /etc/wireguard/wg0.conf
-      rm /root/clients/$client.*
-      systemctl reload wg-quick@wg0
-      break
-    done
+    select client in $(ls /root/clients | grep '.conf' | cut -d '.' -f1); do break; done
+    psk=$(cat /root/clients/"$client.conf" | awk '/PresharedKey/ {print $3}')
+    line=$(cat wg0.conf | sed -n "/$psk/{=;q;}")
+    sed -i "$(expr $line - 3),$(expr $line + 1)d" /etc/wireguard/wg0.conf
+    rm /root/clients/$client.*
+    systemctl reload wg-quick@wg0
     clear
     echo "$client removed"
   fi
-  if [ $loop -eq 5 ]
-  then
+  if [[ $loop -eq 5 ]]; then
     systemctl stop wg-quick@wg0.service
     systemctl disable wg-quick@wg0.service
     rm -rf /root/clients
@@ -149,7 +132,6 @@ EOT
     sed -i 's/.*forward=1/#net.ipv4.ip_forward=1/' /etc/sysctl.conf
     sed -i 's/.*forwarding=1/#net.ipv6.conf.all.forwarding=1/' /etc/sysctl.conf
     sysctl --system
-    exit
   fi
 done
 exit
