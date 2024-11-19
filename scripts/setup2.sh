@@ -44,7 +44,7 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/fil
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
 rm /root/filebrowser.zip
-tee /etc/systemd/system/filebrowser.service > /dev/null <<EOT
+cat >/etc/systemd/system/filebrowser.service <<EOT
 [Unit]
 Description=http file manager
 After=network-online.target
@@ -58,18 +58,13 @@ EOT
 systemctl -q enable filebrowser
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/fixpermi.sh -O /root/fixpermi.sh
 chmod +x /root/fixpermi.sh
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/ngrok.sh -O /root/ngrok.sh
-chmod +x /root/ngrok.sh
 
 #nfs
 echo
 echo "Setting up NFS."
-if [[ ! -f /etc/exports.bak ]]
-then
-  mv /etc/exports /etc/exports.bak
-fi
+[[ -f /etc/exports.bak ]] || mv /etc/exports /etc/exports.bak
 echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
-tee /etc/avahi/services/nfs.service > /dev/null <<EOT
+cat >/etc/avahi/services/nfs.service <<EOT
 <?xml version="1.0" standalone='no'?>
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
@@ -85,11 +80,8 @@ EOT
 #samba
 echo
 echo "Setting up SAMBA."
-if [[ ! -f /etc/samba/smb.bak ]]
-then
-  mv /etc/samba/smb.conf /etc/samba/smb.bak
-fi
-tee /etc/samba/smb.conf > /dev/null <<EOT
+[[ -f /etc/samba/smb.bak ]] || mv /etc/samba/smb.conf /etc/samba/smb.bak
+cat >/etc/samba/smb.conf <<EOT
 [global]
    workgroup = WORKGROUP
    netbios name = $HOSTNAME
@@ -109,11 +101,8 @@ EOT
 #minidlna
 echo
 echo "Setting up minidlna"
-if [[ ! -f /etc/minidlna.bak ]]
-then
-  mv /etc/minidlna.conf /etc/minidlna.bak
-fi
-tee /etc/minidlna.conf > /dev/null <<EOT
+[[ -f /etc/minidlna.bak ]] || mv /etc/minidlna.conf /etc/minidlna.bak
+cat >/etc/minidlna.conf <<EOT
 media_dir=V,/srv/NAS/Public/Movies
 media_dir=V,/srv/NAS/Public/Television
 db_dir=/var/cache/minidlna
