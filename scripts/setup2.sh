@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 #storage
 echo
 echo "Mounting storage."
@@ -12,30 +11,24 @@ lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
 echo
 PS3="Select the partition to use as storage: "
-select part in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2) other
-do
-if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
+select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
+if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount
 then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
   mount -a
   mkdir -p /srv/NAS/Public
 else
-  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/storage.sh -O /root/storage.sh
-  chmod +x /root/storage.sh
-  echo "Device is unavailable. Manually edit fstab or run /root/storage.sh later."
-  read -n 1 -s -r -p "Press any key to continue without mounting storage."
+  echo "No storage mounted. Aborting server installation."
+  echo "Attatch storage to device and reboot to continue."
+  exit 1
 fi
-break
-done
 
 #install
 echo
 echo "Installing server."
-echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox samba tar tigervnc-standalone-server unzip wireguard-tools wsdd xfsprogs
-apt install -y --install-recommends avahi-autoipd avahi-daemon cups-browsed
-tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
+apt install -y avahi-autoipd avahi-daemon cups-browsed cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox samba tar tigervnc-standalone-server unzip wireguard-tools wsdd xfsprogs
+tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
     wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
