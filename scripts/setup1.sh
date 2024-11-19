@@ -27,8 +27,8 @@ fi
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar unzip wireguard-tools wsdd xfsprogs
-tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
+apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar unzip wsdd xfsprogs
+tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
     wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
@@ -44,7 +44,7 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/fil
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
 rm /root/filebrowser.zip
-tee /etc/systemd/system/filebrowser.service > /dev/null <<EOT
+cat >/etc/systemd/system/filebrowser.service <<EOT
 [Unit]
 Description=http file manager
 After=network-online.target
@@ -214,6 +214,7 @@ upstream filebrowser {
 server {
 listen 80 default_server;
 listen [::]:80 default_server;
+
 	location / {
 	return 301 https://$host$request_uri;
 	}
