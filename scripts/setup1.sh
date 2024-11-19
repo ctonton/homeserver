@@ -11,11 +11,16 @@ lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
 echo
 PS3="Select the partition to use as storage: "
-select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}') other; do break; done
-if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount; then
+select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
+if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount
+then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
   mount -a
   mkdir -p /srv/NAS/Public
+else
+  echo "No storage mounted. Aborting server installation."
+  echo "Attatch storage to device and reboot to continue."
+  exit 1
 fi
 
 #install
