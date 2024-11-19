@@ -21,7 +21,6 @@ fi
 #install
 echo
 echo "Installing server."
-echo "0 4 * * 1 /sbin/reboot" | crontab -
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl exfat-fuse gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox samba tar unzip wireguard-tools wsdd xfsprogs
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"//g' | sed 's/tag_name: //g')"
@@ -165,31 +164,16 @@ ExecStart=/usr/bin/qbittorrent-nox -d
 WantedBy=multi-user.target
 EOT
 systemctl enable qbittorrent
-tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
-#!/bin/bash
-wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-systemctl restart qbittorrent
-exit
-EOT
-chmod +x /root/.config/qBittorrent/updatelist.sh
-if ! (crontab -l | grep -q updatelist.sh)
-then
-  cat <(crontab -l) <(echo "30 4 * * 1 /root/.config/qBittorrent/updatelist.sh") | crontab -
-fi
 
 #nginx
 echo
 echo "Setting up NGINX."
-rm /var/www/html/*
+rm -rf /var/www/html/*
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o -q /root/icons.zip -d /var/www/html
 rm /root/icons.zip
-if [[ ! -f /etc/nginx/sites-available/default.bak ]]
-then
-  mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-fi
-tee /var/www/html/index.html > /dev/null <<EOT
+[[ -f /etc/nginx/sites-available/default.bak ]] || mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+cat >/var/www/html/index.html <<EOT
 <!DOCTYPE html>
 <html>
 <head>
@@ -212,7 +196,7 @@ tee /var/www/html/index.html > /dev/null <<EOT
 EOT
 chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
-tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
+cat >/etc/nginx/sites-available/default <<'EOT'
 ##
 map $http_upgrade $connection_upgrade {
 	default upgrade;
@@ -281,9 +265,21 @@ ANSWERS
 rm ipinfo
 wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
+#cron
+cat >/root/.update.sh <<EOT
+#/bin/bash
+wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
+apt update
+apt -y upgrade
+apt -y autopurge
+reboot
+EOT
+echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
+
 #cleanup
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
 systemctl reboot
-exit
+exit 0
