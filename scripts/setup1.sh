@@ -11,21 +11,12 @@ lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo
 echo
 PS3="Select the partition to use as storage: "
-select part in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | cut -d " " -f 2) other
-do
-if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mounts
-then
+select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}') other; do break; done
+if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount; then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
   mount -a
   mkdir -p /srv/NAS/Public
-else
-  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/storage.sh -O /root/storage.sh
-  chmod +x /root/storage.sh
-  echo "Device is unavailable. Manually edit fstab or run /root/storage.sh later."
-  read -n 1 -s -r -p "Press any key to continue without mounting storage."
 fi
-break
-done
 
 #install
 echo
@@ -63,18 +54,13 @@ EOT
 systemctl -q enable filebrowser
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/fixpermi.sh -O /root/fixpermi.sh
 chmod +x /root/fixpermi.sh
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/ngrok.sh -O /root/ngrok.sh
-chmod +x /root/ngrok.sh
 
 #nfs
 echo
 echo "Setting up NFS."
-if [[ ! -f /etc/exports.bak ]]
-then
-  mv /etc/exports /etc/exports.bak
-fi
+[[ -f /etc/exports.bak ]] || mv /etc/exports /etc/exports.bak
 echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
-tee /etc/avahi/services/nfs.service > /dev/null <<EOT
+cat >/etc/avahi/services/nfs.service <<EOT
 <?xml version="1.0" standalone='no'?>
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
@@ -90,11 +76,8 @@ EOT
 #samba
 echo
 echo "Setting up SAMBA."
-if [[ ! -f /etc/samba/smb.bak ]]
-then
-  mv /etc/samba/smb.conf /etc/samba/smb.bak
-fi
-tee /etc/samba/smb.conf > /dev/null <<EOT
+[[ -f /etc/samba/smb.bak ]] || mv /etc/samba/smb.conf /etc/samba/smb.bak
+cat >/etc/samba/smb.conf <<EOT
 [global]
    workgroup = WORKGROUP
    netbios name = $HOSTNAME
@@ -114,11 +97,8 @@ EOT
 #minidlna
 echo
 echo "Setting up minidlna"
-if [[ ! -f /etc/minidlna.bak ]]
-then
-  mv /etc/minidlna.conf /etc/minidlna.bak
-fi
-tee /etc/minidlna.conf > /dev/null <<EOT
+[[ -f /etc/minidlna.bak ]] || mv /etc/minidlna.conf /etc/minidlna.bak
+cat >/etc/minidlna.conf <<EOT
 media_dir=V,/srv/NAS/Public/Movies
 media_dir=V,/srv/NAS/Public/Television
 db_dir=/var/cache/minidlna
@@ -140,7 +120,7 @@ read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
+cat >/root/.config/qBittorrent/qBittorrent.conf <<EOT
 [AutoRun]
 enabled=true
 program=chown -R nobody:nogroup \"%R\"
@@ -170,7 +150,7 @@ WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
 WebUI\LocalHostAuth=false
 EOT
-tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
+cat >/etc/systemd/system/qbittorrent.service <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
 After=network-online.target
@@ -305,6 +285,5 @@ wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/ngi
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
-rm $0
 systemctl reboot
 exit
