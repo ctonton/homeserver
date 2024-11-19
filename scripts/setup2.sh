@@ -119,11 +119,8 @@ echo "Setting up CUPS."
 usermod -aG lpadmin root
 echo
 PS3="Enter the number for the default printer: "
-select defpr in $(lpstat -e)
-do
+select defpr in $(lpstat -e); do break; done
 lpadmin -d $defpr
-break
-done
 cupsctl --no-share-printers
 
 #qbittorrent
@@ -137,7 +134,7 @@ read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-tee /root/.config/qBittorrent/qBittorrent.conf > /dev/null <<EOT
+cat >/root/.config/qBittorrent/qBittorrent.conf <<EOT
 [AutoRun]
 enabled=true
 program=chown -R nobody:nogroup \"%R\"
@@ -167,7 +164,7 @@ WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
 WebUI\LocalHostAuth=false
 EOT
-tee /etc/systemd/system/qbittorrent.service > /dev/null <<'EOT'
+cat >/etc/systemd/system/qbittorrent.service <<'EOT'
 [Unit]
 Description=qBittorrent Command Line Client
 After=network-online.target
@@ -182,30 +179,18 @@ ExecStart=/usr/bin/qbittorrent-nox -d
 WantedBy=multi-user.target
 EOT
 systemctl enable qbittorrent
-tee /root/.config/qBittorrent/updatelist.sh > /dev/null <<EOT
-#!/bin/bash
-wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-systemctl restart qbittorrent
-exit
-EOT
-chmod +x /root/.config/qBittorrent/updatelist.sh
-if ! (crontab -l | grep -q updatelist.sh)
-then
-  cat <(crontab -l) <(echo "30 4 * * 1 /root/.config/qBittorrent/updatelist.sh") | crontab -
-fi
 
 #firefox
 echo
 echo "Setting up Firefox."
 mkdir -p /root/Downloads
 mkdir -p /root/.vnc
-tee /root/.vnc/xstartup > /dev/null <<EOT
+cat >/root/.vnc/xstartup <<EOT
 #!/bin/bash
 /usr/bin/jwm
 EOT
 chmod +x /root/.vnc/xstartup
-tee /root/.jwmrc > /dev/null <<EOT
+cat >/root/.jwmrc <<EOT
 <?xml version="1.0"?>
 <JWM>
     <Group>
@@ -243,7 +228,7 @@ tee /root/.jwmrc > /dev/null <<EOT
     <StartupCommand>/root/.ignite.sh</StartupCommand>
 </JWM>
 EOT
-tee /root/.ignite.sh > /dev/null <<'EOT'
+cat >/root/.ignite.sh <<'EOT'
 #!/bin/bash
 websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
 ecode=0
@@ -254,7 +239,7 @@ do
 done
 EOT
 chmod +x /root/.ignite.sh
-tee /etc/systemd/system/tigervnc.service > /dev/null <<'EOT'
+cat >/etc/systemd/system/tigervnc.service <<'EOT'
 [Unit]
 Description=Remote desktop service (VNC)
 After=network.target
@@ -275,11 +260,8 @@ rm /var/www/html/*
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o -q /root/icons.zip -d /var/www/html
 rm /root/icons.zip
-if [[ ! -f /etc/nginx/sites-available/default.bak ]]
-then
-  mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-fi
-tee /var/www/html/index.html > /dev/null <<EOT
+[[ -f /etc/nginx/sites-available/default.bak ]] || mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+cat >/var/www/html/index.html <<EOT
 <!DOCTYPE html>
 <html>
 <head>
@@ -340,7 +322,7 @@ tee /var/www/html/index.html > /dev/null <<EOT
 </html>
 EOT
 mkdir /var/www/html/print
-tee /var/www/html/print/index.html > /dev/null <<'EOT'
+cat >/var/www/html/print/index.html <<'EOT'
 <html>
 <body>
 
@@ -353,7 +335,7 @@ tee /var/www/html/print/index.html > /dev/null <<'EOT'
 </body>
 </html>
 EOT
-tee /var/www/html/print/print.php > /dev/null <<'EOT'
+cat >/var/www/html/print/print.php <<'EOT'
 <?php
    if(isset($_FILES['fileToUpload'])){
       $file_name = $_FILES['fileToUpload']['name'];
@@ -376,14 +358,14 @@ tee /var/www/html/print/print.php > /dev/null <<'EOT'
    }
 ?>
 EOT
-tee /var/www/html/print/.user.ini > /dev/null <<'EOT'
+cat >/var/www/html/print/.user.ini <<'EOT'
 upload_max_filesize = 10M
 post_max_size = 10M
 EOT
 chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
 ln -s /root/Downloads /var/www/html/egg
-tee /etc/nginx/sites-available/default > /dev/null <<'EOT'
+cat >/etc/nginx/sites-available/default <<'EOT'
 ##
 map $http_upgrade $connection_upgrade {
 	default upgrade;
@@ -492,6 +474,18 @@ admin@localhost
 ANSWERS
 rm ipinfo
 wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
+
+#cron
+cat >/root/.update.sh <<EOT
+#/bin/bash
+wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
+apt update
+apt -y upgrade
+apt -y autopurge
+reboot
+EOT
+echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
 
 #cleanup
 apt -y autopurge
