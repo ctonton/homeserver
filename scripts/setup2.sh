@@ -234,6 +234,7 @@ websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
 ecode=0
 while [[ $ecode -eq 0 ]]
 do
+  wait -n
   DISPLAY=:1 firefox -private-window
   ecode=$?
 done
