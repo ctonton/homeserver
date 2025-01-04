@@ -27,7 +27,7 @@ fi
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y avahi-autoipd avahi-daemon cups-browsed cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox samba tar tigervnc-standalone-server unzip wireguard-tools wsdd xfsprogs
+apt install -y avahi-autoipd avahi-daemon cups-browsed cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox rsync samba tar tigervnc-standalone-server unzip wireguard-tools wsdd xfsprogs
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
@@ -56,7 +56,18 @@ ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.js
 WantedBy=multi-user.target
 EOT
 systemctl -q enable filebrowser
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/fixpermi.sh -O /root/fixpermi.sh
+cat >/etc/rsyncd.conf <<EOT
+[Public]
+  path = /srv/NAS/Public
+  comment = Public Directory
+  read only = false
+EOT
+cat >/root/fixpermi.sh <<EOT
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOT
 chmod +x /root/fixpermi.sh
 
 #nfs
