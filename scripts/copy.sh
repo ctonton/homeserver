@@ -22,7 +22,7 @@ case $mode in
     [[ $d == "TO" ]] && (srce="/srv/NAS"; dest="$(lsblk -lno MOUNTPOINT /dev/"$part2")")
     tar -b8 --directory="$srce" --exclude='Downloads' -cf - Public | mbuffer -s 4K -m 256M | tar -b8 --directory="$dest" -xf -
     mkdir -p "$dest/Public/Downloads"; chmod -R 777 "$dest/Public"; chown -R nobody:nogroup "$dest/Public"
-    [ -d /mnt/part2 ] && (umount /mnt/part2; rmdir /mnt/part2)
+    [[ -d /mnt/part2 ]] && (umount /mnt/part2; rmdir /mnt/part2)
   ;;
   LAN)
     read -p "Enter a valid ip address for the remote server: " remote
