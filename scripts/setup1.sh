@@ -206,36 +206,40 @@ EOT
 chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
 cat >/etc/nginx/sites-available/default <<'EOT'
-##
+
 map $http_upgrade $connection_upgrade {
 	default upgrade;
-	''      close;
+	'' close;
 }
+
 upstream filebrowser {
 	server 127.0.0.1:8000;
 }
-##
+
 server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
 	client_max_body_size 10M;
 	root /var/www/html;
 	index index.html;
-	autoindex on;
+
+	location /Public {
+		alias /srv/NAS/Public;
+		autoindex on;
+		sendfile on;
+		sendfile_max_chunk 1m;
+  	}
 
 	location /filebrowser {
 		proxy_pass http://filebrowser;
-  		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /torrents/ {
 		proxy_pass http://127.0.0.1:8080/;
 		proxy_buffering off;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 }
+
 EOT
 
 #cleanup
