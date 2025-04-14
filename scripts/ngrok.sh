@@ -38,12 +38,10 @@ endpoints:
       url: 80
 EOT
       ngrok service install --config /root/.config/ngrok/ngrok.yml
-      systemctl start ngrok
-      clear; echo "NGROK installed"
-    ;;
+      ngrok service start
+      clear; echo "NGROK installed";;
     2)
-      if ! grep -q 'traffic' /root/.config/ngrok/ngrok.yml; then
-        tee -a /root/.config/ngrok/ngrok.yml >/dev/null <<EOT
+      grep -q 'traffic_policy' /root/.config/ngrok/ngrok.yml || tee -a /root/.config/ngrok/ngrok.yml >/dev/null <<EOT
     traffic_policy:
       on_http_request:
         - actions:
@@ -51,35 +49,30 @@ EOT
             config:
               credentials:
 EOT
-      fi
       read -p "Enter a user name: " user
       read -p "Enter a password: " pass
       echo -e "                - $user:$pass" >>/root/.config/ngrok/ngrok.yml
-      systemctl restart ngrok
-      clear; echo "$user added"
-    ;;
+      ngrok service restart
+      clear; echo "$user added";;
     3)
-      clear
-      awk 'f;/credentials/{f=1}' /home/clayton/.config/ngrok/ngrok.yml | sed 's/^[ \-]*//'
-    ;;
+      clear; awk '/credentials/,EOF' /root/.config/ngrok/ngrok.yml | sed 's/^[ \-]*//';;
     4)
       PS3="Enter a number: "
-      select user in $(awk 'f;/credentials/{f=1}' /home/clayton/.config/ngrok/ngrok.yml | sed 's/^[ \-]*//' | cut -d ':' -f 1)
+      select user in $(awk 'f;/credentials/{f=1}' /root/.config/ngrok/ngrok.yml | sed 's/^[ \-]*//' | cut -d ':' -f 1)
       do
         sed -i "/$user/d" /root/.config/ngrok/ngrok.yml
-        break
       done
-      systemctl restart ngrok
-      clear
-      echo "$user removed"
-    ;;
+      [ -z $(awk 'f;/credentials/{f=1}' /root/.config/ngrok/ngrok.yml) ] && sed -i '/traffic_policy/,$d' /root/.config/ngrok/ngrok.yml
+      ngrok service restart
+      clear; echo "$user removed";;
     5)
       ngrok service uninstall
       rm -rf /root/.config/ngrok
-      rm -f /usr/local/bin/ngrok
+      rm -f /usr/local/bin/ngrok;;
+    6)
+      break;;
     *)
-      clear
-      echo "Invalid selection"
-      ;;
+      clear; echo "Invalid selection";;
   esac
 done
+exit
