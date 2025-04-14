@@ -26,7 +26,7 @@ fi
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit curl gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox rsync samba tar unzip wsdd xfsprogs
+apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit curl gzip nfs-kernel-server nginx ntfs-3g qbittorrent-nox rsync samba tar unzip wsdd xfsprogs
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
