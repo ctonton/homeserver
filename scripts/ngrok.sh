@@ -58,9 +58,9 @@ EOT
       systemctl restart ngrok
       clear; echo "$user added"
     ;;
-    2)
+    3)
       clear
-      cat /root/.config/ngrok/ngrok.yml | grep '-' | sed '1d' | cut -d '"' -f 2 | cut -d ':' -f 1
+      awk 'f;/credentials/{f=1}' /home/clayton/.config/ngrok/ngrok.yml | sed 's/^[ \-]*//'
     ;;
     3)
       PS3="Enter a number: "
