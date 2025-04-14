@@ -30,16 +30,16 @@ apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit curl
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
-    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+    wget -q --show-progress --inet4-only "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
   arm64)
-    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-arm64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+    wget -q --show-progress --inet4-only "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-arm64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
   amd64)
-    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-amd64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+    wget -q --show-progress --inet4-only "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-amd64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
 esac
 tar -xzf /root/filemanager.tar.gz -C /usr/local/bin filebrowser
 chmod +x /usr/local/bin/filebrowser
 rm /root/filemanager.tar.gz
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
+wget -q --show-progress --inet4-only https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
 rm /root/filebrowser.zip
@@ -72,7 +72,7 @@ chmod +x /root/fixpermi.sh
 #cron
 cat >/root/.update.sh <<EOT
 #/bin/bash
-wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q --show-progress --inet4-only https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 apt update
 apt -y upgrade
@@ -183,7 +183,7 @@ systemctl enable qbittorrent
 echo
 echo "Setting up NGINX."
 rm -rf /var/www/html/*
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
+wget -q --show-progress --inet4-only https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o -q /root/icons.zip -d /var/www/html
 rm /root/icons.zip
 [[ -f /etc/nginx/sites-available/default.bak ]] || mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
