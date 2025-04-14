@@ -12,21 +12,16 @@ echo
 echo
 PS3="Select the partition to use as storage: "
 select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
-if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount; then
-  echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
-  mount -a
-  mkdir -p /srv/NAS/Public
-else
-  echo "No storage mounted. Aborting server installation."
-  echo "Attatch storage to device and reboot to continue."
-  exit 1
-fi
+grep -q /dev/$part /proc/mount && (echo "No storage mounted. Aborting server installation."; echo "Attatch storage to device and reboot to continue."; exit 1)
+echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
+mount -a
+mkdir -p /srv/NAS/Public
 
 #install
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit curl gzip nfs-kernel-server nginx ntfs-3g qbittorrent-nox rsync samba tar unzip wsdd xfsprogs
+apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit nfs-kernel-server nginx qbittorrent-nox rsync samba wsdd
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
