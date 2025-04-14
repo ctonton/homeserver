@@ -26,8 +26,7 @@ clear
 read -p "Enter a hostname for this server. : " serv
 hostnamectl set-hostname $serv
 sed -i "s/$HOSTNAME/$serv/g" /etc/hosts
-apt update
-apt install -y cron networkd-dispatcher policykit-1 openssh-server systemd-resolved
+apt update && apt install -y cron networkd-dispatcher policykit-1 openssh-server systemd-resolved
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client resolvconf openvpn unattended-upgrades cloud-init firefox needrestart ufw
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp /var/log/unattended-upgrades /etc/cloud
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
