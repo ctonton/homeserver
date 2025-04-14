@@ -1,9 +1,8 @@
 #!/bin/bash
-opt=0
 clear
 echo "Manage HTTP users"
-until [ $opt -eq 4 ]
-do
+opt=0
+until [[ $opt -eq 4 ]]; do
   echo
   echo "1 - Add user"
   echo "2 - Remove user"
