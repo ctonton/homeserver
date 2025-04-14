@@ -8,13 +8,14 @@ wget -q --spider www.google.com || (read -n 1 -s -r -p "The network is not onlin
 
 #initialize
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo)
-if [[ ${mem%.*} -lt 1 ]]
-then wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup1.sh -O /root/setup.sh
-else wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup2.sh -O /root/setup.sh
+if [[ ${mem%.*} -lt 1 ]]; then
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup1.sh -O /root/setup.sh
+else
+  wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/scripts/setup2.sh -O /root/setup.sh
 fi
 chmod +x /root/setup.sh
-if [[ $(ls /sys/class/net | grep ^e | wc -w) -eq 1 ]]
-then adapt=$(ls /sys/class/net | grep ^e)
+if [[ $(ls /sys/class/net | grep ^e | wc -w) -eq 1 ]]; then
+  adapt=$(ls /sys/class/net | grep ^e)
 else 
   ip route
   PS3="Select the network adapter that this server will use to connect: "
