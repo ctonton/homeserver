@@ -4,7 +4,7 @@
 clear
 [[ $EUID -ne 0 ]] && (read -n 1 -s -r -p "Run as "root" user. Press any key to exit."; exit)
 wget -q --spider www.google.com || (read -n 1 -s -r -p "The network is not online. Press any key to exit."; exit)
-[[ $(lsb_release -is) != "Debian" ]] && (read -n 1 -s -r -p "This script only works with Debian Linux. Press any key to exit." exit)
+[[ $(lsb_release -is) != "Debian" ]] && (read -n 1 -s -r -p "This script only works with Debian Linux. Press any key to exit."; exit)
 
 #initialize
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo)
