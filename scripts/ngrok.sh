@@ -1,6 +1,6 @@
 #!/bin/bash
 opt=0
-clear; echo "Manage NGROK users"
+clear; echo "Setup NGROK"
 until [[ $opt -eq 6 ]]; do
   echo
   echo "1 - Install NGROK"
@@ -62,18 +62,21 @@ EOT
       clear
       awk 'f;/credentials/{f=1}' /home/clayton/.config/ngrok/ngrok.yml | sed 's/^[ \-]*//'
     ;;
-    3)
+    4)
       PS3="Enter a number: "
-      select use in $(cat /root/.config/ngrok/ngrok.yml | grep '-' | sed '1d' | cut -d '"' -f 2 | cut -d ':' -f 1)
+      select user in $(awk 'f;/credentials/{f=1}' /home/clayton/.config/ngrok/ngrok.yml | sed 's/^[ \-]*//' | cut -d ':' -f 1)
       do
-        sed -i "/$use/d" /root/.config/ngrok/ngrok.yml
+        sed -i "/$user/d" /root/.config/ngrok/ngrok.yml
         break
       done
       systemctl restart ngrok
       clear
-      echo "$use removed"
-      ;;
-
+      echo "$user removed"
+    ;;
+    5)
+      ngrok service uninstall
+      rm -rf /root/.config/ngrok
+      rm -f /usr/local/bin/ngrok
     *)
       clear
       echo "Invalid selection"
