@@ -13,7 +13,7 @@ hostnamectl set-hostname $REPLY
 sed -i "s/$HOSTNAME/$REPLY/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
-apt update && apt install -y cron openssh-server
+apt update && apt install -y cron curl gzip ntfs-3g openssh-server tar unzip xfsprogs
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo)
 if [[ ${mem%.*} -lt 1 ]]
