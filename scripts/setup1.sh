@@ -12,8 +12,7 @@ echo
 echo
 PS3="Select the partition to use as storage: "
 select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
-if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount
-then
+if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount; then
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
   mount -a
   mkdir -p /srv/NAS/Public
@@ -27,7 +26,7 @@ fi
 echo
 echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y --no-install-recommends avahi-autoipd avahi-daemon curl gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox rsync samba tar unzip wsdd xfsprogs
+apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit curl gzip minidlna nfs-kernel-server nginx ntfs-3g openssl qbittorrent-nox rsync samba tar unzip wsdd xfsprogs
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
@@ -70,6 +69,20 @@ exit
 EOT
 chmod +x /root/fixpermi.sh
 
+#cron
+cat >/root/.update.sh <<EOT
+#/bin/bash
+wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
+apt update
+apt -y upgrade
+apt -y autopurge
+bleachbit -c --all-but-warning
+fstrim -av
+reboot
+EOT
+echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
+
 #nfs
 echo
 echo "Setting up NFS."
@@ -108,21 +121,6 @@ cat >/etc/samba/smb.conf <<EOT
    create mask = 0777
    directory mask = 0777
 EOT
-
-#minidlna
-echo
-echo "Setting up minidlna"
-[[ -f /etc/minidlna.bak ]] || mv /etc/minidlna.conf /etc/minidlna.bak
-cat >/etc/minidlna.conf <<EOT
-media_dir=V,/srv/NAS/Public/Movies
-media_dir=V,/srv/NAS/Public/Television
-db_dir=/var/cache/minidlna
-log_dir=/var/log/minidlna
-log_level=off
-port=8200
-inotify=yes
-EOT
-systemctl enable minidlna
 
 #qbittorrent
 echo
@@ -223,32 +221,8 @@ upstream filebrowser {
 }
 ##
 server {
-listen 80 default_server;
-listen [::]:80 default_server;
-
-	location / {
-	return 301 https://$host$request_uri;
-	}
-}
-##
-server {
-	listen 443 ssl http2;
-	listen [::]:443 ssl http2;
-	ssl_certificate /etc/nginx/nginx-selfsigned.crt;
-	ssl_certificate_key /etc/nginx/nginx-selfsigned.key;
-	ssl_session_timeout  10m;
-	ssl_session_cache shared:SSL:10m;
-	ssl_session_tickets off;
-	ssl_dhparam /etc/nginx/dhparam.pem;
-	ssl_protocols TLSv1.2 TLSv1.3;
-	ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-	ssl_prefer_server_ciphers off;
-	resolver 8.8.8.8 8.8.4.4 valid=300s;
-	resolver_timeout 5s;
-	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-	add_header X-Frame-Options DENY;
-	add_header X-Content-Type-Options nosniff;
-	add_header X-XSS-Protection "1; mode=block";
+	listen 80 default_server;
+	listen [::]:80 default_server;
 	client_max_body_size 10M;
 	root /var/www/html;
 	index index.html;
@@ -268,31 +242,6 @@ server {
 	}
 }
 EOT
-sed -i 's/www-data/root/g' /etc/nginx/nginx.conf
-curl -s ipinfo.io | tr -d ' ' | tr -d '"' | tr -d ',' > ipinfo
-openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt << ANSWERS
-$(cat ipinfo | grep "country" | cut -d ':' -f 2)
-$(cat ipinfo | grep "region" | cut -d ':' -f 2)
-$(cat ipinfo | grep "city" | cut -d ':' -f 2)
-NA
-NA
-localhost
-admin@localhost
-ANSWERS
-rm ipinfo
-wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
-
-#cron
-cat >/root/.update.sh <<EOT
-#/bin/bash
-wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-apt update
-apt -y upgrade
-apt -y autopurge
-reboot
-EOT
-echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
 
 #cleanup
 apt -y autopurge
