@@ -8,13 +8,13 @@ wget -q --inet4-only --spider www.google.com || (echo "The network is not online
 
 #initialize
 clear
+apt update && apt install -y cron curl gzip locales nano ntfs-3g openssh-server tar unzip xfsprogs
+sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 read -p "Enter a hostname for this server. : "
 hostnamectl set-hostname $REPLY
 sed -i "s/$HOSTNAME/$REPLY/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
-apt update && apt install -y cron curl gzip nano ntfs-3g openssh-server tar unzip xfsprogs
-sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo)
 if [[ ${mem%.*} -lt 1 ]]
 then wget -q --show-progress --inet4-only https://github.com/ctonton/homeserver/raw/main/scripts/setup1.sh -O /root/.bash_profile
