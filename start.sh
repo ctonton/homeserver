@@ -7,7 +7,7 @@ wget -q --inet4-only --spider www.google.com || (echo "The network is not online
 [[ $(lsb_release -is) == "Debian" ]] || (echo "This script only works with Debian Linux."; exit 1)
 
 #initialize
-apt update && apt install -y cron curl gzip locales nano ntfs-3g openssh-server tar tzdata unzip xfsprogs
+apt update && apt install -y cron curl exfat-fuse gzip locales nano ntfs-3g openssh-server tar tzdata unzip xfsprogs
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
 clear; read -p "Enter a hostname for this server. : "
 hostnamectl set-hostname $REPLY
