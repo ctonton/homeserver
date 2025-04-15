@@ -19,7 +19,7 @@ until [ $loop -eq 6 ]; do
       exit
     fi
     apt update
-    apt install -y wireguard qrencode ufw
+    apt install -y wireguard-tools qrencode ufw
     PS3="Select the network adapter to use: "
     clear
     select eth in $(ls /sys/class/net); do break; done
