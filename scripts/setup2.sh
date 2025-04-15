@@ -23,8 +23,8 @@ chown -R nobody:nogroup /srv/NAS/Public
 
 #install
 apt full-upgrade -y --fix-missing
-apt install -y avahi-autoipd avahi-daemon cups-browsed cups firefox-esr jwm nfs-kernel-server nginx-extras novnc openssl php-fpm printer-driver-hpcups qbittorrent-nox rsync samba tigervnc-standalone-server wireguard-tools wsdd
-
+apt install -y avahi-autoipd avahi-daemon cups-browsed cups firefox-esr jwm nfs-kernel-server nginx-extras\
+  novnc openssl php-fpm printer-driver-hpcups qbittorrent-nox rsync samba tigervnc-standalone-server wsdd
 tee /etc/rsyncd.conf >/dev/null <<EOF
 [Public]
   path = /srv/NAS/Public
@@ -182,13 +182,21 @@ cupsctl --no-share-printers
 
 #firefox
 mkdir -p /root/Downloads
-mkdir -p /root/.vnc
-cat >/root/.vnc/xstartup <<EOT
+cat >/root/.ignite.sh <<'EOT'
 #!/bin/bash
-/usr/bin/jwm
+websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
+ecode=0
+while [[ $ecode -eq 0 ]]
+do
+  wait -n
+  DISPLAY=:1 firefox -private-window
+  ecode=$?
+done
 EOT
-chmod +x /root/.vnc/xstartup
-cat >/root/.jwmrc <<EOT
+chmod +x /root/.ignite.sh
+
+#jwm
+tee /root/.jmrc <<EOF
 <?xml version="1.0"?>
 <JWM>
     <Group>
@@ -225,19 +233,15 @@ cat >/root/.jwmrc <<EOT
     <ResizeMode>opaque</ResizeMode>
     <StartupCommand>/root/.ignite.sh</StartupCommand>
 </JWM>
-EOT
-cat >/root/.ignite.sh <<'EOT'
+EOF
+
+#vnc
+mkdir -p /root/.vnc
+tee /root/.vnc/xstartup <<EOF
 #!/bin/bash
-websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
-ecode=0
-while [[ $ecode -eq 0 ]]
-do
-  wait -n
-  DISPLAY=:1 firefox -private-window
-  ecode=$?
-done
+/usr/bin/jwm
 EOT
-chmod +x /root/.ignite.sh
+chmod +x /root/.vnc/xstartup
 cat >/etc/systemd/system/tigervnc.service <<'EOT'
 [Unit]
 Description=Remote desktop service (VNC)
@@ -249,7 +253,7 @@ ExecStart=/usr/bin/tigervncserver -Log *:syslog:0 -localhost no -SecurityTypes N
 ExecStop=/usr/bin/tigervncserver -kill :1
 [Install]
 WantedBy=multi-user.target
-EOT
+EOF
 systemctl enable tigervnc
 
 #nginx
