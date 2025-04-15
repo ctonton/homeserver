@@ -1,27 +1,52 @@
 #!/bin/bash
 
 #storage
-echo
-echo "Mounting storage."
+echo; echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-echo
-lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
-echo
-echo
+echo; lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
+echo; echo
 PS3="Select the partition to use as storage: "
 select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
 grep -q /dev/$part /proc/mounts && (echo "No storage mounted. Aborting server installation."; echo "Attatch storage to device and reboot to continue."; exit 1)
 echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
-mount -a
+mount /srv/NAS
 mkdir -p /srv/NAS/Public
 
 #install
-echo
-echo "Installing server."
+echo; echo "Installing server."
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit nfs-kernel-server nginx qbittorrent-nox rsync samba wsdd
+tee /etc/rsyncd.conf >/dev/null <<EOF
+[Public]
+  path = /srv/NAS/Public
+  comment = Public Directory
+  read only = false
+EOF
+tee /root/fixpermi.sh >/dev/null <<EOF
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOF
+chmod +x /root/fixpermi.sh
+
+#cron
+tee /root/.update.sh >/dev/null <<EOF
+#/bin/bash
+wget -q --show-progress --inet4-only https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
+apt update
+apt -y upgrade
+apt -y autopurge
+bleachbit -c --all-but-warning
+fstrim -av
+reboot
+EOF
+echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
+
+#filebrowser
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
@@ -38,7 +63,7 @@ wget -q --show-progress --inet4-only https://github.com/ctonton/homeserver/raw/m
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
 rm /root/filebrowser.zip
-cat >/etc/systemd/system/filebrowser.service <<EOT
+tee /etc/systemd/system/filebrowser.service >/dev/null <<EOF
 [Unit]
 Description=http file manager
 After=network-online.target
@@ -48,42 +73,13 @@ Type=exec
 ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.json -d /root/.config/filebrowser/filebrowser.db
 [Install]
 WantedBy=multi-user.target
-EOT
+EOF
 systemctl -q enable filebrowser
-cat >/etc/rsyncd.conf <<EOT
-[Public]
-  path = /srv/NAS/Public
-  comment = Public Directory
-  read only = false
-EOT
-cat >/root/fixpermi.sh <<EOT
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
-exit
-EOT
-chmod +x /root/fixpermi.sh
-
-#cron
-cat >/root/.update.sh <<EOT
-#/bin/bash
-wget -q --show-progress --inet4-only https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-apt update
-apt -y upgrade
-apt -y autopurge
-bleachbit -c --all-but-warning
-fstrim -av
-reboot
-EOT
-echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
 
 #nfs
-echo
-echo "Setting up NFS."
 [[ -f /etc/exports.bak ]] || mv /etc/exports /etc/exports.bak
 echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
-cat >/etc/avahi/services/nfs.service <<EOT
+tee /etc/avahi/services/nfs.service >/dev/null <<EOF
 <?xml version="1.0" standalone='no'?>
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
@@ -94,13 +90,11 @@ cat >/etc/avahi/services/nfs.service <<EOT
     <txt-record>path=/srv/NAS/Public</txt-record>
   </service>
 </service-group>
-EOT
+EOF
 
 #samba
-echo
-echo "Setting up SAMBA."
 [[ -f /etc/samba/smb.bak ]] || mv /etc/samba/smb.conf /etc/samba/smb.bak
-cat >/etc/samba/smb.conf <<EOT
+tee /etc/samba/smb.conf >/dev/null <<EOF
 [global]
    workgroup = WORKGROUP
    netbios name = $HOSTNAME
@@ -115,20 +109,17 @@ cat >/etc/samba/smb.conf <<EOT
    read only = no
    create mask = 0777
    directory mask = 0777
-EOT
+EOF
 
 #qbittorrent
-echo
-echo "Setting up qBittorrent."
-echo
-echo "*** Legal Notice ***"
+echo; echo "*** Legal Notice ***"
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
 wget -q --show-progress --inet4-only https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-cat >/root/.config/qBittorrent/qBittorrent.conf <<EOT
+tee /root/.config/qBittorrent/qBittorrent.conf >/dev/null <<EOF
 [AutoRun]
 enabled=true
 program=chown -R nobody:nogroup \"%R\"
@@ -171,18 +162,16 @@ UMask=000
 ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
-EOT
+EOF
 systemctl enable qbittorrent
 
 #nginx
-echo
-echo "Setting up NGINX."
 rm -rf /var/www/html/*
 wget -q --show-progress --inet4-only https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o -q /root/icons.zip -d /var/www/html
 rm /root/icons.zip
 [[ -f /etc/nginx/sites-available/default.bak ]] || mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-cat >/var/www/html/index.html <<EOT
+tee /var/www/html/index.html >/dev/null <<EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -202,11 +191,10 @@ cat >/var/www/html/index.html <<EOT
   <br>
 </body>
 </html>
-EOT
+EOF
 chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
-cat >/etc/nginx/sites-available/default <<'EOT'
-
+tee /etc/nginx/sites-available/default >/dev/null <<'EOF'
 map $http_upgrade $connection_upgrade {
 	default upgrade;
 	'' close;
@@ -239,12 +227,11 @@ server {
 		proxy_buffering off;
 	}
 }
-
-EOT
+EOF
 
 #cleanup
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
-systemctl reboot
+reboot
 exit 0
