@@ -1,50 +1,76 @@
 #!/bin/bash
 
 #storage
-echo
-echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-echo
-lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
-echo
-echo
+clear; lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
+echo; echo
 PS3="Select the partition to use as storage: "
 select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
-if [[ -b /dev/$part ]] && ! grep -q /dev/$part /proc/mount
-then
+if grep -q /dev/$part /proc/mounts; then
+  clear; echo "WARNING. The selected block device is already mounted to $(grep $part /proc/mounts | cut -d" " -f2)."
+  echo "If you wish to continue the instalation without adding storage, type the word \"continue\"."
+  read -p ":" cont
+  [[ $cont != "continue" ]] && exit 1
+else
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
   mount -a
-  mkdir -p /srv/NAS/Public
-else
-  echo "No storage mounted. Aborting server installation."
-  echo "Attatch storage to device and reboot to continue."
-  exit 1
 fi
+mkdir -p /srv/NAS/Public
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
 
 #install
-echo
-echo "Installing server."
 apt full-upgrade -y --fix-missing
-apt install -y avahi-autoipd avahi-daemon cups-browsed cups curl exfat-fuse firefox-esr gzip jwm minidlna nfs-kernel-server nginx-extras novnc ntfs-3g openssl php-fpm printer-driver-hpcups qbittorrent-nox rsync samba tar tigervnc-standalone-server unzip wireguard-tools wsdd xfsprogs
+apt install -y avahi-autoipd avahi-daemon cups-browsed cups firefox-esr jwm nfs-kernel-server nginx-extras novnc openssl php-fpm printer-driver-hpcups qbittorrent-nox rsync samba tigervnc-standalone-server wireguard-tools wsdd
+
+tee /etc/rsyncd.conf >/dev/null <<EOF
+[Public]
+  path = /srv/NAS/Public
+  comment = Public Directory
+  read only = false
+EOF
+tee /root/fixpermi.sh >/dev/null <<EOF
+#!/bin/bash
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
+exit
+EOF
+chmod +x /root/fixpermi.sh
+
+#cron
+tee /root/.update.sh >/dev/null <<EOF
+#/bin/bash
+wget -q --show-progress --inet4-only https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
+apt update
+apt -y upgrade
+apt -y autopurge
+bleachbit -c --all-but-warning
+fstrim -av
+reboot
+EOF
+echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
+
+#filebrowser
 tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
 case $(dpkg --print-architecture) in
   armhf)
-    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+    wget -q --show-progress --inet4-only "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-armv7-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
   arm64)
-    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-arm64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+    wget -q --show-progress --inet4-only "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-arm64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
   amd64)
-    wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-amd64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
+    wget -q --show-progress --inet4-only "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-amd64-filebrowser.tar.gz" -O /root/filemanager.tar.gz;;
 esac
 tar -xzf /root/filemanager.tar.gz -C /usr/local/bin filebrowser
 chmod +x /usr/local/bin/filebrowser
 rm /root/filemanager.tar.gz
-wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
+wget -q --show-progress --inet4-only https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
 rm /root/filebrowser.zip
-cat >/etc/systemd/system/filebrowser.service <<EOT
+tee /etc/systemd/system/filebrowser.service >/dev/null <<EOF
 [Unit]
 Description=http file manager
 After=network-online.target
@@ -54,28 +80,13 @@ Type=exec
 ExecStart=/usr/local/bin/filebrowser -c /root/.config/filebrowser/filebrowser.json -d /root/.config/filebrowser/filebrowser.db
 [Install]
 WantedBy=multi-user.target
-EOT
+EOF
 systemctl -q enable filebrowser
-cat >/etc/rsyncd.conf <<EOT
-[Public]
-  path = /srv/NAS/Public
-  comment = Public Directory
-  read only = false
-EOT
-cat >/root/fixpermi.sh <<EOT
-#!/bin/bash
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
-exit
-EOT
-chmod +x /root/fixpermi.sh
 
 #nfs
-echo
-echo "Setting up NFS."
 [[ -f /etc/exports.bak ]] || mv /etc/exports /etc/exports.bak
 echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
-cat >/etc/avahi/services/nfs.service <<EOT
+tee /etc/avahi/services/nfs.service >/dev/null <<EOF
 <?xml version="1.0" standalone='no'?>
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
@@ -86,13 +97,11 @@ cat >/etc/avahi/services/nfs.service <<EOT
     <txt-record>path=/srv/NAS/Public</txt-record>
   </service>
 </service-group>
-EOT
+EOF
 
 #samba
-echo
-echo "Setting up SAMBA."
 [[ -f /etc/samba/smb.bak ]] || mv /etc/samba/smb.conf /etc/samba/smb.bak
-cat >/etc/samba/smb.conf <<EOT
+tee /etc/samba/smb.conf >/dev/null <<EOF
 [global]
    workgroup = WORKGROUP
    netbios name = $HOSTNAME
@@ -107,30 +116,17 @@ cat >/etc/samba/smb.conf <<EOT
    read only = no
    create mask = 0777
    directory mask = 0777
-EOT
-
-#cups
-echo
-echo "Setting up CUPS."
-usermod -aG lpadmin root
-echo
-PS3="Enter the number for the default printer: "
-select defpr in $(lpstat -e); do break; done
-lpadmin -d $defpr
-cupsctl --no-share-printers
+EOF
 
 #qbittorrent
-echo
-echo "Setting up qBittorrent."
-echo
-echo "*** Legal Notice ***"
+clear; echo "*** Legal Notice ***"
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
-wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
+wget -q --show-progress --inet4-only https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-cat >/root/.config/qBittorrent/qBittorrent.conf <<EOT
+tee /root/.config/qBittorrent/qBittorrent.conf >/dev/null <<EOF
 [AutoRun]
 enabled=true
 program=chown -R nobody:nogroup \"%R\"
@@ -173,12 +169,18 @@ UMask=000
 ExecStart=/usr/bin/qbittorrent-nox -d
 [Install]
 WantedBy=multi-user.target
-EOT
+EOF
 systemctl enable qbittorrent
 
-#firefox
+#cups
+usermod -aG lpadmin root
 echo
-echo "Setting up Firefox."
+PS3="Enter the number for the default printer: "
+select defpr in $(lpstat -e); do break; done
+lpadmin -d $defpr
+cupsctl --no-share-printers
+
+#firefox
 mkdir -p /root/Downloads
 mkdir -p /root/.vnc
 cat >/root/.vnc/xstartup <<EOT
@@ -472,22 +474,9 @@ ANSWERS
 rm ipinfo
 wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
 
-#cron
-cat >/root/.update.sh <<EOT
-#/bin/bash
-wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-apt update
-apt -y upgrade
-apt -y autopurge
-reboot
-EOT
-echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
-
 #cleanup
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
 rm /root/.bash_profile
-rm $0
-systemctl reboot
-exit
+reboot
+exit 0
