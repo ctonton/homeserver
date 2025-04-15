@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #storage
-echo; echo "Mounting storage."
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
@@ -13,9 +12,10 @@ grep -q /dev/$part /proc/mounts && (echo "No storage mounted. Aborting server in
 echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
 mount /srv/NAS
 mkdir -p /srv/NAS/Public
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
 
 #install
-echo; echo "Installing server."
 apt full-upgrade -y --fix-missing
 apt install -y --no-install-recommends avahi-autoipd avahi-daemon bleachbit nfs-kernel-server nginx qbittorrent-nox rsync samba wsdd
 tee /etc/rsyncd.conf >/dev/null <<EOF
