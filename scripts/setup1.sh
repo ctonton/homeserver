@@ -4,13 +4,19 @@
 mkdir /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-echo; lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
+clear; lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo; echo
 PS3="Select the partition to use as storage: "
 select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
-grep -q /dev/$part /proc/mounts && (echo "No storage mounted. Aborting server installation."; echo "Attatch storage to device and reboot to continue."; exit 1)
-echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
-mount /srv/NAS
+if grep -q /dev/$part /proc/mounts; then
+  clear; echo "WARNING. The selected block device is already mounted to $(grep $part /proc/mounts | cut -d" " -f2)."
+  echo "If you wish to continue the instalation without adding storage, type the word \"continue\"."
+  read -p ":" cont
+  [[ $cont != "continue" ]] && exit 1
+else
+  echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
+  mount -a
+fi
 mkdir -p /srv/NAS/Public
 chmod -R 777 /srv/NAS/Public
 chown -R nobody:nogroup /srv/NAS/Public
@@ -112,7 +118,7 @@ tee /etc/samba/smb.conf >/dev/null <<EOF
 EOF
 
 #qbittorrent
-echo; echo "*** Legal Notice ***"
+clear; echo "*** Legal Notice ***"
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
