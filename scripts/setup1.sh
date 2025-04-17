@@ -234,6 +234,6 @@ EOF
 #cleanup
 apt -y autopurge
 read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
-rm /root/.bash_profile
+rm -f /root/.bash_profile
 reboot
 exit 0
