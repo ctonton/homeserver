@@ -485,8 +485,6 @@ server {
 	ssl_session_tickets off;
 	ssl_dhparam /etc/nginx/dhparam.pem;
 	add_header Strict-Transport-Security "max-age=63072000" always;
-	client_max_body_size 10M;
-	upload_progress uploads 1m;
 	root /var/www/html;
 	index index.html;
 
