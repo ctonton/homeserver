@@ -97,7 +97,7 @@ arc="$(dpkg --print-architecture)"
 wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-$arc-filebrowser.tar.gz" -O /root/filebrowser.tar.gz
 tar -xzf /root/filebrowser.tar.gz -C /usr/local/bin filebrowser
 chmod +x /usr/local/bin/filebrowser
-rm /root/filemanager.tar.gz
+rm /root/filebrowser.tar.gz
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/filebrowser.zip -O /root/filebrowser.zip
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
