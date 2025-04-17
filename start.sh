@@ -12,9 +12,9 @@ apt update; apt full-upgrade
 rm -rf /var/log/unattended-upgrades
 apt install -y cron curl exfat-fuse gzip locales nano ntfs-3g openssh-server tar tzdata unzip xfsprogs
 sed -i '0,/.*PermitRootLogin.*/s//PermitRootLogin yes/' /etc/ssh/sshd_config
-clear; read -p "Enter a hostname for this server. : "
-hostnamectl set-hostname $REPLY
-sed -i "s/$HOSTNAME/$REPLY/g" /etc/hosts
+clear; read -p "Enter a hostname for this server. : " hst
+hostnamectl set-hostname $hst
+sed -i "s/$HOSTNAME/$hst/g" /etc/hosts
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo)
