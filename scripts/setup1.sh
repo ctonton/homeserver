@@ -9,8 +9,9 @@ echo; echo
 PS3="Select the partition to use as storage: "
 select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
 if grep -q /dev/$part /proc/mounts; then
-  clear; echo "WARNING. The selected block device is already mounted to $(grep $part /proc/mounts | cut -d" " -f2)."
-  echo "If you wish to continue the instalation without adding storage, type the word \"continue\"."
+  clear; echo "WARNING. The selected block device is already mounted to: "
+  grep $part /proc/mounts | cut -d" " -f2
+  echo; echo "If you wish to continue the instalation without adding storage, type the word \"continue\"."
   read -p ":" cont
   [[ $cont != "continue" ]] && exit 1
 else
