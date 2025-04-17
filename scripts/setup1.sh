@@ -115,7 +115,7 @@ EOF
 systemctl -q enable filebrowser
 
 #qbittorrent
-clear; echo "*** Legal Notice ***"
+echo; echo "*** Legal Notice ***"
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
 echo "No further notices will be issued."
 read -n 1 -s -r -p "Press any key to accept and continue..."
@@ -151,8 +151,8 @@ WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
 WebUI\LocalHostAuth=false
-EOT
-cat >/etc/systemd/system/qbittorrent.service <<'EOT'
+EOF
+tee /etc/systemd/system/qbittorrent.service <<EOF
 [Unit]
 Description=qBittorrent Command Line Client
 After=network-online.target
