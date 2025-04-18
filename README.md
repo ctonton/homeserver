@@ -7,3 +7,9 @@ Run the "setup.sh" script as "root" on a fresh Debian installation to setup a ne
 ```shell
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/setup.sh -O setup.sh && chmod +x setup.sh
 ```
+
+##Arguments
+
+-a       acknoledge all warnings
+-n host  set hostname
+-p part  set partition for storage ex. sda1
