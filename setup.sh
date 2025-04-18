@@ -26,8 +26,6 @@ wget -q --spider www.google.com || (echo "The network is not online."; exit 1)
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo) && mem=${mem%.*}
 
 #install
-apt autopurge -y unattended-upgrades
-rm -rf /var/log/unattended-upgrades
 apt update && apt full-upgrade -y --fix-missing
 pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd xfsprogs)
 [[ $mem -ge 1 ]] && pkg+=(cups-browsed cups firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups tigervnc-standalone-server)
@@ -77,7 +75,12 @@ tee /etc/rsyncd.conf <<EOF
   read only = false
 EOF
 
-#cron
+#update
+f="$(grep -l 'APT::Periodic' /etc/apt/apt.conf.d/*)"
+grep -q 'Periodic::Enable' "$f" || sed -i '1s/^/APT::Periodic::Enable "0";\n/' "$f"
+grep 'APT::Periodic' "$f" | cut -d" " -f1 >/dev/shm/list
+cat /dev/shm/list | while read l; do sed -i "s~$l.*~$l \"0\"\;~" "$f"; done
+rm -f /dev/shm/list
 tee /root/.update.sh <<EOF
 #/bin/bash
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
