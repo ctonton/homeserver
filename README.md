@@ -8,15 +8,14 @@ Run the "setup.sh" script as "root" on a fresh Debian installation to setup a ne
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/setup.sh -O setup.sh && chmod +x setup.sh
 ```
 
-## Usage
-
-To run the script without any ineruptions, use the following arguments.
-```shell
-./setup.sh -a -h hostname -p sda1)
-```
+### Options
+To run the script without any interuptions, use the following arguments.
 <br>
 -a &emsp;&emsp;&emsp;acknoledge all warnings
 <br>
 -n host &ensp;set hostname
 <br>
 -p part &ensp;set partition for storage
+```shell
+./setup.sh -a -h hostname -p sda1
+```
