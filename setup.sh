@@ -1,18 +1,8 @@
 #!/bin/bash
 
-#option
-while getopts n:p:a opt; do
-  case $opt in
-    a) acc=1;;
-    n) hst=$OPTARG;;
-    p) prt=$OPTARG;;
-    \?) echo "Error: Invalid option" && exit 1;;
-  esac
-done
-
 #function
 function finish {
-  [[ $acc -eq 1 ]] || (clear; read -n 1 -s -r -p "System needs to reboot. Press any key to do so.")
+  clear; read -n 1 -s -r -p "System needs to reboot. Press any key to do so."
   rm -f $0
   reboot
   exit 0
@@ -33,7 +23,7 @@ pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano
 apt install -y ${pkg[@]}
 
 #initialize
-[[ -n $hst ]] || (clear; read -p "Enter a hostname for this server. : " hst)
+clear; read -p "Enter a hostname for this server. : " hst
 hostnamectl set-hostname $hst
 sed -i "s/$HOSTNAME/$hst/g" /etc/hosts
 dpkg-reconfigure locales
@@ -46,12 +36,12 @@ chown nobody:nogroup /srv/NAS
 clear; lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
 echo; echo
 PS3="Select the partition to use as storage: "
-[[ -n $part ]] || (select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done)
+select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
 if grep -q /dev/$part /proc/mounts; then
   clear; echo "WARNING. The selected block device is already mounted to: "
   grep $part /proc/mounts | cut -d" " -f2
   echo; echo "If you wish to continue the instalation without adding storage, type the word \"continue\"."
-  [[ $acc -eq 1 ]] && cont="continue" || read -p ":" cont
+  read -p ":" cont
   [[ $cont == "continue" ]] || exit 1
 else
   echo "UUID=$(blkid -o value -s UUID /dev/${part})  /srv/NAS  $(blkid -o value -s TYPE /dev/${part})  defaults,nofail  0  0" >> /etc/fstab
@@ -159,7 +149,7 @@ systemctl -q enable filebrowser
 clear; echo "*** Legal Notice ***"
 echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
 echo "No further notices will be issued."
-[[ $acc -eq 1 ]] || read -n 1 -s -r -p "Press any key to accept and continue..."
+read -n 1 -s -r -p "Press any key to accept and continue..."
 mkdir -p /root/.config/qBittorrent
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
