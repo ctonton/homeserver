@@ -10,7 +10,7 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/setup.sh 
 bash setup.sh
 ```
 ### Options
-To run the script without any interuptions, use the following arguments.
+Run the script without any interuptions or additional input.
 <br>
 -a &emsp;&emsp;&emsp;acknoledge all warnings
 <br>
