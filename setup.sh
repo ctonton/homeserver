@@ -29,7 +29,7 @@ mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo) && mem=${mem%.*}
 systemctl disable unattended-upgrades --now
 apt update && apt full-upgrade -y --fix-missing
 pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd xfsprogs)
-[[ $mem -ge 1 ]] && pkg+=(cups-browsed cups firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups tigervnc-standalone-server)
+[[ $mem -lt 1 ]] || pkg+=(cups-browsed cups firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups tigervnc-standalone-server)
 apt install -y ${pkg[@]}
 
 #initialize
@@ -273,7 +273,7 @@ server {
 EOF
 
 #quit
-[[ $mem -lt 1 ]] && finish
+[[ $mem -ge 1 ]] || finish
 
 #firefox
 mkdir -p /root/Downloads
