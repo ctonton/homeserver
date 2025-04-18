@@ -76,7 +76,7 @@ tee /etc/rsyncd.conf <<EOF
 EOF
 
 #update
-f="$(grep -l 'APT::Periodic' /etc/apt/apt.conf.d/*)"
+f="$(grep -l 'APT::Periodic' /etc/apt/apt.conf.d/* | head -n1)"
 grep -q 'Periodic::Enable' "$f" || sed -i '1s/^/APT::Periodic::Enable "0";\n/' "$f"
 grep 'APT::Periodic' "$f" | cut -d" " -f1 >/dev/shm/list
 cat /dev/shm/list | while read l; do sed -i "s~$l.*~$l \"0\"\;~" "$f"; done
