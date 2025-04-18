@@ -11,6 +11,7 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/setup.sh 
 ## Usage
 
 To run the script without any ineruptions, use the following arguments. (ex. ./setup.sh -a -h hostname -p sda1)
+
 <br>
 -a &emsp;&emsp;&emsp;acknoledge all warnings
 <br>
