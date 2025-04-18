@@ -1,5 +1,4 @@
 # Scripts to build NAS server
-##
 ### Download
 ```shell
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/setup.sh -O setup.sh && chmod +x setup.sh
