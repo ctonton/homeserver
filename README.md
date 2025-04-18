@@ -10,9 +10,9 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/setup.sh 
 
 ## Arguments
 
--a&emsp;&emsp;&emsp;acknoledge all warnings
+-a &emsp;&emsp;&emsp;acknoledge all warnings
 <br>
--n host set hostname
+-n host &ensp;set hostname
 <br>
--p part  set partition for storage ex. sda1
+-p part &ensp;set partition for storage ex. sda1
 <br>
