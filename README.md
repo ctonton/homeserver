@@ -10,7 +10,7 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/setup.sh 
 
 ## Arguments
 
--a       acknoledge all warnings
+-a\tacknoledge all warnings
 <br>
 -n host  set hostname
 <br>
