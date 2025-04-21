@@ -16,7 +16,7 @@ wget -q --spider www.google.com || (echo "The network is not online."; exit 1)
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo) && mem=${mem%.*}
 
 #install
-systemctl disable unattended-upgrades --now
+systemctl -q disable unattended-upgrades --now
 apt update && apt full-upgrade -y --fix-missing
 pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd xfsprogs)
 [[ $mem -lt 1 ]] || pkg+=(cups-browsed cups firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups tigervnc-standalone-server)
