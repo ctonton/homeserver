@@ -83,6 +83,7 @@ bleachbit -c --all-but-warning
 fstrim -av
 reboot
 EOF
+chmod +x /root/.update.sh
 echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
 
 #nfs
