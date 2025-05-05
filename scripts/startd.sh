@@ -18,7 +18,7 @@ else
 [NetDev]
 Name=br0
 Kind=bridge
-MACAddress=$(cat /sys/class/net/en*/address | head -n1)
+MACAddress=$(cat /sys/class/net/e*/address | head -n1)
 EOT
   tee /etc/systemd/network/20-br0.network <<EOT
 [Match]
