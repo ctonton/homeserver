@@ -447,8 +447,9 @@ server {
 }
 
 server {
-	listen 443 ssl http2;
-	listen [::]:443 ssl http2;
+	listen 443 ssl;
+	listen [::]:443 ssl;
+	http2 on;
 	ssl_certificate /etc/nginx/nginx-selfsigned.crt;
 	ssl_certificate_key /etc/nginx/nginx-selfsigned.key;
 	ssl_protocols TLSv1.2 TLSv1.3;
