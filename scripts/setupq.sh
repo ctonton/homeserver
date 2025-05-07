@@ -458,7 +458,6 @@ server {
 	ssl_prefer_server_ciphers off;
 	ssl_session_timeout 1d;
 	ssl_session_cache shared:SSL:10m;
-	ssl_session_tickets off;
 	ssl_dhparam /etc/nginx/dhparam.pem;
 	add_header Strict-Transport-Security "max-age=63072000" always;
 	root /var/www/html;
