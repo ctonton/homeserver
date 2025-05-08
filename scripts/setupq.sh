@@ -219,7 +219,7 @@ chown -R www-data:www-data /var/www/html
 
 #nginx
 [[ -f /etc/nginx/nginx.bak ]] || cp /etc/nginx/nginx.conf /etc/nginx/nginx.bak
-sed -i '/ssl_/d;s/user www-data/user root/;s/gzip on/gzip off/;s/access_log.*/access_log off\;/' /etc/nginx/nginx.conf
+sed -i 's/ssl_/#ssl_/;s/user www-data/user root/;s/gzip on/gzip off/;s/access_log.*/access_log off\;/' /etc/nginx/nginx.conf
 grep -q 'sendfile_max_chunk' /etc/nginx/nginx.conf || sed -i 's/sendfile on\;/&\n\tsendfile_max_chunk 1m\;/' /etc/nginx/nginx.conf
 tee /etc/nginx/sites-available/default >/dev/null <<'EOF'
 
