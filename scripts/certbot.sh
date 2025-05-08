@@ -1,6 +1,6 @@
 #!/bin/bash
 apt update
-apt install certbot
+apt -y install certbot
 read -p 'Enter domain without the "www." prefix: ' dom
 wom="www.$dom"
 certbot certonly --webroot -w /var/www/html -d $wom -d $dom --register-unsafely-without-email --agree-tos
