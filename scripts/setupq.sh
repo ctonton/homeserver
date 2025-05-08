@@ -20,15 +20,17 @@ pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano
 apt install -y ${pkg[@]}
 
 #storage
-mkdir /srv/NAS
+mkdir -p /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
 part=$(blkid | grep "xfs" | cut -d: -f1)
-echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
-mount -a
-mkdir -p /srv/NAS/Public
-chmod -R 777 /srv/NAS/Public
-chown -R nobody:nogroup /srv/NAS/Public
+if [[ ! grep -q /dev/"$part" /proc/mounts ]]; then
+  echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
+  mount -a
+  mkdir -p /srv/NAS/Public
+  chmod -R 777 /srv/NAS/Public
+  chown -R nobody:nogroup /srv/NAS/Public
+fi
 tee /root/fixpermi.sh <<EOF
 #!/bin/bash
 chmod -R 777 /srv/NAS/Public
