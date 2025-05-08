@@ -555,6 +555,7 @@ server {
   }
 }
 EOF
+wget -q --show-progress https://github.com/ctonton/homeserver/raw/refs/heads/main/scripts/http_users.sh -O /root/http_users.sh
 
 #ssl
 curl -s ipinfo.io | tr -d ',; ;"' >/dev/shm/ipinfo
