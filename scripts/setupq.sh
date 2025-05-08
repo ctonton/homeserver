@@ -221,7 +221,7 @@ chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
 
 #nginx
-[[ -f /etc/nginx/nginx.bak ]] || cp /etc/nginx/nginx.conf /etc/nginx/nginx.bak
+[[ -f /etc/nginx/nginx.bak ]] && cp -f /etc/nginx/nginx.bak /etc/nginx/nginx.conf || cp /etc/nginx/nginx.conf /etc/nginx/nginx.bak
 sed -i 's/^\tssl_/\t#ssl_/;s/user www-data/user root/;s/gzip on/gzip off/;s/access_log.*/access_log off\;/' /etc/nginx/nginx.conf
 tee /etc/nginx/sites-available/default >/dev/null <<'EOF'
 
