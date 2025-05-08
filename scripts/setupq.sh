@@ -434,7 +434,7 @@ chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
 
 #nginx
-sed -i '/http {/a\\tclient_max_body_size 10M;\n\tupload_progress uploads 1m;' /etc/nginx/nginx.conf
+grep -q 'client_max_body_size' /etc/nginx/nginx.conf || sed -i 's/server_tokens.*/&\n\tclient_max_body_size 10M\;\n\tupload_progress uploads 1m\;/' /etc/nginx/nginx.conf
 tee /etc/nginx/sites-available/default <<'EOF'
 
 map $http_upgrade $connection_upgrade {
