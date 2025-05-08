@@ -130,6 +130,9 @@ mkdir -p /root/.config/qBittorrent
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf <<EOF
+[Application]
+FileLogger\Enabled=false
+
 [AutoRun]
 enabled=true
 program=chown -R nobody:nogroup \"%R\"
@@ -137,22 +140,30 @@ program=chown -R nobody:nogroup \"%R\"
 [BitTorrent]
 Session\AnonymousModeEnabled=true
 Session\DefaultSavePath=/srv/NAS/Public/Downloads/
+Session\GlobalMaxInactiveSeedingMinutes=1
 Session\GlobalMaxSeedingMinutes=1
 Session\GlobalUPSpeedLimit=10
 Session\IPFilter=/root/.config/qBittorrent/blocklist.p2p
 Session\IPFilteringEnabled=true
-Session\MaxActiveDownloads=2
+Session\IgnoreSlowTorrentsForQueueing=true
+Session\MaxActiveDownloads=3
 Session\MaxActiveTorrents=3
 Session\MaxActiveUploads=1
-Session\MaxRatioAction=1
+Session\MaxConnections=300
+Session\MaxUploads=12
 Session\QueueingSystemEnabled=true
+Session\ShareLimitAction=Remove
 Session\TempPath=/srv/NAS/Public/Downloads/
 Session\TrackerFilteringEnabled=true
+
+[Core]
+AutoDeleteAddedTorrentFile=IfAdded
 
 [LegalNotice]
 Accepted=true
 
 [Preferences]
+General\Locale=en
 WebUI\AuthSubnetWhitelist=0.0.0.0/0
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
