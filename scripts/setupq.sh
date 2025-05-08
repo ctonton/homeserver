@@ -24,13 +24,14 @@ mkdir -p /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
 part=$(blkid | grep "xfs" | cut -d: -f1)
-if [[ ! grep -q /dev/"$part" /proc/mounts ]]; then
-  echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
-  mount -a
-  mkdir -p /srv/NAS/Public
-  chmod -R 777 /srv/NAS/Public
-  chown -R nobody:nogroup /srv/NAS/Public
-fi
+umount -q $part
+sed -i "/$(blkid -o value -s UUID ${part})/d" /etc/fstab
+echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
+systemctl daemon-reload
+mount -a
+mkdir -p /srv/NAS/Public
+chmod -R 777 /srv/NAS/Public
+chown -R nobody:nogroup /srv/NAS/Public
 tee /root/fixpermi.sh <<EOF
 #!/bin/bash
 chmod -R 777 /srv/NAS/Public
@@ -65,7 +66,7 @@ fstrim -av
 reboot
 EOF
 chmod +x /root/.update.sh
-echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
+crontab -l | grep -q 'update.sh' || echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
 
 #nfs
 [[ -f /etc/exports.bak ]] || mv /etc/exports /etc/exports.bak
