@@ -484,6 +484,9 @@ server {
 	location /Public {
 		alias /srv/NAS/Public;
 		autoindex on;
+		#dav_methods PUT DELETE MKCOL COPY MOVE;
+		dav_ext_methods PROPFIND OPTIONS;
+		dav_access all:r;
 		satisfy any;
 		#auth_basic "Restricted Content";
 		#auth_basic_user_file /etc/nginx/.htpasswd;
