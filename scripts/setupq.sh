@@ -420,7 +420,7 @@ tee /var/www/html/index.html <<EOF
       <h1>Torrent Server</h1>
       <br>
       <br>
-      <a href="/novnc/"><img src="images/fox.png" alt="Firefox"></a>
+      <a href="/novnc/vnc.html?resize=remote"><img src="images/fox.png" alt="Firefox"></a>
       <h1>Web Browser</h1>
       <br>
       <br>
