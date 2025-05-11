@@ -420,7 +420,7 @@ tee /var/www/html/index.html <<EOF
       <h1>Torrent Server</h1>
       <br>
       <br>
-      <a href="/novnc/vnc.html?path=novnc/websockify"><img src="images/fox.png" alt="Firefox"></a>
+      <a href="/novnc/"><img src="images/fox.png" alt="Firefox"></a>
       <h1>Web Browser</h1>
       <br>
       <br>
@@ -442,10 +442,6 @@ tee /etc/nginx/sites-available/default <<'EOF'
 map $http_upgrade $connection_upgrade {
 	default upgrade;
 	''      close;
-}
-
-upstream novnc-firefox {
-	server 127.0.0.1:5800;
 }
 
 upstream filebrowser {
@@ -510,7 +506,7 @@ server {
 		satisfy any;
 		#auth_basic "Restricted Content";
 		#auth_basic_user_file /etc/nginx/.htpasswd;
-  }
+	}
 
 	location /print.php {
 		include /etc/nginx/fastcgi_params;
@@ -525,15 +521,8 @@ server {
 	}
 
 	location /novnc/ {
-		proxy_pass http://novnc-firefox/;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
-
-	location /novnc/websockify {
-		proxy_pass http://novnc-firefox/;
-		proxy_http_version 1.1;
+		proxy_pass http://127.0.0.1:5800/;
+  		proxy_http_version 1.1;
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection $connection_upgrade;
 		proxy_set_header Host $host;
