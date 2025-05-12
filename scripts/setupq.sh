@@ -134,15 +134,23 @@ wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_b
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 tee /root/.config/qBittorrent/qBittorrent.conf <<EOF
 [Application]
+FileLogger\Age=1
+FileLogger\AgeType=1
+FileLogger\Backup=true
+FileLogger\DeleteOld=true
 FileLogger\Enabled=false
+FileLogger\MaxSizeBytes=66560
+FileLogger\Path=/root/.local/share/qBittorrent/logs
 
 [AutoRun]
 enabled=true
 program=chown -R nobody:nogroup \"%R\"
 
 [BitTorrent]
+Session\AddTorrentStopped=false
 Session\AnonymousModeEnabled=true
 Session\DefaultSavePath=/srv/NAS/Public/Downloads/
+Session\ExcludedFileNames=
 Session\GlobalMaxInactiveSeedingMinutes=1
 Session\GlobalMaxSeedingMinutes=1
 Session\GlobalUPSpeedLimit=10
@@ -154,7 +162,9 @@ Session\MaxActiveTorrents=3
 Session\MaxActiveUploads=1
 Session\MaxConnections=300
 Session\MaxUploads=12
+Session\Port=49309
 Session\QueueingSystemEnabled=true
+Session\SSL\Port=57338
 Session\ShareLimitAction=Remove
 Session\TempPath=/srv/NAS/Public/Downloads/
 Session\TrackerFilteringEnabled=true
@@ -165,8 +175,18 @@ AutoDeleteAddedTorrentFile=IfAdded
 [LegalNotice]
 Accepted=true
 
+[Meta]
+MigrationVersion=8
+
+[Network]
+Proxy\HostnameLookupEnabled=false
+Proxy\Profiles\BitTorrent=true
+Proxy\Profiles\Misc=true
+Proxy\Profiles\RSS=true
+
 [Preferences]
 General\Locale=en
+MailNotification\req_auth=true
 WebUI\AuthSubnetWhitelist=0.0.0.0/0
 WebUI\AuthSubnetWhitelistEnabled=true
 WebUI\CSRFProtection=false
