@@ -162,9 +162,7 @@ Session\MaxActiveTorrents=3
 Session\MaxActiveUploads=1
 Session\MaxConnections=300
 Session\MaxUploads=12
-Session\Port=49309
 Session\QueueingSystemEnabled=true
-Session\SSL\Port=57338
 Session\ShareLimitAction=Remove
 Session\TempPath=/srv/NAS/Public/Downloads/
 Session\TrackerFilteringEnabled=true
@@ -179,10 +177,6 @@ Accepted=true
 MigrationVersion=8
 
 [Network]
-Proxy\HostnameLookupEnabled=false
-Proxy\Profiles\BitTorrent=true
-Proxy\Profiles\Misc=true
-Proxy\Profiles\RSS=true
 
 [Preferences]
 General\Locale=en
