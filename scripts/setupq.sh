@@ -66,7 +66,7 @@ fstrim -av
 reboot
 EOF
 chmod +x /root/.update.sh
-crontab -l | grep -q 'update.sh' || echo "0 4 * * 1 /root/.update.sh &>/dev/null" | crontab -
+crontab -l | grep -q '.update.sh' || echo '0 4 * * 1 /root/.update.sh &>/dev/null' | crontab -
 
 #nfs
 [[ -f /etc/exports.bak ]] || mv /etc/exports /etc/exports.bak
