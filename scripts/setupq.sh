@@ -254,6 +254,9 @@ EOF
 #quit
 [[ $mem -ge 1 ]] || finish
 
+#shell
+sed -i 's/--no-beep/--no-beep --disable-ssl/' /etc/default/shellinabox
+
 #firefox
 ls -s /srv/NAS/Public/Downloads /root/Downloads
 tee /root/.ignite.sh <<'EOF'
