@@ -1,4 +1,11 @@
 #!/bin/bash
+
+function finish {
+  rm -f $0
+  reboot
+  exit 0
+}
+
 while true; do wget -q --spider https://deb.debian.org && break; sleep 5; done
 apt update
 apt install -y networkd-dispatcher polkitd systemd-resolved
@@ -7,39 +14,42 @@ rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
 rm -rf /etc/systemd/network/*
+eth=$(grep -l 'up' /sys/class/net/e*/operstate | cut -d/ -f5)
 if [[ $(ls /sys/class/net | grep ^e | wc -w) -eq 1 ]]; then
-  tee /etc/systemd/network/10-wired.network <<EOT
+  tee /etc/systemd/network/10-wired.network <<EOF
 [Match]
-Name=$(ls /sys/class/net | grep ^e)
+Name=$eth
 
 [Network]
 DHCP=yes
-EOT
+EOF
 else
-  tee /etc/systemd/network/10-br0.netdev <<EOT
+  tee /etc/systemd/network/10-br0.netdev <<EOF
 [NetDev]
 Name=br0
 Kind=bridge
-MACAddress=$(cat /sys/class/net/e*/address | head -n1)
-EOT
-  tee /etc/systemd/network/20-br0.network <<EOT
+MACAddress=$(cat /sys/class/net/$eth/address)
+EOF
+  tee /etc/systemd/network/20-br0.network <<EOF
 [Match]
 Name=$(ls /sys/class/net | grep ^e | xargs)
 
 [Network]
 Bridge=br0
-EOT
-  tee /etc/systemd/network/30-br0.network <<EOT
+EOF
+  tee /etc/systemd/network/30-br0.network <<EOF
 [Match]
 Name=br0
 
 [Network]
 DHCP=yes
-EOT
+EOF
 fi
 mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
-tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf <<EOT
+tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf <<EOF
 [Service]
 ExecStart=
 ExecStart=/lib/systemd/systemd-networkd-wait-online --any --timeout=30
-EOT
+EOF
+finish
+
