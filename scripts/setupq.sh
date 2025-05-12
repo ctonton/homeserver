@@ -407,28 +407,28 @@ tee /var/www/html/index.html <<EOF
     <div class="column">
       <br>
       <br>
-      <a href="/filebrowser"><img src="images/fbr.png" alt="File Browser"></a>
-      <h1>File Browser</h1>
+      <a href="/novnc/vnc.html?autoconnect=true&resize=remote"><img src="images/fox.png" alt="Firefox"></a>
+      <h1>Browser</h1>
+      <br>
+      <br>
+      <a href="print.html"><img src="images/prn.png" alt="Print Server"></a>
+      <h1>Print</h1>
       <br>
       <br>
       <a href="/shell/"><img src="images/tml.png" alt="Terminal"></a>
       <h1>Terminal</h1>
       <br>
       <br>
-      <a href="/novnc/vnc.html?autoconnect=true&resize=remote"><img src="images/fox.png" alt="Firefox"></a>
-      <h1>Web Browser</h1>
-      <br>
-      <br>
     </div>
     <div class="column">
       <br>
       <br>
-      <a href="print.html"><img src="images/prn.png" alt="Print Server"></a>
-      <h1>Print Server</h1>
+      <a href="/filebrowser"><img src="images/fbr.png" alt="File Browser"></a>
+      <h1>Files</h1>
       <br>
       <br>
       <a href="/torrents/"><img src="images/qbt.png" alt="Qbittorrent"></a>
-      <h1>Torrent Server</h1>
+      <h1>Torrents</h1>
       <br>
       <br>
     </div>
