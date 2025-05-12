@@ -16,7 +16,7 @@ systemctl -q disable unattended-upgrades --now
 apt update
 apt full-upgrade -y --fix-missing
 pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd xfsprogs)
-[[ $mem -ge 1 ]] && pkg+=(cups-browsed cups ffmpeg firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups tigervnc-standalone-server)
+[[ $mem -ge 1 ]] && pkg+=(cups-browsed cups ffmpeg firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
 apt install -y ${pkg[@]}
 
 #storage
@@ -29,7 +29,7 @@ sed -i "/$(blkid -o value -s UUID ${part})/d" /etc/fstab
 [[ -z $part ]] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
 systemctl daemon-reload
 mount -a
-mkdir -p /srv/NAS/Public
+mkdir -p /srv/NAS/Public/Downloads
 chmod -R 777 /srv/NAS/Public
 chown -R nobody:nogroup /srv/NAS/Public
 tee /root/fixpermi.sh <<EOF
@@ -255,7 +255,7 @@ EOF
 [[ $mem -ge 1 ]] || finish
 
 #firefox
-mkdir -p /root/Downloads
+ls -s /srv/NAS/Public/Downloads /root/Downloads
 tee /root/.ignite.sh <<'EOF'
 #!/bin/bash
 websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
@@ -408,26 +408,29 @@ tee /var/www/html/index.html <<EOF
       <h1>File Browser</h1>
       <br>
       <br>
-      <a href="print.html"><img src="images/prn.png" alt="Print Server"></a>
-      <h1>Print Server</h1>
+      <a href="/shell/"><img src="images/tml.png" alt="Terminal"></a>
+      <h1>Terminal</h1>
+      <br>
+      <br>
+      <a href="/novnc/vnc.html?autoconnect=true&resize=remote"><img src="images/fox.png" alt="Firefox"></a>
+      <h1>Web Browser</h1>
       <br>
       <br>
     </div>
     <div class="column">
       <br>
       <br>
+      <a href="print.html"><img src="images/prn.png" alt="Print Server"></a>
+      <h1>Print Server</h1>
+      <br>
+      <br>
       <a href="/torrents/"><img src="images/qbt.png" alt="Qbittorrent"></a>
       <h1>Torrent Server</h1>
-      <br>
-      <br>
-      <a href="/novnc/vnc.html?resize=remote&autoconnect=true"><img src="images/fox.png" alt="Firefox"></a>
-      <h1>Web Browser</h1>
       <br>
       <br>
     </div>
   </div>
   <div class="footer">
-    <a href="/downloads"><img src="images/egg.png" alt="Downloads"></a>
   </div>
 </body>
 </html>
@@ -500,6 +503,14 @@ server {
 		satisfy any;
 		#auth_basic "Restricted Content";
 		#auth_basic_user_file /etc/nginx/.htpasswd;
+	}
+
+	location /shell/ {
+		proxy_pass http://127.0.0.1:4200/;
+		proxy_buffering off;
+		satisfy any;
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location print.html {
