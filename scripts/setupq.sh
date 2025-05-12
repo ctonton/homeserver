@@ -9,7 +9,7 @@ function finish {
 
 #check
 mem=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo) && mem=${mem%.*}
-while true; do wget -q --spider http://www.google.com && break; sleep 5; done
+while true; do wget -q --spider https://deb.debian.org && break; sleep 5; done
 
 #install
 systemctl -q disable unattended-upgrades --now
