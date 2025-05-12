@@ -1,12 +1,13 @@
 #!/bin/bash
-apt update && apt install -y networkd-dispatcher polkitd openssh-server systemd-resolved
+apt update
+apt install -y networkd-dispatcher polkitd systemd-resolved
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client resolvconf openvpn
 rm -rf /etc/NetworkManager /etc/netplan /etc/network /etc/dhcp
 systemctl --quiet unmask systemd-networkd
 systemctl --quiet enable systemd-networkd
 rm -rf /etc/systemd/network/*
 if [[ $(ls /sys/class/net | grep ^e | wc -w) -eq 1 ]]; then
-  tee /etc/systemd/network/30-wired.network <<EOT
+  tee /etc/systemd/network/10-wired.network <<EOT
 [Match]
 Name=$(ls /sys/class/net | grep ^e)
 
@@ -22,7 +23,7 @@ MACAddress=$(cat /sys/class/net/e*/address | head -n1)
 EOT
   tee /etc/systemd/network/20-br0.network <<EOT
 [Match]
-Name=e*
+Name=$(ls /sys/class/net | grep ^e | xargs)
 
 [Network]
 Bridge=br0
