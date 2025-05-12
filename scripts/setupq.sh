@@ -75,7 +75,7 @@ tee /etc/avahi/services/nfs.service <<EOF
 <?xml version="1.0" standalone='no'?>
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
-  <name replace-wildcards="yes">NFS server at $hst</name>  
+  <name replace-wildcards="yes">NFS server at $HOSTNAME</name>  
   <service>
     <type>_nfs._tcp</type>
     <port>2049</port>
@@ -89,7 +89,7 @@ EOF
 tee /etc/samba/smb.conf <<EOF
 [global]
    workgroup = WORKGROUP
-   netbios name = $hst
+   netbios name = $HOSTNAME
    log level = 0
    server role = standalone server
    map to guest = Bad User
@@ -214,7 +214,7 @@ tee /var/www/html/index.html <<EOF
 <!DOCTYPE html>
 <html>
 <head>
-  <title>$hst</title>
+  <title>$HOSTNAME</title>
   <meta charset="UTF-8">
 </head>
 <body style="background-color:#F3F3F3;font-family:arial;text-align:center">
@@ -393,7 +393,7 @@ tee /var/www/html/index.html <<EOF
 <!DOCTYPE html>
 <html>
 <head>
-  <title>$hst</title>
+  <title>$HOSTNAME</title>
   <meta charset="UTF-8">
   <style>
     body {
