@@ -15,7 +15,7 @@ while true; do wget -q --spider https://deb.debian.org && break; sleep 5; done
 systemctl -q disable unattended-upgrades --now
 apt update
 apt full-upgrade -y --fix-missing
-pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd xfsprogs)
+pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd2 xfsprogs)
 [[ $mem -ge 1 ]] && pkg+=(cups-browsed cups ffmpeg firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
 apt install -y ${pkg[@]}
 
