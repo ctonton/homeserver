@@ -293,25 +293,25 @@ tee /root/.jwmrc <<EOF
     </Group>
     <WindowStyle>
         <Font>Sans-9:bold</Font>
-        <Width>4</Width>
-        <Height>21</Height>
-        <Corner>3</Corner>
+        <Width>1</Width>
+        <Height>1</Height>
+        <Corner>0</Corner>
         <Foreground>#FFFFFF</Foreground>
-        <Background>#555555</Background>
-        <Outline>#000000</Outline>
-        <Opacity>0.5</Opacity>
+        <Background>#FFFFFF</Background>
+        <Outline>#FFFFFF</Outline>
+        <Opacity>1.0</Opacity>
         <Active>
             <Foreground>#FFFFFF</Foreground>
-            <Background>#0077CC</Background>
-            <Outline>#000000</Outline>
+            <Background>#FFFFFF</Background>
+            <Outline>#FFFFFF</Outline>
             <Opacity>1.0</Opacity>
         </Active>
     </WindowStyle>
     <IconPath>/usr/share/icons</IconPath>
     <IconPath>/usr/share/pixmaps</IconPath>
     <IconPath>/usr/local/share/jwm</IconPath>
-    <Desktops width="4" height="1">
-        <Background type="solid">#111111</Background>
+    <Desktops width="1" height="1">
+        <Background type="solid">#FFFFFF</Background>
     </Desktops>
     <DoubleClickSpeed>400</DoubleClickSpeed>
     <DoubleClickDelta>2</DoubleClickDelta>
