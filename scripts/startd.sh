@@ -1,4 +1,5 @@
 #!/bin/bash
+while true; do wget -q --spider https://deb.debian.org && break; sleep 5; done
 apt update
 apt install -y networkd-dispatcher polkitd systemd-resolved
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client resolvconf openvpn
