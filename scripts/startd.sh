@@ -42,4 +42,5 @@ tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf <<E
 ExecStart=
 ExecStart=/lib/systemd/systemd-networkd-wait-online --any --timeout=30
 EOT
+rm $0
 exit 0
