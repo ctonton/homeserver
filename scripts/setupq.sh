@@ -104,7 +104,7 @@ tee /etc/samba/smb.conf <<EOF
 EOF
 
 #filebrowser
-tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d '"' -f4)"
+tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d \" -f4)"
 arc="$(dpkg --print-architecture)"
 [[ $arc == "armhf" ]] && arc="armv7"
 wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-$arc-filebrowser.tar.gz" -O /root/filebrowser.tar.gz
