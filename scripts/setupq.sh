@@ -349,7 +349,8 @@ usermod -aG lpadmin root
 defpr="$(lpstat -e | head -n1)"
 lpadmin -d $defpr
 cupsctl --no-share-printers
-tee /var/www/html/print.html <<EOF
+mkdir -p /var/www/html/print
+tee /var/www/html/print/index.html <<EOF
 <!DOCTYPE html>
 <html>
   <body>
@@ -360,7 +361,7 @@ tee /var/www/html/print.html <<EOF
   </body>
 </html>
 EOF
-tee /var/www/html/print.php <<'EOF'
+tee /var/www/html/print/print.php <<'EOF'
 <?php
    if(isset($_FILES['fileToUpload'])){
       $file_name = $_FILES['fileToUpload']['name'];
@@ -383,7 +384,7 @@ tee /var/www/html/print.php <<'EOF'
    }
 ?>
 EOF
-tee /var/www/html/.user.ini <<EOF
+tee /var/www/html/print/.user.ini <<EOF
 upload_max_filesize = 10M
 post_max_size = 10M
 EOF
@@ -425,7 +426,7 @@ tee /var/www/html/index.html <<EOF
       <h1>Browser</h1>
       <br>
       <br>
-      <a href="print.html"><img src="images/prn.png" alt="Print Server"></a>
+      <a href="/print/"><img src="images/prn.png" alt="Print Server"></a>
       <h1>Print</h1>
       <br>
       <br>
@@ -526,11 +527,11 @@ server {
 		proxy_pass http://127.0.0.1:4200/;
 		proxy_buffering off;
 		satisfy any;
-		auth_basic "Restricted Content";
-		auth_basic_user_file /etc/nginx/.htpasswd;
+		#auth_basic "Restricted Content";
+		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
-	location print.html {
+	location /print/ {
 		satisfy any;
 		#auth_basic "Restricted Content";
 		#auth_basic_user_file /etc/nginx/.htpasswd;
@@ -557,11 +558,6 @@ server {
 		satisfy any;
 		#auth_basic "Restricted Content";
 		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
-
-	location /downloads {
-		alias /root/Downloads;
-		autoindex on;
 	}
 }
 
