@@ -1,12 +1,5 @@
 #!/bin/bash
 
-function finish {
-  rm -f $0
-  reboot
-  exit 0
-}
-
-while true; do wget -q --spider https://deb.debian.org && break; sleep 5; done
 apt update
 apt install -y networkd-dispatcher polkitd systemd-resolved
 apt autopurge -y network-manager netplan.io ifupdown isc-dhcp-client resolvconf openvpn
@@ -51,5 +44,3 @@ tee /etc/systemd/system/systemd-networkd-wait-online.service.d/override.conf <<E
 ExecStart=
 ExecStart=/lib/systemd/systemd-networkd-wait-online --any --timeout=30
 EOF
-finish
-
