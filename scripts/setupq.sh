@@ -281,6 +281,7 @@ done
 EOF
 chmod +x /root/.ignite.sh
 
+#jwm
 tee /root/.jwmrc <<EOF
 <?xml version="1.0"?>
 <JWM>
