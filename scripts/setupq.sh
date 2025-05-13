@@ -495,6 +495,8 @@ server {
 	add_header Strict-Transport-Security "max-age=63072000" always;
 	root /var/www/html;
 	index index.html;
+	#auth_basic "Restricted Content";
+	#auth_basic_user_file /etc/nginx/.htpasswd;
 
 	location = /robots.txt {
 		add_header Content-Type text/plain;
@@ -507,38 +509,21 @@ server {
 		try_files $uri $uri/ =404;
 		dav_ext_methods PROPFIND OPTIONS;
 		dav_access all:r;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /filebrowser {
 		proxy_pass http://filebrowser;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
+  		proxy_buffering off;
 	}
 
 	location /torrents/ {
 		proxy_pass http://127.0.0.1:8080/;
 		proxy_buffering off;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /shell/ {
 		proxy_pass http://127.0.0.1:4200/;
 		proxy_buffering off;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
-
-	location /print/ {
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /print/print.php {
@@ -548,9 +533,6 @@ server {
 		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 		fastcgi_intercept_errors on;
 		track_uploads uploads 300s;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 
 	location /novnc/ {
@@ -559,9 +541,6 @@ server {
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection $connection_upgrade;
 		proxy_set_header Host $host;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
 	}
 }
 
