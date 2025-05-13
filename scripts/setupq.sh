@@ -513,7 +513,7 @@ server {
 
 	location /filebrowser {
 		proxy_pass http://filebrowser;
-  		proxy_buffering off;
+		proxy_buffering off;
 	}
 
 	location /torrents/ {
@@ -537,7 +537,7 @@ server {
 
 	location /novnc/ {
 		proxy_pass http://127.0.0.1:5800/;
-  		proxy_buffering off;
+		proxy_buffering off;
 		proxy_http_version 1.1;
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection $connection_upgrade;
