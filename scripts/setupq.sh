@@ -275,10 +275,8 @@ sed -i 's/--no-beep/--no-beep --disable-ssl/' /etc/default/shellinabox
 ln -s /srv/NAS/Public/Downloads /root/Downloads
 tee /root/.ignite.sh <<'EOF'
 #!/bin/bash
-ecode=0
-while [[ $ecode -eq 0 ]]; do
-  DISPLAY=:1 firefox -private-window &>/dev/null
-  ecode=$?
+while :
+do DISPLAY=:1 firefox -private-window || break
 done
 EOF
 chmod +x /root/.ignite.sh
