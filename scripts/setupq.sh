@@ -243,28 +243,28 @@ sed -i 's/^\tssl_/\t#ssl_/;s/user www-data/user root/;s/gzip on/gzip off/;s/acce
 tee /etc/nginx/sites-available/default >/dev/null <<EOF
 
 upstream filebrowser {
-	server 127.0.0.1:8000;
+  server 127.0.0.1:8000;
 }
 
 server {
-	listen 80 default_server;
-	listen [::]:80 default_server;
-	root /var/www/html;
-	index index.html;
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  root /var/www/html;
+  index index.html;
 
-	location /Public {
-		alias /srv/NAS/Public;
-		autoindex on;
-  	}
+  location /Public {
+    alias /srv/NAS/Public;
+    autoindex on;
+  }
 
-	location /filebrowser {
-		proxy_pass http://filebrowser;
-	}
+  location /filebrowser {
+    proxy_pass http://filebrowser;
+  }
 
-	location /torrents/ {
-		proxy_pass http://127.0.0.1:8080/;
-		proxy_buffering off;
-	}
+  location /torrents/ {
+    proxy_pass http://127.0.0.1:8080/;
+    proxy_buffering off;
+  }
 }
 EOF
 
@@ -463,104 +463,104 @@ grep -q 'client_max_body_size' /etc/nginx/nginx.conf || sed -i 's/server_tokens.
 tee /etc/nginx/sites-available/default <<'EOF'
 
 map $http_upgrade $connection_upgrade {
-	default upgrade;
-	''      close;
+  default upgrade;
+  ''      close;
 }
 
 upstream filebrowser {
-	server 127.0.0.1:8000;
+  server 127.0.0.1:8000;
 }
 
 server {
-	listen 80 default_server;
-	listen [::]:80 default_server;
+  listen 80 default_server;
+  listen [::]:80 default_server;
 
-	return 301 https://$host$request_uri;
+  return 301 https://$host$request_uri;
 }
 
 server {
-	listen 443 ssl;
-	listen [::]:443 ssl;
-	http2 on;
-	ssl_certificate /etc/nginx/nginx-selfsigned.crt;
-	ssl_certificate_key /etc/nginx/nginx-selfsigned.key;
-	ssl_protocols TLSv1.2 TLSv1.3;
-	ssl_ecdh_curve X25519:prime256v1:secp384r1;
-	ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
-	ssl_prefer_server_ciphers off;
-	ssl_session_timeout 1d;
-	ssl_session_cache shared:SSL:10m;
-	ssl_dhparam /etc/nginx/dhparam.pem;
-	add_header Strict-Transport-Security "max-age=63072000" always;
-	root /var/www/html;
-	index index.html;
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  http2 on;
+  ssl_certificate /etc/nginx/nginx-selfsigned.crt;
+  ssl_certificate_key /etc/nginx/nginx-selfsigned.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_ecdh_curve X25519:prime256v1:secp384r1;
+  ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
+  ssl_prefer_server_ciphers off;
+  ssl_session_timeout 1d;
+  ssl_session_cache shared:SSL:10m;
+  ssl_dhparam /etc/nginx/dhparam.pem;
+  add_header Strict-Transport-Security "max-age=63072000" always;
+  root /var/www/html;
+  index index.html;
 
-	location = /robots.txt {
-		add_header Content-Type text/plain;
-		return 200 "User-agent: *\nDisallow: /\n";
-	}
+  location = /robots.txt {
+    add_header Content-Type text/plain;
+    return 200 "User-agent: *\nDisallow: /\n";
+  }
 
-	location /Public {
-		alias /srv/NAS/Public;
-		autoindex on;
-		dav_ext_methods PROPFIND OPTIONS;
-		dav_access all:r;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
+  location /Public {
+    alias /srv/NAS/Public;
+    autoindex on;
+    dav_ext_methods PROPFIND OPTIONS;
+    dav_access all:r;
+    satisfy any;
+    #auth_basic "Restricted Content";
+    #auth_basic_user_file /etc/nginx/.htpasswd;
+  }
 
-	location /filebrowser {
-		proxy_pass http://filebrowser;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
+  location /filebrowser {
+    proxy_pass http://filebrowser;
+    satisfy any;
+    #auth_basic "Restricted Content";
+    #auth_basic_user_file /etc/nginx/.htpasswd;
+  }
 
-	location /torrents/ {
-		proxy_pass http://127.0.0.1:8080/;
-		proxy_buffering off;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
+  location /torrents/ {
+    proxy_pass http://127.0.0.1:8080/;
+    proxy_buffering off;
+    satisfy any;
+    #auth_basic "Restricted Content";
+    #auth_basic_user_file /etc/nginx/.htpasswd;
+  }
 
-	location /shell/ {
-		proxy_pass http://127.0.0.1:4200/;
-		proxy_buffering off;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
+  location /shell/ {
+    proxy_pass http://127.0.0.1:4200/;
+    proxy_buffering off;
+    satisfy any;
+    #auth_basic "Restricted Content";
+    #auth_basic_user_file /etc/nginx/.htpasswd;
+  }
 
-	location /print/ {
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
+  location /print/ {
+    satisfy any;
+    #auth_basic "Restricted Content";
+    #auth_basic_user_file /etc/nginx/.htpasswd;
+  }
 
-	location /print.php {
-		include /etc/nginx/fastcgi_params;
-		fastcgi_pass unix:/run/php/php-fpm.sock;
-		fastcgi_index print.php;
-		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-		fastcgi_intercept_errors on;
-		track_uploads uploads 300s;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
+  location /print.php {
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass unix:/run/php/php-fpm.sock;
+    fastcgi_index print.php;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_intercept_errors on;
+    track_uploads uploads 300s;
+    satisfy any;
+    #auth_basic "Restricted Content";
+    #auth_basic_user_file /etc/nginx/.htpasswd;
+  }
 
-	location /novnc/ {
-		proxy_pass http://127.0.0.1:5800/;
-		proxy_http_version 1.1;
-		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection $connection_upgrade;
-		proxy_set_header Host $host;
-		satisfy any;
-		#auth_basic "Restricted Content";
-		#auth_basic_user_file /etc/nginx/.htpasswd;
-	}
+  location /novnc/ {
+    proxy_pass http://127.0.0.1:5800/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+    proxy_set_header Host $host;
+    satisfy any;
+    #auth_basic "Restricted Content";
+    #auth_basic_user_file /etc/nginx/.htpasswd;
+  }
 }
 
 server {
