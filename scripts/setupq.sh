@@ -465,7 +465,7 @@ tee /etc/nginx/sites-available/default <<'EOF'
 
 map $http_upgrade $connection_upgrade {
 	default upgrade;
-	''			close;
+	'' close;
 }
 
 upstream filebrowser {
