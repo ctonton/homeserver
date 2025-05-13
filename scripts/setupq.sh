@@ -504,6 +504,7 @@ server {
   location /Public {
     alias /srv/NAS/Public;
     autoindex on;
+    try_files $uri $uri/ =404;
     dav_ext_methods PROPFIND OPTIONS;
     dav_access all:r;
     satisfy any;
@@ -540,7 +541,7 @@ server {
     #auth_basic_user_file /etc/nginx/.htpasswd;
   }
 
-  location /print.php {
+  location /print/print.php {
     include /etc/nginx/fastcgi_params;
     fastcgi_pass unix:/run/php/php-fpm.sock;
     fastcgi_index print.php;
@@ -570,6 +571,7 @@ server {
   location /Public {
     alias /srv/NAS/Public;
     autoindex on;
+    try_files $uri $uri/ =404;
   }
 }
 EOF
