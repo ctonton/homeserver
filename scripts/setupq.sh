@@ -574,6 +574,7 @@ server {
 EOF
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/refs/heads/main/scripts/http_users.sh -O /root/http_users.sh
 chmod +x /root/http_users.sh
+[[ -f /etc/nginx/.htpasswd ]] && sed -i 's/#auth_basic/auth_basic/g' /etc/nginx/sites-available/default
 
 #ssl
 curl -s ipinfo.io | tr -d ',; ;"' >/dev/shm/ipinfo
