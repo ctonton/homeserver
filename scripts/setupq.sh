@@ -275,7 +275,6 @@ sed -i 's/--no-beep/--no-beep --disable-ssl/' /etc/default/shellinabox
 ln -s /srv/NAS/Public/Downloads /root/Downloads
 tee /root/.ignite.sh <<'EOF'
 #!/bin/bash
-websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
 ecode=0
 while [[ $ecode -eq 0 ]]; do
   DISPLAY=:1 firefox -private-window &>/dev/null
@@ -327,6 +326,7 @@ EOF
 mkdir -p /root/.vnc
 tee /root/.vnc/xstartup <<EOF
 #!/bin/bash
+websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
 /usr/bin/jwm
 EOF
 chmod +x /root/.vnc/xstartup
