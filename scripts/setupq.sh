@@ -255,6 +255,7 @@ server {
   location /Public {
     alias /srv/NAS/Public;
     autoindex on;
+    try_files $uri $uri/ =404;
   }
 
   location /filebrowser {
