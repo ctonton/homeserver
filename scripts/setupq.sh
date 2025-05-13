@@ -272,7 +272,7 @@ EOF
 sed -i 's/--no-beep/--no-beep --disable-ssl/' /etc/default/shellinabox
 
 #firefox
-ln -s /srv/NAS/Public/Downloads /root/Downloads
+[[ -d /root/Downloads ]] || ln -s /srv/NAS/Public/Downloads /root/Downloads
 tee /root/.ignite.sh <<'EOF'
 #!/bin/bash
 while :
