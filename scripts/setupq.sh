@@ -248,23 +248,28 @@ upstream filebrowser {
 
 server {
 	listen 80 default_server;
-	listen [::]:80 default_server;
 	root /var/www/html;
 	index index.html;
 
-	location /Public {
-		alias /srv/NAS/Public;
-		autoindex on;
-		try_files $uri $uri/ =404;
-	}
-
 	location /filebrowser {
 		proxy_pass http://filebrowser;
+		proxy_buffering off;
+
 	}
 
 	location /torrents/ {
 		proxy_pass http://127.0.0.1:8080/;
 		proxy_buffering off;
+	}
+}
+
+server {
+	listen 591;
+
+	location /Public {
+		alias /srv/NAS/Public;
+		autoindex on;
+		try_files $uri $uri/ =404;
 	}
 }
 EOF
