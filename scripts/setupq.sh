@@ -497,6 +497,9 @@ server {
 	ssl_session_cache shared:SSL:10m;
 	ssl_dhparam /etc/nginx/dhparam.pem;
 	add_header Strict-Transport-Security "max-age=63072000" always;
+	add_header X-Frame-Options SAMEORIGIN;
+	add_header X-Content-Type-Options nosniff;
+	add_header X-XSS-Protection "1; mode=block";
 	root /var/www/html;
 	index index.html;
 	#auth_basic "Restricted Content";
