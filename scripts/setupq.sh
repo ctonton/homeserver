@@ -269,7 +269,6 @@ server {
 	location /Public {
 		alias /srv/NAS/Public;
 		autoindex on;
-		try_files $uri $uri/ =404;
 	}
 }
 EOF
@@ -511,9 +510,12 @@ server {
 	location /Public {
 		alias /srv/NAS/Public;
 		autoindex on;
-		try_files $uri $uri/ =404;
-		dav_ext_methods PROPFIND OPTIONS;
-		dav_access all:r;
+  		dav_methods PUT DELETE MKCOL COPY MOVE;
+		dav_ext_methods PROPFIND OPTIONS LOCK UNLOCK;
+		dav_access user:rw group:rw all:rw;
+		client_body_temp_path /srv/NAS/Public/Downloads;
+		client_max_body_size 0;
+		create_full_put_path on;
 	}
 
 	location /filebrowser {
@@ -556,7 +558,6 @@ server {
 	location /Public {
 		alias /srv/NAS/Public;
 		autoindex on;
-		try_files $uri $uri/ =404;
 	}
 }
 EOF
