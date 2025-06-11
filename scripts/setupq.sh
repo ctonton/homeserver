@@ -2,7 +2,7 @@
 
 #function
 finish () {
-  rm -f $0
+  rm -f "$0"
   reboot
   exit 0
 }
@@ -19,23 +19,23 @@ systemctl -q disable unattended-upgrades --now
 apt update
 apt full-upgrade -y --fix-missing
 pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd2 xfsprogs)
-[[ $mem -ge 1 ]] && pkg+=(cups-browsed cups ffmpeg firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
+[[ $mem -ge 1 ]] && pkg+=(cups-browsed ffmpeg firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
 apt install -y ${pkg[@]}
 
 #storage
 mkdir -p /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-part=$(blkid | grep "xfs" | cut -d: -f1)
+part=$(blkid | grep "xfs" | cut -d \: -f 1)
 umount -q $part
 sed -i "/$(blkid -o value -s UUID ${part})/d" /etc/fstab
-[[ -z $part ]] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
+[ -z $part ] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
 systemctl daemon-reload
 mount -a
 mkdir -p /srv/NAS/Public/Downloads
 chmod -R 777 /srv/NAS/Public
 chown -R nobody:nogroup /srv/NAS/Public
-tee /root/fixpermi.sh <<EOF
+tee /root/fixpermi.sh << EOF
 #!/bin/bash
 chmod -R 777 /srv/NAS/Public
 chown -R nobody:nogroup /srv/NAS/Public
@@ -44,7 +44,7 @@ EOF
 chmod +x /root/fixpermi.sh
 
 #rsync
-tee /etc/rsyncd.conf <<EOF
+tee /etc/rsyncd.conf << EOF
 [Public]
   path = /srv/NAS/Public
   comment = Public Directory
@@ -52,12 +52,12 @@ tee /etc/rsyncd.conf <<EOF
 EOF
 
 #update
-f="$(grep -l 'APT::Periodic' /etc/apt/apt.conf.d/* | head -n1)"
+f="$(grep -l 'APT::Periodic' /etc/apt/apt.conf.d/* | head -n 1)"
 grep -q 'Periodic::Enable' "$f" || sed -i '1s/^/APT::Periodic::Enable "0";\n/' "$f"
-grep 'APT::Periodic' "$f" | cut -d" " -f1 >/dev/shm/list
-cat /dev/shm/list | while read l; do sed -i "s~$l.*~$l \"0\"\;~" "$f"; done
+grep 'APT::Periodic' "$f" | cut -d " " -f 1 > /dev/shm/list
+cat /dev/shm/list | while read l ; do sed -i "s~$l.*~$l \"0\"\;~" "$f" ; done
 rm -f /dev/shm/list
-tee /root/.update.sh <<EOF
+tee /root/.update.sh << EOF
 #/bin/bash
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
@@ -69,12 +69,12 @@ fstrim -av
 reboot
 EOF
 chmod +x /root/.update.sh
-crontab -l | grep -q '.update.sh' || echo '0 4 * * 1 /root/.update.sh &>/dev/null' | crontab -
+crontab -l | grep -q '.update.sh' || echo '0 4 * * 1 /root/.update.sh &> /dev/null' | crontab -
 
 #nfs
-[[ -f /etc/exports.bak ]] || mv /etc/exports /etc/exports.bak
+[ -f /etc/exports.bak ] || mv /etc/exports /etc/exports.bak
 echo "/srv/NAS/Public *(rw,sync,all_squash,no_subtree_check,insecure)" > /etc/exports
-tee /etc/avahi/services/nfs.service <<EOF
+tee /etc/avahi/services/nfs.service << EOF
 <?xml version="1.0" standalone='no'?>
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
@@ -88,8 +88,8 @@ tee /etc/avahi/services/nfs.service <<EOF
 EOF
 
 #samba
-[[ -f /etc/samba/smb.bak ]] || mv /etc/samba/smb.conf /etc/samba/smb.bak
-tee /etc/samba/smb.conf <<EOF
+[ -f /etc/samba/smb.bak ] || mv /etc/samba/smb.conf /etc/samba/smb.bak
+tee /etc/samba/smb.conf << EOF
 [global]
    workgroup = WORKGROUP
    netbios name = $HOSTNAME
@@ -107,7 +107,7 @@ tee /etc/samba/smb.conf <<EOF
 EOF
 
 #filebrowser
-tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d \" -f4)"
+tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d \" -f 4)"
 arc="$(dpkg --print-architecture)"
 [[ $arc == "armhf" ]] && arc="armv7"
 wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-$arc-filebrowser.tar.gz" -O /root/filebrowser.tar.gz
@@ -118,7 +118,7 @@ wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/fil
 mkdir -p /root/.config
 unzip -o /root/filebrowser.zip -d /root/.config/
 rm /root/filebrowser.zip
-tee /etc/systemd/system/filebrowser.service <<EOF
+tee /etc/systemd/system/filebrowser.service << EOF
 [Unit]
 Description=http file manager
 After=network-online.target
@@ -135,7 +135,7 @@ systemctl -q enable filebrowser
 mkdir -p /root/.config/qBittorrent
 wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
 gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-tee /root/.config/qBittorrent/qBittorrent.conf <<EOF
+tee /root/.config/qBittorrent/qBittorrent.conf << EOF
 [Application]
 FileLogger\Age=1
 FileLogger\AgeType=1
@@ -190,7 +190,7 @@ WebUI\CSRFProtection=false
 WebUI\ClickjackingProtection=true
 WebUI\LocalHostAuth=false
 EOF
-tee /etc/systemd/system/qbittorrent.service <<EOF
+tee /etc/systemd/system/qbittorrent.service << EOF
 [Unit]
 Description=qBittorrent Command Line Client
 After=network-online.target
@@ -212,8 +212,8 @@ mkdir -p /var/www/html/images
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/main/files/icons.zip -O /root/icons.zip
 unzip -o -q /root/icons.zip -d /var/www/html/images
 rm /root/icons.zip
-[[ -f /etc/nginx/sites-available/default.bak ]] || mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-tee /var/www/html/index.html <<EOF
+[ -f /etc/nginx/sites-available/default.bak ] || mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+tee /var/www/html/index.html << EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -238,9 +238,9 @@ chmod -R 774 /var/www/html
 chown -R www-data:www-data /var/www/html
 
 #nginx
-[[ -f /etc/nginx/nginx.bak ]] && cp -f /etc/nginx/nginx.bak /etc/nginx/nginx.conf || cp /etc/nginx/nginx.conf /etc/nginx/nginx.bak
+[ -f /etc/nginx/nginx.bak ] && cp -f /etc/nginx/nginx.bak /etc/nginx/nginx.conf || cp /etc/nginx/nginx.conf /etc/nginx/nginx.bak
 sed -i 's/^\tssl_/\t#ssl_/;s/user www-data/user root/;s/gzip on/gzip off/;s/access_log.*/access_log off\;/' /etc/nginx/nginx.conf
-tee /etc/nginx/sites-available/default >/dev/null <<EOF
+tee /etc/nginx/sites-available/default > /dev/null << EOF
 
 upstream filebrowser {
 	server 127.0.0.1:8000;
@@ -280,8 +280,8 @@ EOF
 sed -i 's/--no-beep/--no-beep --disable-ssl/' /etc/default/shellinabox
 
 #firefox
-[[ -d /root/Downloads ]] || ln -s /srv/NAS/Public/Downloads /root/Downloads
-tee /root/.ignite.sh <<'EOF'
+[ -d /root/Downloads ] || ln -s /srv/NAS/Public/Downloads /root/Downloads
+tee /root/.ignite.sh << 'EOF'
 #!/bin/bash
 while : ; do
   DISPLAY=:1 firefox -private-window || break
@@ -290,7 +290,7 @@ EOF
 chmod +x /root/.ignite.sh
 
 #jwm
-tee /root/.jwmrc <<EOF
+tee /root/.jwmrc << EOF
 <?xml version="1.0"?>
 <JWM>
     <Group>
@@ -331,13 +331,13 @@ EOF
 
 #vnc
 mkdir -p /root/.vnc
-tee /root/.vnc/xstartup <<EOF
+tee /root/.vnc/xstartup << EOF
 #!/bin/bash
 websockify -D --web=/usr/share/novnc/ 5800 127.0.0.1:5901
 /usr/bin/jwm
 EOF
 chmod +x /root/.vnc/xstartup
-tee /etc/systemd/system/tigervnc.service <<EOF
+tee /etc/systemd/system/tigervnc.service << EOF
 [Unit]
 Description=Remote desktop service (VNC)
 After=network.target
@@ -353,11 +353,11 @@ systemctl enable tigervnc
 
 #cups
 usermod -aG lpadmin root
-defpr="$(lpstat -e | head -n1)"
+defpr="$(lpstat -e | head -n 1)"
 lpadmin -d $defpr
 cupsctl --no-share-printers
 mkdir -p /var/www/html/print
-tee /var/www/html/print/index.html <<EOF
+tee /var/www/html/print/index.html << EOF
 <!DOCTYPE html>
 <html>
   <body>
@@ -368,7 +368,7 @@ tee /var/www/html/print/index.html <<EOF
   </body>
 </html>
 EOF
-tee /var/www/html/print/print.php <<'EOF'
+tee /var/www/html/print/print.php << 'EOF'
 <?php
    if(isset($_FILES['fileToUpload'])){
       $file_name = $_FILES['fileToUpload']['name'];
@@ -391,13 +391,13 @@ tee /var/www/html/print/print.php <<'EOF'
    }
 ?>
 EOF
-tee /var/www/html/print/.user.ini <<EOF
+tee /var/www/html/print/.user.ini << EOF
 upload_max_filesize = 10M
 post_max_size = 10M
 EOF
 
 #html
-tee /var/www/html/index.html <<EOF
+tee /var/www/html/index.html << EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -465,7 +465,7 @@ chown -R www-data:www-data /var/www/html
 
 #nginx
 grep -q 'client_max_body_size' /etc/nginx/nginx.conf || sed -i 's/server_tokens.*/&\n\tclient_max_body_size 10M\;\n\tupload_progress uploads 1m\;/' /etc/nginx/nginx.conf
-tee /etc/nginx/sites-available/default <<'EOF'
+tee /etc/nginx/sites-available/default << 'EOF'
 
 map $http_upgrade $connection_upgrade {
 	default upgrade;
@@ -513,7 +513,7 @@ server {
 	location /Public {
 		alias /srv/NAS/Public;
 		autoindex on;
-  		dav_methods PUT DELETE MKCOL COPY MOVE;
+		dav_methods PUT DELETE MKCOL COPY MOVE;
 		dav_ext_methods PROPFIND OPTIONS LOCK UNLOCK;
 		dav_access user:rw group:rw all:rw;
 		client_body_temp_path /srv/NAS/Public/Downloads;
@@ -566,14 +566,14 @@ server {
 EOF
 wget -q --show-progress https://github.com/ctonton/homeserver/raw/refs/heads/main/scripts/http_users.sh -O /root/http_users.sh
 chmod +x /root/http_users.sh
-[[ -f /etc/nginx/.htpasswd ]] && sed -i 's/#auth_basic/auth_basic/g' /etc/nginx/sites-available/default
+[ -f /etc/nginx/.htpasswd ] && sed -i 's/#auth_basic/auth_basic/g' /etc/nginx/sites-available/default
 
 #ssl
-curl -s ipinfo.io | tr -d ',; ;"' >/dev/shm/ipinfo
-openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt <<ANSWERS
-$(grep "country" /dev/shm/ipinfo | cut -d: -f2)
-$(grep "region" /dev/shm/ipinfo | cut -d: -f2)
-$(grep "city" /dev/shm/ipinfo | cut -d: -f2)
+curl -s ipinfo.io | tr -d ',; ;"' > /dev/shm/ipinfo
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/nginx-selfsigned.key -out /etc/nginx/nginx-selfsigned.crt << ANSWERS
+$(grep "country" /dev/shm/ipinfo | cut -d \: -f 2)
+$(grep "region" /dev/shm/ipinfo | cut -d \: -f 2)
+$(grep "city" /dev/shm/ipinfo | cut -d \: -f 2)
 NA
 NA
 localhost
@@ -581,7 +581,7 @@ admin@localhost
 ANSWERS
 rm -f /dev/shm/ipinfo
 wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/nginx/dhparam.pem
-if [ -d /etc/letsencrypt/live/www* ]; then
+if [ -d /etc/letsencrypt/live/www* ] ; then
   wom=$(ls /etc/letsencrypt/live | grep 'www')
   sed -i 's/ssl_certificate/#ssl_certificate/g' /etc/nginx/sites-available/default
   sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate_key \/etc\/letsencrypt\/live\/$wom\/privkey.pem\;/" /etc/nginx/sites-available/default
