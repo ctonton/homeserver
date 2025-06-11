@@ -27,7 +27,6 @@ mkdir -p /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
 part=$(blkid | grep "xfs" | cut -d \: -f 1)
-umount -q $part
 sed -i "/$(blkid -o value -s UUID ${part})/d" /etc/fstab
 [ -z $part ] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
 systemctl daemon-reload
