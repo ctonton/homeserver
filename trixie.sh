@@ -59,7 +59,6 @@ sed -i "/\/srv\/NAS/d" /etc/fstab
 mkdir -p /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-[ $part == "auto" ] && part=$(blkid | grep "xfs" | cut -d \: -f 1)
 if [ -z $part ] ; then
   echo ; echo
   lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
@@ -67,6 +66,7 @@ if [ -z $part ] ; then
   PS3="Select the partition to use as storage: "
   select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}') none ; do break ; done
 fi
+[ $part == "auto" ] && part=$(blkid | grep "xfs" | cut -d \: -f 1)
 [ $part == "none" ] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
 systemctl daemon-reload
 mount -a
