@@ -1,8 +1,9 @@
 #!/bin/bash
 
 #name="$HOSTNAME"
-#lang="en_US.UTF-8 UTF-8"
+#lang="en_US.UTF-8 UTF-8" 
 #time="America/Chicago"
+#part="auto"
 #acpt="true"
 
 #function
@@ -19,11 +20,11 @@ while : ; do
 done
 
 #initialize
-systemctl -q disable unattended-upgrades --now
+systemctl -f --now disable unattended-upgrades
 apt update
 (dpkg -l locales | grep -q 'ii') || apt install -y locales
 until [ ! -z $name ] ; do
-  clear
+  echo ; echo
   read -p "Enter a hostname for this device :" name
 done
 hostnamectl set-hostname "$name"
@@ -53,12 +54,20 @@ pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano
 apt install -y ${pkg[@]}
 
 #storage
+umount -f -q /srv/NAS
+sed -i "/\/srv\/NAS/d" /etc/fstab
 mkdir -p /srv/NAS
 chmod 777 /srv/NAS
 chown nobody:nogroup /srv/NAS
-part=$(blkid | grep "xfs" | cut -d \: -f 1)
-sed -i "/$(blkid -o value -s UUID ${part})/d" /etc/fstab
-[ -z $part ] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
+[ $part == "auto" ] && part=$(blkid | grep "xfs" | cut -d \: -f 1)
+if [ -z $part ] ; then
+  echo ; echo
+  lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL
+  echo
+  PS3="Select the partition to use as storage: "
+  select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}') none ; do break ; done
+fi
+[ $part == "none" ] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
 systemctl daemon-reload
 mount -a
 mkdir -p /srv/NAS/Public/Downloads
@@ -136,10 +145,10 @@ tee /etc/samba/smb.conf << EOF
 EOF
 
 #filebrowser
-tag="$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d \" -f 4)"
-arc="$(dpkg --print-architecture)"
-[[ $arc == "armhf" ]] && arc="armv7"
-wget -q --show-progress "https://github.com/filebrowser/filebrowser/releases/download/$tag/linux-$arc-filebrowser.tar.gz" -O /root/filebrowser.tar.gz
+tag=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep 'tag_name' | cut -d \" -f 4)
+arc=$(dpkg --print-architecture)
+[ $arc == "armhf" ] && arc="armv7"
+wget -q --show-progress https://github.com/filebrowser/filebrowser/releases/download/${tag}/linux-${arc}-filebrowser.tar.gz -O /root/filebrowser.tar.gz
 tar -xzf /root/filebrowser.tar.gz -C /usr/local/bin filebrowser
 chmod +x /usr/local/bin/filebrowser
 rm /root/filebrowser.tar.gz
@@ -161,8 +170,8 @@ EOF
 systemctl -q enable filebrowser
 
 #qbittorrent
-if [[ $acpt != "true" ]] ; then
-  clear
+if [ $acpt != "true" ] ; then
+  echo ; echo
   echo "*** Legal Notice ***"
   echo "qBittorrent is a file sharing program. When you run a torrent, its data will be made available to others by means of upload. Any content you share is your sole responsibility."
   echo "No further notices will be issued."
@@ -389,7 +398,7 @@ systemctl enable tigervnc
 
 #cups
 usermod -aG lpadmin root
-defpr="$(lpstat -e | head -n 1)"
+defpr=$(lpstat -e | head -n 1)
 lpadmin -d $defpr
 cupsctl --no-share-printers
 mkdir -p /var/www/html/print
@@ -620,8 +629,8 @@ wget -q --show-progress https://ssl-config.mozilla.org/ffdhe4096.txt -O /etc/ngi
 if [ -d /etc/letsencrypt/live/www* ] ; then
   wom=$(ls /etc/letsencrypt/live | grep 'www')
   sed -i 's/ssl_certificate/#ssl_certificate/g' /etc/nginx/sites-available/default
-  sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate_key \/etc\/letsencrypt\/live\/$wom\/privkey.pem\;/" /etc/nginx/sites-available/default
-  sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate \/etc\/letsencrypt\/live\/$wom\/fullchain.pem\;/" /etc/nginx/sites-available/default
+  sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate_key \/etc\/letsencrypt\/live\/${wom}\/privkey.pem\;/" /etc/nginx/sites-available/default
+  sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate \/etc\/letsencrypt\/live\/${wom}\/fullchain.pem\;/" /etc/nginx/sites-available/default
 fi
 
 #exit
