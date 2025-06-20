@@ -50,7 +50,7 @@ ramm=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo) && ramm=${ramm%.*}
 #install
 apt full-upgrade -y --fix-missing
 pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd2 xfsprogs)
-[[ $ramm -ge 1 ]] && pkg+=(cups-browsed ffmpeg firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
+[[ $ramm -ge 1 ]] && pkg+=(cups-browsed ffmpeg firefox-esr jwm nginx-extras nmap novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
 apt install -y ${pkg[@]}
 
 #storage
