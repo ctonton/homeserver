@@ -50,7 +50,7 @@ ramm=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo) && ramm=${ramm%.*}
 #install
 apt full-upgrade -y --fix-missing
 pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd2 xfsprogs)
-[[ $ramm -ge 1 ]] && pkg+=(cups-browsed ffmpeg firefox-esr jwm nginx-extras nmap novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
+[[ $ramm -ge 1 ]] && pkg+=(cups-browsed ffmpeg firefox-esr jwm nginx-extras novnc openssl php-fpm printer-driver-hpcups shellinabox tigervnc-standalone-server)
 apt install -y ${pkg[@]}
 
 #storage
@@ -546,7 +546,7 @@ server {
 	add_header X-Content-Type-Options nosniff;
 	add_header X-XSS-Protection "1; mode=block";
 	root /var/www/html;
-	index index.html;
+	index index.html index.php;
 	#auth_basic "Restricted Content";
 	#auth_basic_user_file /etc/nginx/.htpasswd;
 
