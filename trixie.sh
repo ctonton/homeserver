@@ -1,5 +1,14 @@
 #!/bin/bash
+getopts u option
+if [[ $option == "u" ]] ; then
+  name="$HOSTNAME"
+  lang="$(sed -e '/^#/d' /etc/locale.gen)"
+  zone="$(ls -l /etc/localtime | sed -e 's/.*zoneinfo\///')"
+  part="auto"
+  acpt="true"
+fi
 
+## set these variables to aoutomate the installation ##
 #name="$HOSTNAME"
 #lang="en_US.UTF-8 UTF-8"
 #zone="America/Chicago"
