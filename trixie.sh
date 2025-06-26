@@ -553,16 +553,20 @@ tee /var/www/html/print/index.html << 'EOF'
       <label for="pdf">Upload PDF:</label><br>
       <input style="font-size: 16px; width: auto" type="file" name="pdf" accept=".pdf" required></input>
     </p>
-    <h3>Print options:</h3>
-    <label for="copies">Number of Copies:</label>
-    <input type="number" name="copies" value="1" min="1"></input><br><br>
-    <label for="duplex">Duplex (Default Single-sided):</label>
-    <input type="checkbox" name="duplex" value="DuplexNoTumble"></input><br><br>
-    <label for="color">Black & White (Default Color):</label>
-    <input type="checkbox" name="color" value="Gray"></input><br><br>
-    <label for="scale">No Scaling (Default Auto):</label>
-    <input type="checkbox" name="scale" value="none"></input><br><br>
-    <button type="submit">Print PDF</button>
+    <p>
+      <h3>Printer Options</h3>
+      <label for="copies">Number of Copies:</label>
+      <input type="number" name="copies" value="1" min="1"></input><br><br>
+      <label for="duplex">Duplex (Default Single-sided):</label>
+      <input type="checkbox" name="duplex" value="DuplexNoTumble"></input><br><br>
+      <label for="color">Black & White (Default Color):</label>
+      <input type="checkbox" name="color" value="Gray"></input><br><br>
+      <label for="scale">No Scaling (Default Auto):</label>
+      <input type="checkbox" name="scale" value="none"></input><br><br>
+    </p>
+    <p>
+      <button type="submit">Print PDF</button>
+    </p>
   </form>
   <script>
     fetch('printers.php')
