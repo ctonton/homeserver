@@ -518,14 +518,15 @@ tee /var/www/html/print/index.html << 'EOF'
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
+      max-width: 512px;
     }
     label {
       margin-top: 10px;
     }
     input, select {
-      padding: 5px;
       margin-top: 5px;
-      width: 100%;
+      width: auto;
+      padding: 5px;
     }
     button {
       padding: 10px;
@@ -544,12 +545,12 @@ tee /var/www/html/print/index.html << 'EOF'
   <h1>Print PDF on Network Printer</h1>
   <form action="print.php" method="POST" enctype="multipart/form-data">
     <p>
-      <label for="printer">Select Printer:</label>
-      <select name="printer" id="printer" required></select>
+      <label for="printer">Select Printer:</label><br>
+      <select style="width: 100%" name="printer" id="printer" required></select>
     </p>
     <p>
-      <label for="pdf">Upload PDF:</label>
-      <input type="file" name="pdf" accept=".pdf" required></input>
+      <label for="pdf">Upload PDF:</label><br>
+      <input style="width: auto" type="file" name="pdf" accept=".pdf" required></input>
     </p>
     <h3>Print options:</h3>
     <label for="copies">Number of Copies:</label>
