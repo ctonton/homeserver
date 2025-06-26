@@ -535,6 +535,7 @@ tee /var/www/html/print/index.html << 'EOF'
       border: none;
       cursor: pointer;
       width: 100%;
+      font-size: 16px;
     }
     button:hover {
       background-color: #45a049;
@@ -550,7 +551,7 @@ tee /var/www/html/print/index.html << 'EOF'
     </p>
     <p>
       <label for="pdf">Upload PDF:</label><br>
-      <input style="width: auto" type="file" name="pdf" accept=".pdf" required></input>
+      <input style="font-size: 16px; width: auto" type="file" name="pdf" accept=".pdf" required></input>
     </p>
     <h3>Print options:</h3>
     <label for="copies">Number of Copies:</label>
