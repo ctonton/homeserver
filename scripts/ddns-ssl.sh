@@ -7,7 +7,11 @@ curl "https://www.duckdns.org/update?domains=${dom}&token=${tok}&ip="
 apt update
 apt -y install certbot
 systemctl stop nginx.service
-certbot certonly --standalone -d www.${dom}.duckdns.org -d ${dom}.duckdns.org --register-unsafely-without-email --agree-tos || exit 1
+certbot certonly --standalone -d www.${dom}.duckdns.org -d ${dom}.duckdns.org --register-unsafely-without-email --agree-tos
+if [ $? != 0 ] ; then
+  systemctl start nginx.service
+  exit 1
+fi
 sed -i '/_hook/d' /etc/letsencrypt/renewal/www.${dom}.duckdns.org.conf
 echo 'pre_hook = "systemctl stop nginx.service"' >> /etc/letsencrypt/renewal/www.${dom}.duckdns.org.conf
 echo 'post_hook = "systemctl start nginx.service"' >> /etc/letsencrypt/renewal/www.${dom}.duckdns.org.conf
