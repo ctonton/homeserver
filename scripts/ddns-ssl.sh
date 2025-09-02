@@ -23,7 +23,7 @@ fi
 sed -i '/_hook/d' /etc/letsencrypt/renewal/www.${dom}.duckdns.org.conf
 echo 'pre_hook = "systemctl stop nginx.service"' >> /etc/letsencrypt/renewal/www.${dom}.duckdns.org.conf
 echo 'post_hook = "systemctl start nginx.service"' >> /etc/letsencrypt/renewal/www.${dom}.duckdns.org.conf
-sed -i 's/^ssl_certificate/#ssl_certificate/g' /etc/nginx/sites-available/default
+sed -i 's/ssl_certificate/#ssl_certificate/g' /etc/nginx/sites-available/default
 sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate_key \/etc\/letsencrypt\/live\/www.${dom}.duckdns.org\/privkey.pem\;/" /etc/nginx/sites-available/default
 sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate \/etc\/letsencrypt\/live\/www.${dom}.duckdns.org\/fullchain.pem\;/" /etc/nginx/sites-available/default
 systemctl start nginx.service
