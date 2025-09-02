@@ -11,7 +11,7 @@ fi
 pub=$(dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com 2> /dev/null | tr -d '"')
 dub=$(dig @8.8.8.8 -4 A +short ${dom}.duckdns.org 2> /dev/null | tr -d '"')
 if [ "$pub" != "$dub" ] ; then
-  echo "$dom.duckdns.org is unreachable. Try again later."
+  echo "${dom}.duckdns.org is unreachable. Try again later."
   exit 1
 fi
 systemctl stop nginx.service
