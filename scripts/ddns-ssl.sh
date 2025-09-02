@@ -4,8 +4,10 @@ echo ; read -p "Enter the token from your DuckDNS account: " tok
 echo ; read -p "Enter the domain from your DuckDNS account: " dom
 curl "https://www.duckdns.org/update?domains=${dom}&token=${tok}&ip="
 (crontab -l | sed '/duckdns/d' ; echo -e "*/15 * * * * curl \"https://www.duckdns.org/update?domains=${dom}&token=${tok}&ip=\" &> /dev/null") | crontab -
-apt update
-apt -y install certbot
+if ! certbot --version &> /dev/null ; then
+  apt update
+  apt -y install certbot
+fi
 systemctl stop nginx.service
 certbot certonly --standalone -d www.${dom}.duckdns.org -d ${dom}.duckdns.org --register-unsafely-without-email --agree-tos
 if [ $? != 0 ] ; then
