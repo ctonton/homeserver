@@ -19,4 +19,5 @@ sed -i 's/^ssl_certificate/#ssl_certificate/g' /etc/nginx/sites-available/defaul
 sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate_key \/etc\/letsencrypt\/live\/www.${dom}.duckdns.org\/privkey.pem\;/" /etc/nginx/sites-available/default
 sed -i "s/#ssl_certificate_key.*/&\n\tssl_certificate \/etc\/letsencrypt\/live\/www.${dom}.duckdns.org\/fullchain.pem\;/" /etc/nginx/sites-available/default
 systemctl start nginx.service
+rm $0
 exit 0
