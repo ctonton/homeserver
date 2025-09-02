@@ -2,7 +2,7 @@
 clear ; echo "Ensure that ports 80 and 443 are open."
 echo ; read -p "Enter the token from your DuckDNS account: " tok
 echo ; read -p "Enter the domain from your DuckDNS account: " dom
-curl "https://www.duckdns.org/update?domains=${dom}&token=${tok}&ip="
+curl "https://www.duckdns.org/update?domains=${dom}&token=${tok}&ip=" &> /dev/null
 (crontab -l | sed '/duckdns/d' ; echo -e "*/15 * * * * curl \"https://www.duckdns.org/update?domains=${dom}&token=${tok}&ip=\" &> /dev/null") | crontab -
 if ! certbot --version &> /dev/null ; then
   apt update
