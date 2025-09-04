@@ -95,7 +95,7 @@ tee /etc/rsyncd.conf << EOF
 [Public]
   path = /srv/NAS/Public
   comment = Public Directory
-  read only = false
+  read only = true
 EOF
 
 #update
