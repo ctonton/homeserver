@@ -111,6 +111,7 @@ gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
 apt update
 apt -y upgrade
 apt -y autopurge
+killall firefox-esr
 bleachbit -c --all-but-warning
 fstrim -av
 reboot
