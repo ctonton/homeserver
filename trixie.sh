@@ -104,20 +104,22 @@ grep -q 'Periodic::Enable' "$f" || sed -i '1s/^/APT::Periodic::Enable "0";\n/' "
 grep 'APT::Periodic' "$f" | cut -d " " -f 1 > /dev/shm/list
 cat /dev/shm/list | while read l ; do sed -i "s~$l.*~$l \"0\"\;~" "$f" ; done
 rm -f /dev/shm/list
-tee /root/.update.sh << EOF
+mkdir -p /opt/cron
+tee /opt/cron/update.sh << 'EOF'
 #/bin/bash
-wget -q --show-progress https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz -O /root/.config/qBittorrent/blocklist.p2p.gz
-gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
-apt update
-apt -y upgrade
-apt -y autopurge
-killall firefox-esr
-bleachbit -c --all-but-warning
-fstrim -av
-reboot
+/usr/bin/wget -q --show-progress "https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz" -O /root/.config/qBittorrent/blocklist.p2p.gz
+/usr/bin/gzip -df /root/.config/qBittorrent/blocklist.p2p.gz
+/usr/bin/apt update
+/usr/bin/apt -y upgrade
+/usr/bin/apt -y autopurge
+/usr/bin/killall firefox-esr
+/usr/bin/bleachbit -c --all-but-warning
+/usr/sbin/fstrim -av
+/usr/bin/systemctl reboot
+exit 0
 EOF
-chmod +x /root/.update.sh
-crontab -l | grep -q '.update.sh' || echo '0 4 * * 1 /root/.update.sh &> /dev/null' | crontab -
+chmod +x /opt/cron/update.sh
+echo '0 4 * * 1 /opt/cron/update.sh &> /dev/null' | crontab -
 
 #nfs
 [ -f /etc/exports.bak ] || mv /etc/exports /etc/exports.bak
