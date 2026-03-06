@@ -31,7 +31,7 @@ done
 #initialize
 systemctl -f --now disable unattended-upgrades
 apt update
-(dpkg -l locales | grep -q 'ii') || apt install -y locales
+apt install -y locales tzdata
 until [ ! -z "$name" ] ; do
   echo ; echo
   read -p "Enter a hostname for this device :" name
@@ -58,7 +58,7 @@ ramm=$(awk '/MemTotal/ {print $2 / 1000000}' /proc/meminfo) && ramm=${ramm%.*}
 
 #install
 apt full-upgrade -y --fix-missing
-pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip locales nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar tzdata unzip wsdd2 xfsprogs)
+pkg=(avahi-autoipd avahi-daemon bleachbit cron curl exfat-fuse gzip nano nfs-kernel-server nginx ntfs-3g openssh-server qbittorrent-nox rsync samba tar unzip wsdd2 xfsprogs)
 [[ $ramm -ge 1 ]] && pkg+=(cups-browsed ffmpeg firefox-esr jwm nginx-extras nmap novnc openssl php-fpm printer-driver-hpcups shellinabox sudo tigervnc-standalone-server)
 apt install -y ${pkg[@]}
 
@@ -428,7 +428,7 @@ exit 0
 EOF
 tee /var/www/php/rout.sh << 'EOF'
 #!/bin/bash
-ssh -o StrictHostKeyChecking=no root@$(ip route | awk '/default/{print$3}') 'reboot &'
+ssh -o StrictHostKeyChecking=no root@$(ip route | awk '/default/{print$3}') 'reboot'
 exit 0
 EOF
 tee /var/www/php/serv.sh << 'EOF'
