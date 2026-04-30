@@ -76,7 +76,7 @@ if [ -z $part ] ; then
   select part in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}') none ; do break ; done
 fi
 [ $part == "auto" ] && part=$(blkid | grep "xfs" | cut -d \: -f 1)
-[ $part == "none" ] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail  0  0" >> /etc/fstab
+[ $part == "none" ] || echo "UUID=$(blkid -o value -s UUID ${part})  /srv/NAS  $(blkid -o value -s TYPE ${part})  defaults,nofail,x-systemd.device-timeout=60  0  0" >> /etc/fstab
 systemctl daemon-reload
 mount -a
 mkdir -p /srv/NAS/Public/Downloads
