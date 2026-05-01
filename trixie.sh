@@ -476,16 +476,8 @@ tee /var/www/html/index.html << EOF
       <h1>Browser</h1>
       <br>
       <br>
-      <a href="/list/"><img src="images/net.png" alt="Network"></a>
-      <h1>Network</h1>
-      <br>
-      <br>
-      <a href="/reset/"><img src="images/rst.png" alt="Reboot"></a>
-      <h1>Reboot</h1>
-      <br>
-      <br>
-      <a href="/torrents/"><img src="images/qbt.png" alt="Qbittorrent"></a>
-      <h1>Torrents</h1>
+      <a href="/shell/"><img src="images/tml.png" alt="Terminal"></a>
+      <h1>Terminal</h1>
       <br>
       <br>
     </div>
@@ -496,12 +488,8 @@ tee /var/www/html/index.html << EOF
       <h1>Files</h1>
       <br>
       <br>
-      <a href="/print/"><img src="images/prn.png" alt="Print Server"></a>
-      <h1>Print</h1>
-      <br>
-      <br>
-      <a href="/shell/"><img src="images/tml.png" alt="Terminal"></a>
-      <h1>Terminal</h1>
+      <a href="/torrents/"><img src="images/qbt.png" alt="Qbittorrent"></a>
+      <h1>Torrents</h1>
       <br>
       <br>
     </div>
