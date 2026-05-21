@@ -1,44 +1,34 @@
 #!/bin/bash
-mbuffer --version &>/dev/null || (apt update; apt install mbuffer)
+r="mbuffer screen xfsprogs"
+dpkg -l $r &>/dev/null || (sudo apt update && sudo apt install -y $r)
 echo
-echo "Copy to a DEV (device), over LAN (unsecure), or over WAN (secure)?"
-PS3="Select option: "
-select mode in DEV LAN WAN; do break; done
-case $mode in
-  DEV)
-    echo
-    lsblk -o NAME,FSTYPE,SIZE,LABEL,MOUNTPOINT
-    echo
-    PS3="Select the partition to use: "
-    select part2 in $(lsblk -l -o TYPE,NAME | sed '1d' | sed '/disk/d' | sed 's/[^ ]* //'); do break; done
-    grep -q /dev/"$part2" /proc/mounts || (umount /mnt/part2 &>/dev/null; mkdir -p /mnt/part2; mount /dev/"$part2" /mnt/part2)
-    until [[ $d == "FROM" || $d == "TO" ]]; do
-      echo
-      echo "**CAUTION** **IMPORTANT**"
-      echo "Do you want to copy FROM or TO /dev/$part2?"
-      read -p "Type FROM or TO here: " d
-    done
-    [[ $d == "FROM" ]] && (srce="$(lsblk -lno MOUNTPOINT /dev/"$part2")"; dest="/srv/NAS")
-    [[ $d == "TO" ]] && (srce="/srv/NAS"; dest="$(lsblk -lno MOUNTPOINT /dev/"$part2")")
-    tar -b 2048 --directory="$srce" --exclude='Downloads' -cf - Public | mbuffer -s 1M -m 256M | tar -b 2048 --directory="$dest" -xf -
-    mkdir -p "$dest/Public/Downloads"; chmod -R 777 "$dest/Public"; chown -R nobody:nogroup "$dest/Public"
-    [[ -d /mnt/part2 ]] && (umount /mnt/part2; rmdir /mnt/part2)
-  ;;
-  LAN)
-    read -p "Enter a valid ip address for the remote server: " remote
-    ping -c 1 "$remote" &>/dev/null || (echo "Remote server unavailable."; exit 64)
-    ssh -T root@"$remote" &>/dev/null <<HERE
-mbuffer --version &>/dev/null || (apt update; apt install mbuffer)
-mbuffer -s 1M -m 128M -I 7777 | tar --directory=/srv/NAS -b 2048 -xf - &
-HERE
-    tar --directory=/srv/NAS --exclude='Downloads' -b 2048 -cf - Public | mbuffer -s 1M -m 128M -O "$remote":7777
-    ssh root@"$remote" "mkdir -p /srv/NAS/Public/Downloads; chmod -R 777 /srv/NAS/Public; chown -R nobody:nogroup /srv/NAS/Public"
-  ;;
-  WAN)
-    read -p "Enter a valid ip address for the remote server: " remote
-    ping -c 1 "$remote" &>/dev/null || (echo "Remote server unavailable."; exit 64)
-    tar -b 2048 --directory=/srv/NAS --exclude='Downloads' -cf - Public | mbuffer -s 1M -m 64M | ssh root@"$remote" "tar -b 2048 --directory=/srv/NAS -xf -"
-    ssh root@"$remote" "mkdir -p /srv/NAS/Public/Downloads; chmod -R 777 /srv/NAS/Public; chown -R nobody:nogroup /srv/NAS/Public"
-  ;;
-esac
+lsblk -o NAME,FSTYPE,SIZE,LABEL,MOUNTPOINT
+echo
+PS3="Select source partition: "
+select dev1 in $(lsblk -l -o TYPE,NAME | awk '/part/ {print $2}'); do break; done
+echo
+PS3="Select destination disk: "
+select dev2 in $(lsblk -l -o TYPE,NAME | grep -v "$dev1" | awk '/disk/ {print $2}'); do break; done
+echo "**CAUTION** **IMPORTANT**"
+echo "All data contained on disk $dev2 will be lost."
+echo "Are you certain that you want to copy to $dev2?"
+read -p "Type \"$dev2\" here to confirm: " c
+[[ $c != $dev2 ]] && echo "The job has been canceled. No data was written or erased." && exit 1
+if grep -q /dev/$dev1 /proc/mounts; then
+  src="$(lsblk -lno MOUNTPOINT /dev/$dev1 | head -n 1)"
+else
+  sudo mkdir -p -v /mnt/src
+  sudo umount -f -l /mnt/src
+  sudo mount -v /dev/$dev1 /mnt/src
+  src="/mnt/src"
+fi
+sudo umount -A -f -l /dev/$dev2
+sudo wipefs -a -v /dev/$dev2
+sudo parted /dev/$dev2 mklabel gpt
+sudo mkfs.xfs -f /dev/$dev2
+sudo umount -f -l /mnt/dst
+sudo mkdir -p -v /mnt/dst
+sudo mount -v /dev/$dev2 /mnt/dst
+echo "Starting the copy job inside of a screen session."
+sudo screen -d -m bash -c "tar -b 2048 --directory=\"$src\" --exclude='Downloads' -cf - Public | mbuffer -s 1M -m 256M | tar -b 2048 --directory=/mnt/dst -xf -; umount -q /mnt/src; umount -q /mnt/dst; rmdir /mnt/src /mnt/dst"
 exit 0
